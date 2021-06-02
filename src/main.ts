@@ -2,20 +2,21 @@ import { app, BrowserWindow } from "electron";
 import isDev from "electron-is-dev"; // New Import
 
 const createWindow = (): void => {
-  let win = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
     },
   });
   // console.log("---------------->", isDev);
-  win.loadURL(
+  mainWindow.loadURL(
     isDev ? "http://localhost:9000" : `file://${app.getAppPath()}/index.html`
   );
 
   // Open the DevTools.
-  // win.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished

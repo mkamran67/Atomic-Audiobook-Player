@@ -1,12 +1,11 @@
 import React from "react";
+import Nav from "./components/Nav";
+import OpenFolder from "./components/OpenFolder";
 
 const App = () => {
   return (
     <div className="app">
-      <div>
-        <h1 className="text-blue-700 text-lg">I'm React in Electron App!!</h1>
-        <p className="bg-yellow-500">This is another sentence</p>
-      </div>
+      <Nav />
     </div>
   );
 };
