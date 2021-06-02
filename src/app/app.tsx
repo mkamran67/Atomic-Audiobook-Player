@@ -3,7 +3,10 @@ import React from "react";
 const App = () => {
   return (
     <div className="app">
-      <h1> I'm React running in Electron App!! </h1>
+      <div>
+        <h1 className="text-blue-700 text-lg">I'm React in Electron App!!</h1>
+        <p className="bg-yellow-500">This is another sentence</p>
+      </div>
     </div>
   );
 };
