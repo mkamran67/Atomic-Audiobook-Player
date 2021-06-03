@@ -7,4 +7,8 @@
   .generic-button {
     @apply text-lg bg-blue-500 rounded-md text-white p-2 m-5;
   }
+
+  .link-button {
+    @apply text-lg p-2 hover:bg-btn-color hover:text-black focus:ring-1 focus:ring-blue-600 cursor-pointer w-full text-center my-2;
+  }
 }
