@@ -3,14 +3,14 @@ import { BookmarkAltSolid, ClockOutline } from "@graywolfai/react-heroicons";
 
 function MediaController() {
   return (
-    <div className="h-full w-full bg-gray-400 col-span-10 p-4">
-      <div className="bg-gray-700 h-full w-full">
+    <div className="w-full h-full p-1 bg-gray-400 lg:p-4">
+      <div className="w-full h-full bg-gray-700">
         <ul>
           <li>
-            <ClockOutline className="text-white w-6" />
+            <ClockOutline className="w-6 text-white" />
           </li>
           <li>
-            <BookmarkAltSolid className="text-white w-6" />
+            <BookmarkAltSolid className="w-6 text-white" />
           </li>
         </ul>
       </div>
