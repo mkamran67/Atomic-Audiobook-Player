@@ -1,26 +1,29 @@
 import React from "react";
 import Nav from "./components/Nav";
-import OpenFolder from "./components/OpenFolder";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Library from "./pages/Library";
 import Settings from "./pages/Settings";
-import MediaController from "./components/MediaController";
 import Home from "./pages/Home";
+import Player from "./components/rightside/Player";
 
 const App = () => {
   return (
     <Router>
-      <div className="w-screen h-screen app bg-darkest">
+      <div className="w-screen h-screen bg-white app">
         <div className="flex w-full h-full">
-          <Nav />
-          <div className="w-full h-full bg-gray-600 ">
+          <div className="flex content-around justify-around py-2 mr-2 text-white bg-white flex-10 row-span-full">
+            <Nav />
+          </div>
+          <div className="flex-1 h-full bg-gray-600">
             <Switch>
               <Route exact path="/" component={Home} />
               <Route path="/library" component={Library} />
               <Route path="/settings" component={Settings} />
             </Switch>
           </div>
-          <MediaController />
+          <div className="h-full bg-white flex-2">
+            <Player />
+          </div>
         </div>
       </div>
     </Router>

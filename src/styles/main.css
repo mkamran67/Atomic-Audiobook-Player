@@ -5,10 +5,10 @@
 
 @layer base {
   .generic-button {
-    @apply text-lg bg-blue-500 rounded-md text-white p-2 m-5;
+    @apply p-2 m-5 text-lg text-white bg-blue-500 rounded-md;
   }
 
   .link-button {
-    @apply text-lg p-2 hover:bg-btn-color hover:text-black focus:ring-1 focus:ring-blue-600 cursor-pointer w-full text-center my-2;
+    @apply h-12 p-2 mx-4 text-gray-200 rounded-md cursor-pointer hover:text-indigo-500 hover:bg-gray-200 hover:shadow-2xl;
   }
 }
