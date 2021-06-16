@@ -8,12 +8,20 @@ const createWindow = (): void => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      preload: __dirname + "/preload.js",
     },
   });
   // console.log("---------------->", isDev);
   mainWindow.loadURL(
     isDev ? "http://localhost:9000" : `file://${app.getAppPath()}/index.html`
   );
+
+  mainWindow.webContents.send("pong", "Hello!");
+
+  mainWindow.webContents.on("ping", (event, arg) => {
+    console.log(event);
+    console.log(arg);
+  });
 
   // Remove Menu
   // mainWindow.removeMenu();

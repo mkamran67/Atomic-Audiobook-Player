@@ -1,6 +1,6 @@
 import React from "react";
 import Nav from "./components/Nav";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { HashRouter as Router, Route, Switch } from "react-router-dom";
 import Library from "./pages/Library";
 import Settings from "./pages/Settings";
 import Home from "./pages/Home";
@@ -11,10 +11,10 @@ const App = () => {
     <Router>
       <div className="w-screen h-screen bg-white app">
         <div className="flex w-full h-full">
-          <div className="flex content-around justify-around py-2 mr-2 text-white bg-white flex-10 row-span-full">
+          <div className="flex content-around justify-around py-2 mr-2 text-white bg-white">
             <Nav />
           </div>
-          <div className="flex-1 h-full bg-gray-600">
+          <div className="w-4/5 h-full bg-gray-600">
             <Switch>
               <Route exact path="/" component={Home} />
               <Route path="/library" component={Library} />
