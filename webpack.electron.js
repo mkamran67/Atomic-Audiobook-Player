@@ -27,29 +27,30 @@ module.exports = {
   },
 };
 
-module.exports = {
-  // Build Mode
-  mode: "development",
-  // Electron Entrypoint
-  entry: "./src/preload.ts",
-  target: "electron-preload",
-  resolve: {
-    alias: {
-      ["@"]: path.resolve(__dirname, "src"),
-    },
-    extensions: [".tsx", ".ts", ".js"],
-  },
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        include: /src/,
-        use: [{ loader: "ts-loader" }],
-      },
-    ],
-  },
-  output: {
-    path: __dirname + "/dist",
-    filename: "preload.js",
-  },
-};
+// Removed pre load config
+// module.exports = {
+//   // Build Mode
+//   mode: "development",
+//   // Electron Entrypoint
+//   entry: "./src/preload.ts",
+//   target: "electron-preload",
+//   resolve: {
+//     alias: {
+//       ["@"]: path.resolve(__dirname, "src"),
+//     },
+//     extensions: [".tsx", ".ts", ".js"],
+//   },
+//   module: {
+//     rules: [
+//       {
+//         test: /\.ts$/,
+//         include: /src/,
+//         use: [{ loader: "ts-loader" }],
+//       },
+//     ],
+//   },
+//   output: {
+//     path: __dirname + "/dist",
+//     filename: "preload.js",
+//   },
+// };

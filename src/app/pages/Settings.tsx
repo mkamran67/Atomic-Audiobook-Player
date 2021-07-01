@@ -1,8 +1,8 @@
+import { ipcRenderer } from "electron";
 import React, { useEffect, useRef, useState } from "react";
 
 function Settings() {
   const inputFile = useRef(null);
-
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -19,24 +19,21 @@ function Settings() {
     }
   };
 
-  if (mounted) {
-    // console.log(window.ipcRenderer);
-    window.ipcRenderer.on("pong", (event: any, arg: any) => {
-      console.log(event);
+  const ipcTester = (e: any) => {
+    e.preventDefault();
+    ipcRenderer.send("asynchronous-message", "test");
+
+    ipcRenderer.on("asynchronous-reply", (event, args) => {
+      console.log(args);
     });
-    window.ipcRenderer.send("ping");
-  }
+  };
 
   return (
-    <div>
-      Settings
-      <input
-        ref={inputFile}
-        type="file"
-        onChange={onClickFolderHandler}
-        directory=""
-        webkitdirectory=""
-      />
+    <div className="flex w-full p-10 my-10 bg-gray-300">
+      <p>Settings</p>
+      <button onClick={ipcTester} className="p-4 m-4 bg-gray-400">
+        Button
+      </button>
     </div>
   );
 }

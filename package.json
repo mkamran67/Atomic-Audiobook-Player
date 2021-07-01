@@ -49,5 +49,7 @@
     "webpack-cli": "^4.7.0",
     "webpack-dev-server": "^3.11.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "music-metadata": "^7.8.8"
+  }
 }

@@ -1,6 +1,9 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import path from "path";
+import fs from "fs";
 import isDev from "electron-is-dev"; // New Import
 
+// Function that creates the main window
 const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
     width: 800,
@@ -8,26 +11,25 @@ const createWindow = (): void => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      preload: __dirname + "/preload.js",
+      // Removed preload JS since latest Electron - React supports ipchandler as a module
+      // preload: __dirname + "/preload.js",
     },
   });
-  // console.log("---------------->", isDev);
+
+  // React Loaded
   mainWindow.loadURL(
     isDev ? "http://localhost:9000" : `file://${app.getAppPath()}/index.html`
   );
 
-  mainWindow.webContents.send("pong", "Hello!");
+  // Worker Window
+  // const workerWindow = new BrowserWindow({
+  //   show: false,
+  //   webPreferences: { nodeIntegration: true },
+  // });
 
-  mainWindow.webContents.on("ping", (event, arg) => {
-    console.log(event);
-    console.log(arg);
-  });
+  // workerWindow.loadFile("worker.html");
 
-  // Remove Menu
-  // mainWindow.removeMenu();
-
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished
@@ -49,7 +51,7 @@ app.on("window-all-closed", () => {
 app.on("activate", () => {
   // On macOS it's common to re-create a window in the
   // app when the dock icon is clicked and there are no
-  // other windows open.
+  // other windows open
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
@@ -58,3 +60,75 @@ app.on("activate", () => {
 // In this file, you can include the rest of your
 // app's specific main process code. You can also
 // put them in separate files and require them here.
+
+function flatten(lists: string[][]) {
+  return lists.reduce((a, b) => a.concat(b), []);
+}
+
+function getDirectories(srcpath: string) {
+  return fs
+    .readdirSync(srcpath)
+    .map((file) => path.join(srcpath, file))
+    .filter((path) => fs.statSync(path).isDirectory());
+}
+
+function getDirectoriesRecursive(srcpath: string): string[] {
+  return [
+    srcpath,
+    ...flatten(getDirectories(srcpath).map(getDirectoriesRecursive)),
+  ];
+}
+// Interface -> Get root directory for Audiobooks
+ipcMain.on("asynchronous-message", (event, arg) => {
+  try {
+    dialog
+      .showOpenDialog({
+        filters: [{ name: "Audio", extensions: ["mp3", "ogg", "wav"] }],
+        title: "Select a root directory",
+        buttonLabel: "Select directory",
+        properties: ["openDirectory"],
+      })
+      .then((result) => {
+        console.log(result);
+        if (!result.canceled) {
+          let list = getDirectoriesRecursive(result.filePaths[0]);
+
+          let filteredList = list.filter((src) => {
+            let hasAudio = false;
+
+            let files = fs.readdirSync(src);
+
+            for (let index = 0; index < files.length; index++) {
+              if (
+                path.extname(files[index]) == ".mp3" ||
+                path.extname(files[index]) == ".m4b"
+              ) {
+                hasAudio = true;
+                break;
+              }
+            }
+
+            console.log(hasAudio);
+            return hasAudio;
+          });
+
+          console.log({ filteredList });
+
+          event.reply("asynchronous-reply", [result.canceled, filteredList]);
+        } else {
+          event.reply("asynchronous-reply", [
+            result.canceled,
+            result.filePaths,
+          ]);
+        }
+      });
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+/* -------------------------------------------------------------------------- */
+/*                                 this is app                                */
+/* -------------------------------------------------------------------------- */
+
+console.log(`\n🚀 Electron App is running\n`);
