@@ -4,11 +4,11 @@ module.exports = {
   // Build Mode
   mode: "development",
   // Electron Entrypoint
-  entry: "./src/main.ts",
+  entry: "./src/main/main.ts",
   target: "electron-main",
   resolve: {
     alias: {
-      ["@"]: path.resolve(__dirname, "src"),
+      ["@"]: path.resolve(__dirname, "src", "main"),
     },
     extensions: [".tsx", ".ts", ".js"],
   },

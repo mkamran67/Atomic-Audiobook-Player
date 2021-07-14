@@ -1,6 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import path from "path";
-import fs from "fs";
+import fs from "graceful-fs";
 import isDev from "electron-is-dev"; // New Import
 
 // Function that creates the main window
@@ -29,7 +29,7 @@ const createWindow = (): void => {
 
   // workerWindow.loadFile("worker.html");
 
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished
@@ -61,6 +61,11 @@ app.on("activate", () => {
 // app's specific main process code. You can also
 // put them in separate files and require them here.
 
+/* -------------------------------------------------------------------------- */
+/*                       Functions and Listeneres below                       */
+/* -------------------------------------------------------------------------- */
+
+// Functions for recursively searching directories
 function flatten(lists: string[][]) {
   return lists.reduce((a, b) => a.concat(b), []);
 }
@@ -68,8 +73,8 @@ function flatten(lists: string[][]) {
 function getDirectories(srcpath: string) {
   return fs
     .readdirSync(srcpath)
-    .map((file) => path.join(srcpath, file))
-    .filter((path) => fs.statSync(path).isDirectory());
+    .map((file: any) => path.join(srcpath, file))
+    .filter((path: any) => fs.statSync(path).isDirectory());
 }
 
 function getDirectoriesRecursive(srcpath: string): string[] {
@@ -78,8 +83,21 @@ function getDirectoriesRecursive(srcpath: string): string[] {
     ...flatten(getDirectories(srcpath).map(getDirectoriesRecursive)),
   ];
 }
-// Interface -> Get root directory for Audiobooks
-ipcMain.on("asynchronous-message", (event, arg) => {
+
+// Save books as JSON
+function saveBooksAsJSON(books: {}[]) {
+  try {
+    const bookData = JSON.stringify(books, null, 2);
+    fs.writeFileSync(`${app.getPath("userData")}\\myLibrary.json`, bookData);
+
+    // console.log(`Saved to -> ${app.getPath("userData")}\\myLibrary.json`);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Interface -> Get List of Audiobooks
+ipcMain.on("asynchronous-open-folder", (event, arg) => {
   try {
     dialog
       .showOpenDialog({
@@ -89,32 +107,49 @@ ipcMain.on("asynchronous-message", (event, arg) => {
         properties: ["openDirectory"],
       })
       .then((result) => {
-        console.log(result);
+        // console.log(result);
+        let openedDirectory = null;
+
         if (!result.canceled) {
-          let list = getDirectoriesRecursive(result.filePaths[0]);
+          openedDirectory = result.filePaths[0];
 
-          let filteredList = list.filter((src) => {
+          let list = getDirectoriesRecursive(openedDirectory);
+
+          // Build a JSON array of all the books
+          let filteredList = list.flatMap((src): {} => {
             let hasAudio = false;
-
             let files = fs.readdirSync(src);
 
             for (let index = 0; index < files.length; index++) {
               if (
                 path.extname(files[index]) == ".mp3" ||
-                path.extname(files[index]) == ".m4b"
+                path.extname(files[index]) == ".m4a" ||
+                path.extname(files[index]) == ".m4b" ||
+                path.extname(files[index]) == ".ogg" ||
+                path.extname(files[index]) == ".wav" ||
+                path.extname(files[index]) == ".aax" ||
+                path.extname(files[index]) == ".aac" ||
+                path.extname(files[index]) == ".m4p" ||
+                path.extname(files[index]) == ".wma" ||
+                path.extname(files[index]) == ".flac" ||
+                path.extname(files[index]) == ".alac"
               ) {
-                hasAudio = true;
-                break;
+                return {};
               }
             }
 
-            console.log(hasAudio);
-            return hasAudio;
+            return [];
           });
 
-          console.log({ filteredList });
+          // Save the list of books
+          saveBooksAsJSON(filteredList);
 
-          event.reply("asynchronous-reply", [result.canceled, filteredList]);
+          // reply to renderer process
+          event.reply("asynchronous-reply", [
+            result.canceled,
+            openedDirectory,
+            filteredList,
+          ]);
         } else {
           event.reply("asynchronous-reply", [
             result.canceled,
@@ -126,6 +161,19 @@ ipcMain.on("asynchronous-message", (event, arg) => {
     console.error(err);
   }
 });
+
+// Startup -> Check if library exists
+// ipcMain.on("start-up-checks", (event, arg) => {
+//   try {
+//     if (fs.existsSync(app.getPath("appData"))) {
+//       event.reply("start-up-checks-reply", true);
+//     } else {
+//       event.reply("start-up-checks-reply", false);
+//     }
+//   } catch (err) {
+//     console.error(err);
+//   }
+// });
 
 /* -------------------------------------------------------------------------- */
 /*                                 this is app                                */
