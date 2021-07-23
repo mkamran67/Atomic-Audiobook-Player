@@ -3,7 +3,7 @@ const path = require("path");
 
 module.exports = {
   mode: "development",
-  entry: "./src/renderer.tsx",
+  entry: "./src/renderer/renderer.tsx",
   target: "electron-renderer",
   devtool: "source-map",
   devServer: {
@@ -13,7 +13,7 @@ module.exports = {
   },
   resolve: {
     alias: {
-      ["@"]: path.resolve(__dirname, "src"),
+      ["@"]: path.resolve(__dirname, "src", "renderer"),
     },
     extensions: [".tsx", ".ts", ".js"],
   },
@@ -26,7 +26,7 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        include: path.resolve(__dirname, "src"),
+        include: path.resolve(__dirname, "src", "renderer"),
         use: ["style-loader", "css-loader", "postcss-loader"],
       },
     ],
@@ -37,7 +37,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./src/index.html",
+      template: "./src/renderer/index.html",
     }),
   ],
 };

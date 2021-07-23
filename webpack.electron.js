@@ -4,11 +4,11 @@ module.exports = {
   // Build Mode
   mode: "development",
   // Electron Entrypoint
-  entry: "./src/main.ts",
+  entry: "./src/main/main.ts",
   target: "electron-main",
   resolve: {
     alias: {
-      ["@"]: path.resolve(__dirname, "src"),
+      ["@"]: path.resolve(__dirname, "src", "main"),
     },
     extensions: [".tsx", ".ts", ".js"],
   },
@@ -26,3 +26,31 @@ module.exports = {
     filename: "main.js",
   },
 };
+
+// Removed pre load config
+// module.exports = {
+//   // Build Mode
+//   mode: "development",
+//   // Electron Entrypoint
+//   entry: "./src/preload.ts",
+//   target: "electron-preload",
+//   resolve: {
+//     alias: {
+//       ["@"]: path.resolve(__dirname, "src"),
+//     },
+//     extensions: [".tsx", ".ts", ".js"],
+//   },
+//   module: {
+//     rules: [
+//       {
+//         test: /\.ts$/,
+//         include: /src/,
+//         use: [{ loader: "ts-loader" }],
+//       },
+//     ],
+//   },
+//   output: {
+//     path: __dirname + "/dist",
+//     filename: "preload.js",
+//   },
+// };
