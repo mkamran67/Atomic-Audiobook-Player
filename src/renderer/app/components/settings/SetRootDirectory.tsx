@@ -14,37 +14,25 @@ function SetRootDirectory({ currentRootDirectory, setLoading }: Props) {
   const booksList = useRef([]);
   const currentRootDir = useRef("");
 
-  // useEffect(() => {
-  //   setMounted(true);
-  // }, []);
-
-  //   const onClickFolderHandler = (e: any) => {
-  //     if (typeof e.target.files[0] !== undefined) {
-  //       let pathArr = e.target.files[0].path.split(" ")[0].split("\\");
-
-  //       console.log(pathArr.slice(1, pathArr.length - 1).join("\\"));
-  //     } else {
-  //       console.log(`undefined`);
-  //     }
-  //   };
-
   const openFolder = (e: any) => {
     e.preventDefault();
 
     setLoading(true);
 
-    ipcRenderer.send("asynchronous-open-folder");
+    ipcRenderer.send("asynchronous-open");
 
     ipcRenderer.on("asynchronous-reply", (event, args) => {
-      // console.log(`got a reply`);
-      // Check if it didn't fail -> Continue
+      console.log(`got a reply`);
+      console.log(args);
+      // Check if it didn't fail
       if (!args[0]) {
         booksList.current = args[2];
         currentRootDir.current = args[1];
         setcurrDir(args[1]);
       }
+      setLoading(false);
     });
-    setLoading(false);
+    // setLoading(false);
   };
 
   return (

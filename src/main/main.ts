@@ -5,6 +5,13 @@ import isDev from "electron-is-dev"; // New Import
 import Book from "./electron_Interfaces/Book";
 import * as mm from "music-metadata";
 import uniqid from "uniqid";
+const libraryPath = `${app.getPath("userData")}\\myLibrary.json`;
+const settingsPath = `${app.getPath("userData")}\\mySettings.json`;
+
+// Child Process
+import { fork } from "child_process";
+
+const childProcess = fork("src/main/child_processes/createLibrary.js"); // Forking child code
 
 // Function that creates the main window
 const createWindow = (): void => {
@@ -60,139 +67,14 @@ app.on("activate", () => {
   }
 });
 
-// In this file, you can include the rest of your
-// app's specific main process code. You can also
-// put them in separate files and require them here.
-
 /* -------------------------------------------------------------------------- */
 /*                       Functions and Listeneres below                       */
 /* -------------------------------------------------------------------------- */
 
-// Functions for recursively searching directories
-function flatten(lists: string[][]) {
-  return lists.reduce((a, b) => a.concat(b), []);
-}
-
-function getDirectories(srcpath: string) {
-  return fs
-    .readdirSync(srcpath)
-    .map((file: any) => path.join(srcpath, file))
-    .filter((path: any) => fs.statSync(path).isDirectory());
-}
-
-function getDirectoriesRecursive(srcpath: string): string[] {
-  return [
-    srcpath,
-    ...flatten(getDirectories(srcpath).map(getDirectoriesRecursive)),
-  ];
-}
-
-// Save books as JSON
-function saveBooksAsJSON(books: {}[]) {
-  try {
-    const bookData = JSON.stringify(books, null, 2);
-
-    // Write to AppDate directory
-    fs.writeFileSync(`${app.getPath("userData")}\\myLibrary.json`, bookData);
-
-    console.log(`Saved to -> ${app.getPath("userData")}\\myLibrary.json`);
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-// Get All details of a book
-async function getBookData(dirPath: string): Promise<Book | null> {
-  const dirTitle = dirPath.split("\\").pop(); // Get title of directory
-  let files = fs.readdirSync(dirPath); // Get list of files within a directory
-
-  let book = {} as Book;
-  let images = [] as string[]; // hold images found in directory
-  let book_parts = [] as string[]; // hold paths for each book part (media file)
-  let book_duration = 0; // Accumulate total length/duration of the book
-  try {
-    // For accumulating data from all parts of the book (all files, inside given directory)
-    files.forEach(async (element) => {
-      let extType = path.extname(element); // Get extension
-      const filePath = dirPath + "\\" + element;
-
-      if (
-        extType == ".mp3" ||
-        extType == ".m4a" ||
-        extType == ".m4b" ||
-        extType == ".ogg" ||
-        extType == ".wav" ||
-        extType == ".aax" ||
-        extType == ".aac" ||
-        extType == ".m4p" ||
-        extType == ".wma" ||
-        extType == ".flac" ||
-        extType == ".alac"
-      ) {
-        // 1. Get current audio files path, use this as part for the book
-        book_parts.push(filePath);
-
-        // 2. Get metadata for current audio file
-        const book_metadata = await mm.parseFile(filePath); // parse audio file
-
-        // 3. Accumulate all duration of audio files
-        if (book_metadata.format && book_metadata.format.duration) {
-          book_duration += book_metadata.format.duration;
-        }
-        book_duration += Number(book_metadata.format.duration);
-      } else if (extType == ".jpg" || extType == ".jpeg" || extType == ".png") {
-        // Get images/covers from folder
-        images.push(element);
-      }
-    });
-
-    const filePath = book_parts[0];
-    const book_metadata = await mm.parseFile(filePath); // parse audio file
-
-    // Create book object with gathered data
-    book = {
-      id: uniqid(),
-      title: book_metadata.common.title ? book_metadata.common.title : dirTitle,
-      author: book_metadata.common.artist ? book_metadata.common.artist : "",
-      description: book_metadata.common.description
-        ? book_metadata.common.description
-        : "",
-      comments: book_metadata.common.comment
-        ? book_metadata.common.comment
-        : "",
-      total_length: book_duration,
-      composers: book_metadata.common.composer
-        ? [...book_metadata.common.composer]
-        : [],
-      genre: book_metadata.common.genre ? [...book_metadata.common.genre] : [],
-      folder_path: dirPath,
-      parts_paths: book_parts,
-      image_paths: images,
-      year: book_metadata.common.year
-        ? Number(book_metadata.common.year)
-        : book_metadata.common.date
-        ? Number(book_metadata.common.date)
-        : 0,
-      series_name: book_metadata.common.album ? book_metadata.common.album : "",
-      copyright:
-        book_metadata.common.copyright &&
-        book_metadata.common.copyright.length > 0
-          ? book_metadata.common.copyright[0]
-          : "",
-    };
-
-    // console.log(`\n\nBook -> `, book);
-
-    return book;
-  } catch (error) {
-    console.error(error.message);
-
-    return null;
-  }
-}
-
 // Interface -> Get List of Audiobooks
-ipcMain.on("asynchronous-open-folder", async (event, arg) => {
+ipcMain.on("asynchronous-open", async (event, arg) => {
+  console.log(`\nOpened folder`);
+
   try {
     let booksList = [] as Book[];
 
@@ -203,62 +85,41 @@ ipcMain.on("asynchronous-open-folder", async (event, arg) => {
       properties: ["openDirectory"],
     });
 
-    let openedDirectory = null;
+    let openedDirectory: null | string = null;
 
+    // If user selected a directory
     if (!result.canceled) {
       openedDirectory = result.filePaths[0];
 
-      let list = getDirectoriesRecursive(openedDirectory);
+      childProcess.send({
+        dirPath: openedDirectory,
+        libraryPath,
+        settingsPath,
+      });
 
-      // Build a JSON array of all the books
-      // const booksList = list.flatMap(async (src) =>
-
-      for (let i = 0; i < list.length; i++) {
-        const src = list[i];
-        // Get list of files within folder
-        let files = fs.readdirSync(src);
-
-        // Fetch metadata for each file
-        for (let index = 0; index < files.length; index++) {
-          let extType = path.extname(files[index]);
-
-          if (
-            extType == ".mp3" ||
-            extType == ".m4a" ||
-            extType == ".m4b" ||
-            extType == ".ogg" ||
-            extType == ".wav" ||
-            extType == ".aax" ||
-            extType == ".aac" ||
-            extType == ".m4p" ||
-            extType == ".wma" ||
-            extType == ".flac" ||
-            extType == ".alac"
-          ) {
-            // Read metaData of files
-            const res = await getBookData(src);
-
-            if (res) {
-              booksList.push(res);
-            }
-          }
-        }
-      }
-
-      console.log(
-        `\n\nhi---------------------------------------------------------------------------`
-      );
-
-      // Save the list of books
-      saveBooksAsJSON(booksList);
-      console.log("👉 -> booksList", booksList);
-
-      // reply to renderer process
-      event.reply("asynchronous-reply", [
-        result.canceled,
-        openedDirectory,
-        booksList,
-      ]);
+      childProcess.on("message", (data: any) => {
+        console.log(data.status);
+        // if (fs.existsSync(settingsPath)) {
+        //   //file exists - Append to file
+        //   // 1. Parse previous data
+        //   fs.readFile(settingsPath, "json", (err, data) => {
+        //     if (err) throw err;
+        //     let settings = JSON.parse(data);
+        //     settings.rootDirectory = data.openedDirectory; // Save to local too?
+        //     fs.writeFile(settingsPath, JSON.stringify(settings), (err) => {
+        //       if (err) throw err;
+        //     });
+        //   });
+        //   // 2. Append new data removing old data
+        // } else {
+        //   // Write to new file
+        //   fs.writeFileSync(settingsPath, JSON.stringify(openedDirectory));
+        // }
+        // 3. Send Library location
+        // Reply to React with the path to library.json and settings.json
+        event.reply("asynchronous-reply", data);
+        // Remove
+      });
     } else {
       event.reply("asynchronous-reply", [result.canceled, result.filePaths]);
     }
