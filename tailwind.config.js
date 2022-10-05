@@ -1,18 +1,11 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  // mode: "jit",
-  purge: ["./public/**/*.html", "./src/**/*.{js,jsx,ts,tsx}"],
-  darkMode: false, // or 'media' or 'class'
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
-    extend: {
-      colors: {
-        darkest: "#111111",
-        foreground: "#1D1D1D",
-        "btn-color": "#BB86FC",
-      },
-    },
-  },
-  variants: {
     extend: {},
   },
   plugins: [],
-};
+}
