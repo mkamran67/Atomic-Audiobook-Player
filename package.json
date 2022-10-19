@@ -5,13 +5,15 @@
   "author": "Muhammad Kamran <me@mkamran.us>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon electron electron.js",
+    "start": "electron electron.ts",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "concurrently": "concurrently \"yarn start\" \"yarn dev\" "
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.3",
+    "@heroicons/react": "^2.0.12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
