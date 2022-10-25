@@ -11,6 +11,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
     },
+    autoHideMenuBar: true,
   });
 
   // and load the index.html of the app.
