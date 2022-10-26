@@ -148,7 +148,7 @@ export default function Layout() {
           </div>
         </div>
         <div className="flex flex-col flex-1 md:pl-64">
-          <div className="sticky top-0 z-10 flex flex-shrink-0 h-16 bg-white shadow">
+          <div className="sticky top-0 z-10 flex flex-shrink-0 h-16 bg-white">
             <button
               type="button"
               className="px-4 text-gray-500 border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
@@ -157,19 +157,19 @@ export default function Layout() {
               <span className="sr-only">Open sidebar</span>
               <Bars3BottomLeftIcon className="w-6 h-6" aria-hidden="true" />
             </button>
-            <div className="flex justify-between flex-1 px-4">
+            <div className="flex justify-between flex-1 px-2 ">
               <div className="flex flex-1">
-                <form className="flex w-full md:ml-0" action="#" method="GET">
+                <form className="flex w-full">
                   <label htmlFor="search-field" className="sr-only">
                     Search
                   </label>
                   <div className="relative w-full text-gray-400 focus-within:text-gray-600">
-                    <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 flex items-center pointer-events-none left-4">
                       <MagnifyingGlassIcon className="w-5 h-5" aria-hidden="true" />
                     </div>
                     <input
                       id="search-field"
-                      className="block w-full h-full py-2 pl-8 pr-3 text-gray-900 placeholder-gray-500 border-transparent focus:border-transparent focus:placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-sm"
+                      className="block w-full h-full py-2 pl-12 pr-3 text-gray-900 placeholder-gray-500 border-transparent focus:border-transparent focus:placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-sm"
                       placeholder="Search Books or press Ctrl + K"
                       type="search"
                       name="search"
@@ -180,8 +180,8 @@ export default function Layout() {
             </div>
           </div>
           <main className="flex-1">
-            <div className="py-6">
-              <div className="px-4 mx-auto border border-black max-w-7xl sm:px-6 md:px-8">
+            <div className="p-2 bg-white border-t dark:bg-gray-900 border-t-gray-100">
+              <div>
                 <Outlet />
               </div>
             </div>

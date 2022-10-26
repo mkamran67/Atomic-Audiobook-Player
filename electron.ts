@@ -1,7 +1,8 @@
 const path = require("path");
-
 const { app, BrowserWindow } = require("electron");
 const isDev = require("electron-is-dev");
+const ipcMain = require("electron");
+const { dialog } = require("electron");
 
 function createWindow() {
   // Create the browser window.
@@ -9,7 +10,11 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      nodeIntegration: true,
+      nodeIntegration: false,
+      contextIsolation: true,
+      enableRemoteModule: false,
+      sandbox: true,
+      // preload: path.join(__dirname, "preload.ts"),
     },
     autoHideMenuBar: true,
   });
@@ -27,6 +32,18 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(createWindow);
+
+app.on("ready", () => {
+  console.log(`Setting Listeneres`);
+
+  // ipcMain.on("set-directory", () => {
+  //   dialog.showOpenDialog({ properties: ["openFile", "multiSelections"] });
+  // });
+
+  // ipcMain.on("toMain", (data) => {
+  //   console.log(data);
+  // });
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
