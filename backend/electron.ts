@@ -1,8 +1,7 @@
+const { scanBooks } = require("./electron-utils/utils");
 const path = require("path");
 const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const isDev = require("electron-is-dev");
-
-import scanForBooks from "./electron-utils/utils";
 
 function createWindow() {
   // Create the browser window.
@@ -64,8 +63,7 @@ ipcMain.on("toMain", async (event, data) => {
   } else if (dirPath) {
     // Tell React it succeeded -> React runs loader til next message
     // Check for books and build
-
-    scanForBooks(dirPath);
+    scanBooks(dirPath);
 
     event.reply("done", dirPath);
   }

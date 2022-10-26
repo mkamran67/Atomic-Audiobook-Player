@@ -1,14 +1,18 @@
 {
-  "name": "atomic",
+  "name": "atomic-backend",
   "version": "1.0.0",
   "repository": "git@github.com:mkamran67/Atomic-Audiobook-Player.git",
   "author": "Muhammad Kamran <me@mkamran.us>",
   "license": "MIT",
   "scripts": {
-    "dev": "concurrently \"yarn dev --cwd ./frontend\" \"yarn dev --cwd ./backend\""
+    "start": "electron electron.ts",
+    "dev": "nodemon --exec yarn start"
   },
   "dependencies": {},
   "devDependencies": {
-    "concurrently": "^7.4.0"
+    "@types/electron": "^1.6.10",
+    "electron": "^21.0.1",
+    "electron-is-dev": "^2.0.0",
+    "typescript": "^4.6.4"
   }
 }
