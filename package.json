@@ -10,12 +10,13 @@
     "dev2": "nodemon --watch electron.ts --exec yarn start ",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "con": "concurrently \"nodemon --watch electron.ts --exec yarn start \" \"yarn dev\" "
+    "con": "concurrently \"nodemon --watch electron.ts --watch preload.ts --exec yarn start \" \"yarn dev\" "
   },
   "dependencies": {
     "@headlessui/react": "^1.7.3",
     "@heroicons/react": "^2.0.12",
     "@tailwindcss/forms": "^0.5.3",
+    "electron-redux": "^1.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.4.2"
