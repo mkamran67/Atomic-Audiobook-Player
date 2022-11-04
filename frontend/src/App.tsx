@@ -1,7 +1,6 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
+import React from "react";
 import Layout from "./components/Layout";
-import { createBrowserRouter, RouterProvider, Route } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import ErrorPage from "./components/pages/ErrorPage";
 import Home from "./components/pages/Home";
 import Library from "./components/pages/Library";

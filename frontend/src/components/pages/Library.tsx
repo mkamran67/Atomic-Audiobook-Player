@@ -1,5 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+
 type Props = {};
+
+type MainData = {
+  results: boolean;
+};
 
 export default function Library({}: Props) {
   // const { ipcRenderer } = window.require("electron");
@@ -8,28 +13,23 @@ export default function Library({}: Props) {
 
   const setFolder = async () => {
     let path = "";
+    setLoading(true);
 
-    // Set a root directory for audiobooks
-    console.log(`Folder`);
+    // Popup for directory selector
+    window.api.send("toMain", "Search for books ~!");
 
-    // ipcRenderer
-    window.api.send("toMain", "Potatos grow underground.");
-    window.api.receive("fromMain", (data: string) => {
-      setLoading(true);
-      path = data;
-    });
+    // if it's cancelled -> reset loading
+    window.api.receive("fromMain", (data: MainData) => {
+      // Get updates on path? Settings? etc...
 
-    if (path) {
-      if (path === "Failed") {
-        loaderText = "Looks like you cancelled, we'll keep the old folder as root.";
-        setLoading(false);
+      // if true -> SetLoading -> true
+      if (data.results) {
+        setLoading(true);
       } else {
-        window.api.receive("done", (data: string) => {
-          setLoading(false);
-          // Check for directory info etc...
-        });
+        // if false -> SetLoading -> false
+        setLoading(false);
       }
-    }
+    });
   };
 
   return (

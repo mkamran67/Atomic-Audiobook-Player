@@ -6,10 +6,10 @@ import { decremented, incremented } from "../../slices/counter";
 type Props = {};
 
 export default function Home({}: Props) {
-  const state = useSelector((state) => state);
+  // const state = useSelector((state) => state);
   const dispatch = useDispatch();
 
-  console.log(state);
+  // console.log(state);
 
   return (
     <div className="w-full h-full">

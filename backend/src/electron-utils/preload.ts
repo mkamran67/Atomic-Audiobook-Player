@@ -15,9 +15,6 @@ contextBridge.exposeInMainWorld("api", {
   receive: (channel, func) => {
     let validChannels = ["fromMain", "done"];
 
-    console.log(channel);
-    console.log(func);
-
     if (validChannels.includes(channel)) {
       // Deliberately strip event as it includes `sender`
       ipcRenderer.on(channel, (event, ...args) => func(...args));
