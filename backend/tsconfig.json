@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "es2015",
+    "target": "es6",
+    "module": "commonJS",
     "sourceMap": true,
+    "esModuleInterop": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "stripInternal": true,
@@ -11,7 +12,12 @@
     "lib": ["es2015", "dom"],
     "moduleResolution": "node"
   },
-  "files": ["./src/app.ts", "./src/background.ts"],
+  "watchOptions": {
+    // Use native file system events for files and directories
+    "watchFile": "useFsEvents",
+    "watchDirectory": "useFsEvents",
+    "excludeDirectories": ["node_modules", "dist"]
+  },
   "angularCompilerOptions": {
     "skipTemplateCodegen": true
   }

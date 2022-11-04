@@ -5,7 +5,8 @@
   "author": "Muhammad Kamran <me@mkamran.us>",
   "license": "MIT",
   "scripts": {
-    "dev": "concurrently \"yarn dev --cwd ./frontend\" \"yarn dev --cwd ./backend\""
+    "dev": "concurrently \"yarn --cwd ./frontend dev\" \"yarn --cwd ./backend dev\"",
+    "init": "yarn --cwd ./frontend && yarn --cwd ./backend &&"
   },
   "dependencies": {},
   "devDependencies": {

@@ -1,7 +1,12 @@
-const { scanBooks } = require("./electron-utils/utils");
-const path = require("path");
-const { app, BrowserWindow, dialog, ipcMain } = require("electron");
-const isDev = require("electron-is-dev");
+// const { scanBooks } = require("./electron-utils/utils");
+// const path = require("path");
+// const { app, BrowserWindow, dialog, ipcMain } = require("electron");
+// const isDev = require("electron-is-dev");
+
+import scanBooks from "./electron-utils/utils";
+import path from "path";
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import isDev from "electron-is-dev";
 
 function createWindow() {
   // Create the browser window.
@@ -11,9 +16,8 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      enableRemoteModule: false,
       sandbox: true,
-      preload: path.join(__dirname, "..", "electron-utils", "preload.ts"),
+      preload: path.join(__dirname, "electron-utils", "preload.js"),
     },
     autoHideMenuBar: true,
   });
@@ -63,7 +67,7 @@ ipcMain.on("toMain", async (event, data) => {
   } else if (dirPath) {
     // Tell React it succeeded -> React runs loader til next message
     // Check for books and build
-    scanBooks(dirPath);
+    scanBooks(String(dirPath));
 
     event.reply("done", dirPath);
   }

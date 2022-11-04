@@ -21,6 +21,12 @@
     "incremental": true, // Enable incremental compilation by reading/writing information from prior compilations to a file on disk
     "noFallthroughCasesInSwitch": true // Report errors for fallthrough cases in switch statement
   },
+  "watchOptions": {
+    // Use native file system events for files and directories
+    "watchFile": "useFsEvents",
+    "watchDirectory": "useFsEvents",
+    "excludeDirectories": ["node_modules"]
+  },
   "include": [
     "src/**/*" // *** The files TypeScript should type check ***
   ],
