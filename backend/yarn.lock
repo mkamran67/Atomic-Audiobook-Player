@@ -562,6 +562,13 @@ matcher@^3.0.0:
   dependencies:
     escape-string-regexp "^4.0.0"
 
+mediainfo.js@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/mediainfo.js/-/mediainfo.js-0.1.8.tgz#b24e25815c21dc2bac9903b8b6452a28aa13e154"
+  integrity sha512-j68v2X+SC93X8F1nWKYqCDvGs2VtwPgvvXQsyJIAYP0zMM6WVa8lDfixyi2tthaB51uhC9/RTb9t5P1KJZeKpQ==
+  dependencies:
+    yargs "^17.5.1"
+
 mimic-response@^1.0.0, mimic-response@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/mimic-response/-/mimic-response-1.0.1.tgz"
@@ -913,7 +920,7 @@ yargs-parser@^21.1.1:
   resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-21.1.1.tgz#9096bceebf990d21bb31fa9516e0ede294a77d35"
   integrity sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==
 
-yargs@^17.3.1:
+yargs@^17.3.1, yargs@^17.5.1:
   version "17.6.2"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.6.2.tgz#2e23f2944e976339a1ee00f18c77fedee8332541"
   integrity sha512-1/9UrdHjDZc0eOU0HxOHoS78C69UD3JRMvzlJ7S79S2nTaWRA/whGCTV8o9e/N/1Va9YIV7Q4sOxD8VV4pCWOw==
