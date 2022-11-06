@@ -10,11 +10,11 @@ interface BookData {
   dirPath: string;
 }
 
-async function getTags(fullFilePath: string) {
+function getTags(fullFilePath: string) {
   let title = "";
   let artist = "";
 
-  await new jsmediatags.Reader(fullFilePath).setTagsToRead(["title", "artist"]).read({
+  new jsmediatags.Reader(fullFilePath).setTagsToRead(["title", "artist"]).read({
     onSuccess: function (tag) {
       if (tag.tags.title) {
         title = tag.tags.title;
@@ -32,9 +32,10 @@ async function getTags(fullFilePath: string) {
   return { title, artist };
 }
 
-async function writeToDisk(appData: string, bookDirectories: string[]): Promise<boolean> {
+function writeToDisk(appData: string, bookDirectories: string[]): boolean {
   const mediaExtensions = ["mp3", "m4b"];
   const imgExtensions = ["img", "jpeg", "jpg", "png"];
+
   const dataFilePath = path.join(appData, "data.txt");
   let listOfBooks = [];
 
@@ -42,11 +43,11 @@ async function writeToDisk(appData: string, bookDirectories: string[]): Promise<
   // STUB - Try stringified JSON
   // Append to textfile
   // Data to appened
-  // TITLE - GENRE (TAGS) - COVER PATH - DIRECTORY PATH
+  // TITLE - COVER PATH - DIRECTORY PATH
 
   try {
     // for (let index = 0; index < bookDirectories.length; index++) {
-    for (let index = 0; index < bookDirectories.length; index++) {
+    for (let index = 0; index < 10; index++) {
       const bookPath = bookDirectories[index];
       let bookData: BookData = {
         title: "",
@@ -57,6 +58,7 @@ async function writeToDisk(appData: string, bookDirectories: string[]): Promise<
 
       // 1. Get information & build bookData
       let bookDirectoryContents = readdirSync(bookPath);
+      let checked = false;
 
       // Get cover
       // Get other metadata -> genre/tags
@@ -68,11 +70,13 @@ async function writeToDisk(appData: string, bookDirectories: string[]): Promise<
         // check file type
         // if -> media get metadata
         // if -> image set cover
-        if (mediaExtensions.includes(fileExtension)) {
-          const { title, artist } = await getTags(fullFilePath);
+        if (!checked && mediaExtensions.includes(fileExtension)) {
+          const { title, artist } = getTags(fullFilePath);
 
           bookData.title = title;
           bookData.artist = artist;
+
+          checked = true;
         } else if (imgExtensions.includes(fileExtension)) {
           bookData.cover = fullFilePath;
         }
@@ -98,7 +102,6 @@ async function writeToDisk(appData: string, bookDirectories: string[]): Promise<
     console.error(err);
     return false;
   }
-
   return false;
 }
 
