@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "concurrently \"yarn --cwd ./frontend dev\" \"yarn --cwd ./backend dev\"",
-    "init": "yarn --cwd ./frontend && yarn --cwd ./backend"
+    "setup": "yarn --cwd ./frontend && yarn --cwd ./backend"
   },
   "dependencies": {},
   "devDependencies": {

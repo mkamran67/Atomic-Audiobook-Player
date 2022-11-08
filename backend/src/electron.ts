@@ -56,18 +56,22 @@ app.on("activate", () => {
 ipcMain.on("toMain", async (event, data) => {
   let dirPath = await dialog.showOpenDialog({
     properties: ["openDirectory"],
-    message: "Select the directory containing your audiobooks",
+    message: "Select the root directory containing your audiobooks",
   });
 
   if (dirPath && dirPath.canceled) {
     // Tell React it failed/canceled
     event.reply("fromMain", { results: false });
   } else if (dirPath) {
+    const rootPathForBooks = dirPath.filePaths[0];
+
     // Tell React it succeeded -> React runs loader til next message
     // Check for books and build
-    scanBooks(dirPath.filePaths[0]);
+    const dataFilePath = await scanBooks(rootPathForBooks); // This will take place in a sub process
 
     // Set a new directory -> Continue loading create listener for "Done"
-    event.reply("fromMain", { results: true });
+    if (dataFilePath) {
+      event.reply("fromMain", { results: true, filePath: dataFilePath });
+    }
   }
 });

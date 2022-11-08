@@ -2,9 +2,10 @@ import React, { useState } from "react";
 
 type Props = {};
 
-type MainData = {
+interface MainResponse {
   results: boolean;
-};
+  filePath: string;
+}
 
 export default function Library({}: Props) {
   // const { ipcRenderer } = window.require("electron");
@@ -19,7 +20,7 @@ export default function Library({}: Props) {
     window.api.send("toMain", "Search for books ~!");
 
     // if it's cancelled -> reset loading
-    window.api.receive("fromMain", (data: MainData) => {
+    window.api.receive("fromMain", (data: MainResponse) => {
       // Get updates on path? Settings? etc...
 
       // if true -> SetLoading -> true

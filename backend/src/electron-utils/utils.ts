@@ -2,6 +2,7 @@ import { app } from "electron";
 import { existsSync, readdirSync, mkdirSync, writeFileSync, readFileSync } from "fs";
 import path from "node:path";
 import * as jsmediatags from "jsmediatags";
+import { imgExtensions, mediaExtensions } from "./constants";
 
 interface BookData {
   title: string;
@@ -18,8 +19,6 @@ async function getTags(fullFilePath: string): Promise<{ title: string; artist: s
           resolve(tag);
         },
         onError: (error) => {
-          console.log(`Failed to get tags`);
-          console.log(fullFilePath);
           reject(error);
         },
       });
@@ -36,11 +35,9 @@ async function getTags(fullFilePath: string): Promise<{ title: string; artist: s
   }
 }
 
-async function writeToDisk(appData: string, bookDirectories: string[]): Promise<boolean> {
-  const mediaExtensions = ["mp3", "m4b"];
-  const imgExtensions = ["img", "jpeg", "jpg", "png"];
-  const dataFilePath = path.join(appData, "data.txt");
+async function writeToDisk(appData: string, bookDirectories: string[]): Promise<boolean | string> {
   let listOfBooks = [];
+  const dataFilePath = path.join(appData, "data.txt");
 
   // STUB - Try the sloppy way of storage
   // STUB - Try stringified JSON
@@ -77,7 +74,10 @@ async function writeToDisk(appData: string, bookDirectories: string[]): Promise<
           let results = await getTags(fullFilePath);
 
           if (results.title == "skip" || results.artist == "skip") {
-            bookData.title = "DNF"; // DNF -> Did not find -> use directory name?
+            let splitPath = bookPath.split(path.sep);
+
+            // Since no tag was found we use the directory as the name
+            bookData.title = splitPath[splitPath.length - 1];
             bookData.artist = "DNF";
           } else {
             bookData.title = results.title;
@@ -95,16 +95,9 @@ async function writeToDisk(appData: string, bookDirectories: string[]): Promise<
     // 2. Write to disk
     writeFileSync(dataFilePath, JSON.stringify(listOfBooks));
 
-    console.log(`Done writing all the books.`);
+    console.log(`Done writing all the books.\nData file path :  ${dataFilePath}`);
 
-    // read all the books
-    let booksList = readFileSync(dataFilePath, {
-      encoding: "utf8",
-    });
-
-    console.log(JSON.parse(booksList)[1]);
-
-    return true;
+    return dataFilePath;
   } catch (err) {
     console.error(err);
     return false;
@@ -170,12 +163,14 @@ export default function scanBooks(rootDir) {
   }
 
   appDataPath = path.join(appDataPath, "bookinfo");
-  console.log("👉 -> appDataPath", appDataPath);
 
   // 2. Search directories til bottom (mp3 files)
   let bookDirectories = directorySearch(rootDir);
 
-  writeToDisk(appDataPath, bookDirectories);
+  const filePath = writeToDisk(appDataPath, bookDirectories);
 
+  if (filePath) {
+    return filePath;
+  }
   // Send Main thread the book data path
 }
