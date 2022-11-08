@@ -10,32 +10,35 @@ interface BookData {
   dirPath: string;
 }
 
-function getTags(fullFilePath: string) {
-  let title = "";
-  let artist = "";
+async function getTags(fullFilePath: string): Promise<{ title: string; artist: string }> {
+  try {
+    const res: any = await new Promise((resolve, reject) => {
+      new jsmediatags.Reader(fullFilePath).read({
+        onSuccess: (tag) => {
+          resolve(tag);
+        },
+        onError: (error) => {
+          console.log(`Failed to get tags`);
+          console.log(fullFilePath);
+          reject(error);
+        },
+      });
+    });
 
-  new jsmediatags.Reader(fullFilePath).setTagsToRead(["title", "artist"]).read({
-    onSuccess: function (tag) {
-      if (tag.tags.title) {
-        title = tag.tags.title;
-      }
-      if (tag.tags.artist) {
-        artist = tag.tags.artist;
-      }
-    },
-    onError: function (error) {
-      console.log(`Error occured reading media tags`);
-      console.error(error);
-    },
-  });
-
-  return { title, artist };
+    if (res) {
+      return { title: res.tags.title, artist: res.tags.artist };
+    }
+  } catch (err) {
+    if (err.type == "tagFormat") {
+      return { title: "skip", artist: "skip" };
+    }
+    console.error(err);
+  }
 }
 
-function writeToDisk(appData: string, bookDirectories: string[]): boolean {
+async function writeToDisk(appData: string, bookDirectories: string[]): Promise<boolean> {
   const mediaExtensions = ["mp3", "m4b"];
   const imgExtensions = ["img", "jpeg", "jpg", "png"];
-
   const dataFilePath = path.join(appData, "data.txt");
   let listOfBooks = [];
 
@@ -47,7 +50,7 @@ function writeToDisk(appData: string, bookDirectories: string[]): boolean {
 
   try {
     // for (let index = 0; index < bookDirectories.length; index++) {
-    for (let index = 0; index < 10; index++) {
+    for (let index = 0; index < bookDirectories.length; index++) {
       const bookPath = bookDirectories[index];
       let bookData: BookData = {
         title: "",
@@ -71,11 +74,15 @@ function writeToDisk(appData: string, bookDirectories: string[]): boolean {
         // if -> media get metadata
         // if -> image set cover
         if (!checked && mediaExtensions.includes(fileExtension)) {
-          const { title, artist } = getTags(fullFilePath);
+          let results = await getTags(fullFilePath);
 
-          bookData.title = title;
-          bookData.artist = artist;
-
+          if (results.title == "skip" || results.artist == "skip") {
+            bookData.title = "DNF"; // DNF -> Did not find -> use directory name?
+            bookData.artist = "DNF";
+          } else {
+            bookData.title = results.title;
+            bookData.artist = results.artist;
+          }
           checked = true;
         } else if (imgExtensions.includes(fileExtension)) {
           bookData.cover = fullFilePath;
@@ -95,14 +102,13 @@ function writeToDisk(appData: string, bookDirectories: string[]): boolean {
       encoding: "utf8",
     });
 
-    console.log(JSON.parse(booksList));
+    console.log(JSON.parse(booksList)[1]);
 
     return true;
   } catch (err) {
     console.error(err);
     return false;
   }
-  return false;
 }
 
 function recursiveBookSearch(bookList, dirPath: string) {
@@ -163,7 +169,8 @@ export default function scanBooks(rootDir) {
     throw new Error("Failed to check or create a folder.");
   }
 
-  appDataPath = appDataPath + "/bookinfo";
+  appDataPath = path.join(appDataPath, "bookinfo");
+  console.log("👉 -> appDataPath", appDataPath);
 
   // 2. Search directories til bottom (mp3 files)
   let bookDirectories = directorySearch(rootDir);
