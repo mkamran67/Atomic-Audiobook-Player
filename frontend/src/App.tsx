@@ -1,12 +1,17 @@
-import React from "react";
-import Layout from "./components/Layout";
+// Modules / Dependencies
+import { Provider } from "react-redux";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+// Local imports
+import store from "./store";
+import Layout from "./components/Layout";
 import ErrorPage from "./components/pages/ErrorPage";
 import Home from "./components/pages/Home";
 import Library from "./components/pages/Library";
 import Folders from "./components/pages/Folders";
 import Stats from "./components/pages/Stats";
 import Settings from "./components/pages/Settings";
+import { MainResponseType } from "./types/library.types";
 
 const router = createBrowserRouter([
   {
@@ -41,7 +46,9 @@ const router = createBrowserRouter([
 function App() {
   return (
     <div className="App">
-      <RouterProvider router={router} />
+      <Provider store={store}>
+        <RouterProvider router={router} />
+      </Provider>
     </div>
   );
 }

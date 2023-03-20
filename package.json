@@ -8,7 +8,6 @@
     "dev": "concurrently \"yarn --cwd ./frontend dev\" \"yarn --cwd ./backend dev\"",
     "setup": "yarn --cwd ./frontend && yarn --cwd ./backend"
   },
-  "dependencies": {},
   "devDependencies": {
     "concurrently": "^7.4.0"
   }

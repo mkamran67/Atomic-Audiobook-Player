@@ -11,7 +11,6 @@
     "dev": "nodemon --watch src --exec yarn run seq"
   },
   "devDependencies": {
-    "@types/electron": "^1.6.10",
     "@types/jsmediatags": "^3.9.3",
     "concurrently": "^7.5.0",
     "electron": "^21.0.1",

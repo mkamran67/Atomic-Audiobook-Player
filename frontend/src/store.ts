@@ -1,8 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import counterSlice from "./slices/counter";
+import booksSlice from "./components/Library/booksSlice";
 
 const store = configureStore({
-  reducer: counterSlice.reducer,
+  reducer: {
+    books: booksSlice,
+  },
 });
 
 export default store;

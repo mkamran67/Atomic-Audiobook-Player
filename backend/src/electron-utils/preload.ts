@@ -1,19 +1,21 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-// Expose protected methods that allow the renderer process to use
+// Expose protected methods that allow the renderer (React) process to use
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld("api", {
-  send: (channel, data) => {
+  // Sends requests to Electron
+  send: (channel: string, data: any) => {
     // whitelist channels
-    let validChannels = ["toMain"];
+    let validChannels = ["requestToElectron"];
 
     if (validChannels.includes(channel)) {
-      // console.log(`Sending Data`, data);
       ipcRenderer.send(channel, data);
     }
   },
-  receive: (channel, func) => {
-    let validChannels = ["fromMain", "done"];
+  // Recieves responess from Electron
+  receive: (channel: string, func: any) => {
+    // whitelist channels
+    let validChannels = ["responseFromElectron"];
 
     if (validChannels.includes(channel)) {
       // Deliberately strip event as it includes `sender`

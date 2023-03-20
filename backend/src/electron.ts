@@ -2,11 +2,19 @@
 // const path = require("path");
 // const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 // const isDev = require("electron-is-dev");
-
+import os from "os";
 import scanBooks from "./electron-utils/utils";
 import path from "path";
-import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, session } from "electron";
 import isDev from "electron-is-dev";
+import { INFO_FOLDER_LOCATION, BOOKS_LIST_LOCATION } from "./electron-utils/constants";
+import { existsSync, readFileSync } from "original-fs";
+import getSimpleBookData from "./electron-utils/bookData";
+
+const reactDevToolsPath = path.join(
+  os.homedir(),
+  "AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\lmhkpmbekcpmknklioeibfkpmmfibljd\\3.0.19_0"
+);
 
 function createWindow() {
   // Create the browser window.
@@ -34,7 +42,11 @@ function createWindow() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(createWindow);
+app.whenReady().then(async () => {
+  await session.defaultSession.loadExtension(reactDevToolsPath);
+
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -51,27 +63,98 @@ app.on("activate", () => {
   }
 });
 
-// ------------------------------- Event Listeners -------------------------------
+// ------------------------------- Event Listeners Below -------------------------------
+//
+//
+// Listeners below will be called by React.
+//
+//
+//
+//
+// This listener will send back all the books data to React
+ipcMain.on("requestToElectron", async (event, data) => {
+  switch (data.type) {
+    case "getAllBooksSimplified": {
+      const results = getSimpleBookData();
+      console.log("👉 -> file: electron.ts:82 -> results:", results);
+      event.reply("responseFromElectron", results);
+      break;
+    }
+    case "firstTimeScanForBooks": {
+      let dirPath = await dialog.showOpenDialog({
+        properties: ["openDirectory"],
+        message: "Select the root directory containing your Audiobooks",
+      });
+
+      if (dirPath && dirPath.canceled) {
+        // Tell React it failed/canceled
+        event.reply("fromMain", { results: false });
+      } else if (dirPath) {
+        const rootPathForBooks = dirPath.filePaths[0];
+
+        // Tell React it succeeded -> React runs loader til next message
+        // Check for books and build
+        const dataFilePath = await scanBooks(rootPathForBooks); // This will take place in a sub process
+
+        // Set a new directory -> Continue loading create listener for "Done"
+        if (dataFilePath) {
+          event.reply("fromMain", { results: true, filePath: dataFilePath });
+        }
+      }
+      break;
+    }
+    case "scanForBooks": {
+      let dirPath = await dialog.showOpenDialog({
+        properties: ["openDirectory"],
+        message: "Select the root directory containing your Audiobooks",
+      });
+
+      if (dirPath && dirPath.canceled) {
+        // Tell React it failed/canceled
+        event.reply("fromMain", { results: false });
+      } else if (dirPath) {
+        const rootPathForBooks = dirPath.filePaths[0];
+
+        // Tell React it succeeded -> React runs loader til next message
+        // Check for books and build
+        const dataFilePath = await scanBooks(rootPathForBooks); // This will take place in a sub process
+
+        // Set a new directory -> Continue loading create listener for "Done"
+        if (dataFilePath) {
+          event.reply("fromMain", { results: true, filePath: dataFilePath });
+        }
+      }
+      break;
+    }
+
+    default:
+      console.log(`You've hit default -> ${data.type}`);
+      break;
+  }
+});
 
 ipcMain.on("toMain", async (event, data) => {
-  let dirPath = await dialog.showOpenDialog({
-    properties: ["openDirectory"],
-    message: "Select the root directory containing your audiobooks",
-  });
+  console.log("👉 -> file: electron.ts:57 -> data:", data);
+  // Channel data determines what to do and return
 
-  if (dirPath && dirPath.canceled) {
-    // Tell React it failed/canceled
-    event.reply("fromMain", { results: false });
-  } else if (dirPath) {
-    const rootPathForBooks = dirPath.filePaths[0];
+  // let dirPath = await dialog.showOpenDialog({
+  //   properties: ["openDirectory"],
+  //   message: "Select the root directory containing your audiobooks",
+  // });
 
-    // Tell React it succeeded -> React runs loader til next message
-    // Check for books and build
-    const dataFilePath = await scanBooks(rootPathForBooks); // This will take place in a sub process
+  // if (dirPath && dirPath.canceled) {
+  //   // Tell React it failed/canceled
+  //   event.reply("fromMain", { results: false });
+  // } else if (dirPath) {
+  //   const rootPathForBooks = dirPath.filePaths[0];
 
-    // Set a new directory -> Continue loading create listener for "Done"
-    if (dataFilePath) {
-      event.reply("fromMain", { results: true, filePath: dataFilePath });
-    }
-  }
+  //   // Tell React it succeeded -> React runs loader til next message
+  //   // Check for books and build
+  //   const dataFilePath = await scanBooks(rootPathForBooks); // This will take place in a sub process
+
+  //   // Set a new directory -> Continue loading create listener for "Done"
+  //   if (dataFilePath) {
+  //     event.reply("fromMain", { results: true, filePath: dataFilePath });
+  //   }
+  // }
 });

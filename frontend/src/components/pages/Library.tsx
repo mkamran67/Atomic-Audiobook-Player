@@ -1,11 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 type Props = {};
-
-interface MainResponse {
-  results: boolean;
-  filePath: string;
-}
 
 export default function Library({}: Props) {
   // const { ipcRenderer } = window.require("electron");
@@ -17,20 +12,19 @@ export default function Library({}: Props) {
     setLoading(true);
 
     // Popup for directory selector
-    window.api.send("toMain", "Search for books ~!");
+    window.api.send("requestToElectron", { type: "firstTimeScanForBooks", data: null });
 
-    // if it's cancelled -> reset loading
-    window.api.receive("fromMain", (data: MainResponse) => {
-      // Get updates on path? Settings? etc...
-
-      // if true -> SetLoading -> true
-      if (data.results) {
-        setLoading(true);
-      } else {
-        // if false -> SetLoading -> false
-        setLoading(false);
-      }
-    });
+    // // if it's cancelled -> reset loading
+    // window.api.receive("fromMain", (data: MainResponseType) => {
+    //   // if true -> SetLoading -> true
+    //   if (data.results) {
+    //     setLoading(true);
+    //     //REVIEW -  setPath in state
+    //   } else {
+    //     // if false -> SetLoading -> false
+    //     setLoading(false);
+    //   }
+    // });
   };
 
   return (
