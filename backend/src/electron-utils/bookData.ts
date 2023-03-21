@@ -9,11 +9,12 @@ export default function getSimpleBookData() {
     if (existsSync(BOOKS_LIST_LOCATION)) {
       // 3. Read the file
       // event.reply("BooksFromMain", readFileSync(BOOKS_LIST_LOCATION));
-
-      const results = JSON.parse(readFileSync(BOOKS_LIST_LOCATION, { encoding: "utf-8" }));
-      return results;
+      try {
+        const results = JSON.parse(readFileSync(BOOKS_LIST_LOCATION, { encoding: "utf-8" }));
+        return results;
+      } catch (err) {
+        return new Error(err);
+      }
     }
   }
-
-  return 1;
 }

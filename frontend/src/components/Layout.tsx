@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import {
   Bars3BottomLeftIcon,
@@ -32,12 +32,14 @@ export default function Layout() {
   // const router = useRouter();
   // const searchFocus = () => {};
 
-  // Load Books here
-  // ANCHOR - reEnable later;
-  // window.api.send("requestToElectron", { type: "getAllBooksSimplified", payload: null });
-  window.api.receive("responseFromElectron", (data: any) => {
-    dispatch(setBooks(data));
-  });
+  useEffect(() => {
+    window.api.send("requestToElectron", { type: "getAllBooksSimplified", payload: null });
+
+    window.api.receive("responseFromElectron", (data: any) => {
+      // TODO -> switch by type
+      dispatch(setBooks(data));
+    });
+  }, []);
 
   return (
     <>

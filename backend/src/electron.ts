@@ -85,8 +85,24 @@ ipcMain.on("requestToElectron", async (event, data) => {
   switch (data.type) {
     // Returns the Library data to React -> Does not Scan or ReScan.
     case "getAllBooksSimplified": {
-      const results = getSimpleBookData();
-      event.reply("responseFromElectron", results);
+      try {
+        let results: ResponseFromElectronType = {
+          error: false,
+          message: "Successfully scanned",
+          data: null,
+        };
+
+        results.data = getSimpleBookData();
+        event.reply("responseFromElectron", results);
+      } catch (err) {
+        console.error(err);
+        let results: ResponseFromElectronType = {
+          error: true,
+          message: err.message,
+          data: null,
+        };
+        event.reply("responseFromElectron", results);
+      }
       break;
     }
     // Scans a directory for audiobooks
