@@ -1,10 +1,7 @@
 export interface BookData {
   title: string;
-  artist: string;
+  artist?: string;
   cover?: string;
   dirPath: string;
+  length?: number;
 }
-
-// export interface RequestTypes {
-//   data:
-// }

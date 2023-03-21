@@ -8,9 +8,10 @@ export default function getSimpleBookData() {
     // 2. Check if the library file exists
     if (existsSync(BOOKS_LIST_LOCATION)) {
       // 3. Read the file
-      console.log(readFileSync(BOOKS_LIST_LOCATION, "utf-8"));
-
       // event.reply("BooksFromMain", readFileSync(BOOKS_LIST_LOCATION));
+
+      const results = JSON.parse(readFileSync(BOOKS_LIST_LOCATION, { encoding: "utf-8" }));
+      return results;
     }
   }
 

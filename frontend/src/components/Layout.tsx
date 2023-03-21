@@ -11,9 +11,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { Link, Outlet } from "react-router-dom";
-import { MainResponseType } from "../types/library.types";
 import { useDispatch } from "react-redux";
-import booksSlice from "./Library/booksSlice";
+import { setBooks } from "./Library/booksSlice";
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon, current: true },
   { name: "Library", href: "/library", icon: BuildingLibraryIcon, current: false },
@@ -34,11 +33,10 @@ export default function Layout() {
   // const searchFocus = () => {};
 
   // Load Books here
-
-  window.api.send("requestToElectron", { type: "getAllBooksSimplified", payload: null });
-
+  // ANCHOR - reEnable later;
+  // window.api.send("requestToElectron", { type: "getAllBooksSimplified", payload: null });
   window.api.receive("responseFromElectron", (data: any) => {
-    dispatch(booksSlice.actions.setBooks(data.books));
+    dispatch(setBooks(data));
   });
 
   return (

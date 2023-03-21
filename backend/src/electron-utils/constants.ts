@@ -7,8 +7,8 @@ const IMG_EXTENSIONS = ["img", "jpeg", "jpg", "png"];
 
 // Somewhat Constants -> that are system-generated <OS_TYPICAL> but will function the same.
 const SETTINGS_LOCATION = path.join(app.getPath("appData"), "settings.txt");
-const BOOKS_LIST_LOCATION = path.join(app.getPath("appData"), "library.txt");
 const INFO_FOLDER_LOCATION = path.join(app.getPath("appData"), "Atomic Audiobook Player");
+const BOOKS_LIST_LOCATION = path.join(INFO_FOLDER_LOCATION, "library.txt");
 
 export {
   MEDIA_EXTENSIONS as mediaExtensions,

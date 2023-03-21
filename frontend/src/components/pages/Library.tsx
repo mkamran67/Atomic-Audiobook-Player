@@ -1,30 +1,21 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { setBooks } from "../Library/booksSlice";
 
 type Props = {};
 
 export default function Library({}: Props) {
   // const { ipcRenderer } = window.require("electron");
   const [loading, setLoading] = useState(false);
-  let loaderText = "Loading...";
+  const dispatch = useDispatch();
+  let loaderText = "Scanning for books...";
 
   const setFolder = async () => {
-    let path = "";
     setLoading(true);
-
-    // Popup for directory selector
-    window.api.send("requestToElectron", { type: "firstTimeScanForBooks", data: null });
-
-    // // if it's cancelled -> reset loading
-    // window.api.receive("fromMain", (data: MainResponseType) => {
-    //   // if true -> SetLoading -> true
-    //   if (data.results) {
-    //     setLoading(true);
-    //     //REVIEW -  setPath in state
-    //   } else {
-    //     // if false -> SetLoading -> false
-    //     setLoading(false);
-    //   }
-    // });
+    window.api.send("requestToElectron", {
+      type: "newAudioBookDirectory",
+      payload: null,
+    });
   };
 
   return (

@@ -2,15 +2,16 @@ import { createSlice } from "@reduxjs/toolkit";
 
 // Get books here
 
-let initialState = {};
+let initialState: any[] = [];
 
 // Read books from settings save location
-
 const booksSlice = createSlice({
   name: "books",
   initialState: initialState,
   reducers: {
-    setBooks: (state) => state,
+    setBooks: (_state, { payload }) => {
+      return payload;
+    },
   },
 });
 

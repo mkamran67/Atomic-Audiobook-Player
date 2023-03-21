@@ -2,7 +2,7 @@ import { app } from "electron";
 import { existsSync, readdirSync, mkdirSync, writeFileSync, readFileSync } from "fs";
 import path from "node:path";
 import * as jsmediatags from "jsmediatags";
-import { INFO_FOLDER_LOCATION, imgExtensions, mediaExtensions } from "./constants";
+import { BOOKS_LIST_LOCATION, INFO_FOLDER_LOCATION, imgExtensions, mediaExtensions } from "./constants";
 import { BookData } from "../types/library.types";
 
 async function getTags(fullFilePath: string): Promise<{ title: string; artist: string }> {
@@ -29,7 +29,62 @@ async function getTags(fullFilePath: string): Promise<{ title: string; artist: s
   }
 }
 
-async function getBookInformation(listOfBooks, bookDirectories: string[]) {
+// async function getBookInformation(listOfBooks, bookDirectories: string[]) {
+//   // iterate through directories
+//   for (let index = 0; index < bookDirectories.length; index++) {
+//     const bookPath = bookDirectories[index]; // Path to book directory
+
+//     let bookData: BookData = {
+//       title: "",
+//       artist: "",
+//       cover: "",
+//       dirPath: bookPath,
+//     };
+
+//     // 1. Get information & build bookData
+//     let bookDirectoryContents = readdirSync(bookPath);
+//     let checked = false;
+
+//     // Get cover
+//     // Get other metadata -> genre/tags
+//     for (let i = 0; i < bookDirectoryContents.length; i++) {
+//       let theFile = bookDirectoryContents[i];
+//       let fileExtension = bookDirectoryContents[i].split(".")[1];
+//       let fullFilePath = path.join(bookPath, theFile);
+
+//       // check file type
+//       // if -> media get metadata
+//       // if -> image set cover
+//       if (!checked && mediaExtensions.includes(fileExtension)) {
+//         let results = await getTags(fullFilePath);
+
+//         if (results.title == "skip" || results.artist == "skip") {
+//           let splitPath = bookPath.split(path.sep);
+
+//           // Since no tag was found we use the directory as the name
+//           bookData.title = splitPath[splitPath.length - 1];
+//           bookData.artist = "DNF";
+//         } else {
+//           bookData.title = results.title;
+//           bookData.artist = results.artist;
+//         }
+//         checked = true;
+//       } else if (imgExtensions.includes(fileExtension)) {
+//         bookData.cover = fullFilePath;
+//       }
+
+//       listOfBooks.push(bookData);
+//     }
+//   }
+// }
+
+// NOTE - Might use this later
+
+async function getBookInformation(bookDirectories: string[]): Promise<BookData[]> {
+  let anArrayOfBookData: BookData[] = [];
+
+  console.log("\n\n");
+
   // iterate through directories
   for (let index = 0; index < bookDirectories.length; index++) {
     const bookPath = bookDirectories[index]; // Path to book directory
@@ -41,44 +96,56 @@ async function getBookInformation(listOfBooks, bookDirectories: string[]) {
       dirPath: bookPath,
     };
 
-    // 1. Get information & build bookData
+    // 1. Get current directory content & build bookData
     let bookDirectoryContents = readdirSync(bookPath);
     let checked = false;
+    let coverFound = false;
 
     // Get cover
     // Get other metadata -> genre/tags
+    // iterate through directory contents
     for (let i = 0; i < bookDirectoryContents.length; i++) {
-      let theFile = bookDirectoryContents[i];
-      let fileExtension = bookDirectoryContents[i].split(".")[1];
-      let fullFilePath = path.join(bookPath, theFile);
+      let theFile = bookDirectoryContents[i]; // File name
+      let fileExtension = bookDirectoryContents[i].split(".")[1]; // File extension
+      let fullFilePath = path.join(bookPath, theFile); // Path to file
 
-      // check file type
-      // if -> media get metadata
-      // if -> image set cover
+      // if 'audiobook' hasn't been checked && is a supported extension
       if (!checked && mediaExtensions.includes(fileExtension)) {
+        // get tags
         let results = await getTags(fullFilePath);
 
-        if (results.title == "skip" || results.artist == "skip") {
-          let splitPath = bookPath.split(path.sep);
-
-          // Since no tag was found we use the directory as the name
-          bookData.title = splitPath[splitPath.length - 1];
-          bookData.artist = "DNF";
+        // if no title
+        if (results.title == "skip") {
+          let splitPath = bookPath.split(path.sep); // Split bookPath at \ or /
+          bookData.title = splitPath[splitPath.length - 1]; // Since no tag was found we use the directory as the name
         } else {
           bookData.title = results.title;
+        }
+
+        // if no artist
+        if (results.artist == "skip") {
+          bookData.artist = "DNF";
+        } else {
           bookData.artist = results.artist;
         }
-        checked = true;
-      } else if (imgExtensions.includes(fileExtension)) {
-        bookData.cover = fullFilePath;
-      }
 
-      listOfBooks.push(bookData);
-    }
-  }
+        checked = true;
+      } else if (!coverFound && imgExtensions.includes(fileExtension)) {
+        bookData.cover = fullFilePath;
+        coverFound = true;
+      } // else if
+
+      // if both are checked break out of the loop
+      if (checked && coverFound) {
+        break;
+      }
+    } // for 2
+    anArrayOfBookData.push(bookData);
+  } // for 1
+
+  return anArrayOfBookData;
 }
 
-// NOTE - Might use this later
 async function buildSimpleBookData(listOfBooks: BookData[], bookDirectories: string[]) {
   // This function will build a list containing only
   // Title - Cover Path - Directory Path
@@ -91,45 +158,31 @@ async function buildSimpleBookData(listOfBooks: BookData[], bookDirectories: str
   }
 }
 
-async function writeToDisk(bookDirectories: string[]): Promise<boolean | string> {
-  let listOfBooks = [];
-
-  // Path to books data
-  const dataFilePath = path.join(INFO_FOLDER_LOCATION, "library.txt");
-
-  // STUB - Try the sloppy way of storage
-  // STUB - Try stringified JSON
-  // Append to textfile
-  // Data to appened
-  // TITLE - COVER PATH - DIRECTORY PATH
-
+async function writeToDisk(anArrayOfBookData: BookData[]): Promise<boolean | string> {
   try {
-    // 1. Get information & build listOfBooks
-    await getBookInformation(listOfBooks, bookDirectories);
+    // 1. Write book information to disk
+    writeFileSync(BOOKS_LIST_LOCATION, JSON.stringify(anArrayOfBookData));
 
-    // 1. Simplified way of storing data
-    // buildSimpleBookData(listOfBooks, bookDirectories);
+    console.log(`\nDone writing all the books.\nData file path :  ${BOOKS_LIST_LOCATION}`);
 
-    // 2. Write to disk
-    writeFileSync(dataFilePath, JSON.stringify(listOfBooks));
-
-    console.log(`Done writing all the books.\nData file path :  ${dataFilePath}`);
-
-    return dataFilePath;
+    return true;
   } catch (err) {
     console.error(err);
     return false;
   }
 }
 
-function recursiveBookSearch(bookList: string[], dirPath: string) {
-  let directoryElements = readdirSync(dirPath, { withFileTypes: true });
+// 3. Recursively call searches
+function recursiveBookSearch(bookList: string[], dirPath: string): void {
+  // Read the contents of the current directory
+  const directoryElements = readdirSync(dirPath, { withFileTypes: true });
 
+  // if it's empty -> return;
   if (!directoryElements || directoryElements.length === 0) {
     return;
   }
 
-  // if first file is not a directory appened the directory to bookList
+  // if the first file is not a directory -> push the current directory as an audiobook location;
   if (!directoryElements[0].isDirectory()) {
     bookList.push(dirPath);
     return; // End of recursion
@@ -143,10 +196,10 @@ function recursiveBookSearch(bookList: string[], dirPath: string) {
   }
 }
 
-
+// 2. Starts the search for audiobooks
 function directorySearch(dirPath: string): string[] {
   let currentDirectories = null;
-  let bookList: Array<string> = [];
+  let bookList: string[] = [];
 
   // 1. Get list of initial Directories
   try {
@@ -169,8 +222,8 @@ function directorySearch(dirPath: string): string[] {
   return bookList;
 }
 
-// Responsible for searching for books
-export default function scanBooks(rootDir) {
+// 1. Starts the scan and returns the list of BookData[]
+export default async function scanBooks(rootDir: string): Promise<BookData[]> {
   // 1. Create a folder to store our book information
   try {
     if (!existsSync(INFO_FOLDER_LOCATION)) {
@@ -181,13 +234,14 @@ export default function scanBooks(rootDir) {
   }
 
   // 2. Search directories til bottom (mp3 files)
-  let listOfBookDirectories = directorySearch(rootDir);
+  let listOfBookDirectories: string[] = directorySearch(rootDir);
+
+  // 3. Get BookData ->AKA-> information
+  let bookData: BookData[] = await getBookInformation(listOfBookDirectories);
 
   // 3. Write to disk
-  const filePath = writeToDisk(listOfBookDirectories);
+  await writeToDisk(bookData);
 
-  if (filePath) {
-    return filePath;
-  }
   // Send Main thread the book data path
+  return bookData;
 }

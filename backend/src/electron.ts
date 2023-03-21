@@ -10,6 +10,8 @@ import isDev from "electron-is-dev";
 import { INFO_FOLDER_LOCATION, BOOKS_LIST_LOCATION } from "./electron-utils/constants";
 import { existsSync, readFileSync } from "original-fs";
 import getSimpleBookData from "./electron-utils/bookData";
+import { ResponseFromElectronType } from "./types/response.type";
+import { BookData } from "./types/library.types";
 
 const reactDevToolsPath = path.join(
   os.homedir(),
@@ -43,9 +45,15 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  await session.defaultSession.loadExtension(reactDevToolsPath);
-
-  createWindow();
+  // createWindow();
+  session.defaultSession
+    .loadExtension(reactDevToolsPath)
+    .then(() => {
+      createWindow();
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -57,11 +65,11 @@ app.on("window-all-closed", () => {
   }
 });
 
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
+// app.on("activate", () => {
+//   if (BrowserWindow.getAllWindows().length === 0) {
+//     createWindow();
+//   }
+// });
 
 // ------------------------------- Event Listeners Below -------------------------------
 //
@@ -73,88 +81,62 @@ app.on("activate", () => {
 //
 // This listener will send back all the books data to React
 ipcMain.on("requestToElectron", async (event, data) => {
+  // Determines what actions to take
   switch (data.type) {
+    // Returns the Library data to React -> Does not Scan or ReScan.
     case "getAllBooksSimplified": {
       const results = getSimpleBookData();
-      console.log("👉 -> file: electron.ts:82 -> results:", results);
       event.reply("responseFromElectron", results);
       break;
     }
-    case "firstTimeScanForBooks": {
-      let dirPath = await dialog.showOpenDialog({
+    // Scans a directory for audiobooks
+    case "newAudioBookDirectory": {
+      // Get directory path from user
+      const dirPath = await dialog.showOpenDialog({
         properties: ["openDirectory"],
         message: "Select the root directory containing your Audiobooks",
       });
 
       if (dirPath && dirPath.canceled) {
         // Tell React it failed/canceled
-        event.reply("fromMain", { results: false });
+        const results: ResponseFromElectronType = {
+          error: true,
+          message: "Failed to get a directory",
+          data: null,
+        };
+
+        event.reply("responseFromElectron", results);
       } else if (dirPath) {
-        const rootPathForBooks = dirPath.filePaths[0];
+        try {
+          const rootPathForBooks = dirPath.filePaths[0];
 
-        // Tell React it succeeded -> React runs loader til next message
-        // Check for books and build
-        const dataFilePath = await scanBooks(rootPathForBooks); // This will take place in a sub process
+          // Scan for books and build a save file
+          // This will take place in a sub process
+          const arrayOfBooks: BookData[] = await scanBooks(rootPathForBooks);
 
-        // Set a new directory -> Continue loading create listener for "Done"
-        if (dataFilePath) {
-          event.reply("fromMain", { results: true, filePath: dataFilePath });
+          const results: ResponseFromElectronType = {
+            error: false,
+            message: "Successfully scanned",
+            data: arrayOfBooks,
+          };
+
+          if (arrayOfBooks) {
+            console.log(`Replying to React`);
+            event.reply("responseFromElectron", results);
+          }
+        } catch (err) {
+          event.reply("responseFromElectron", {
+            error: true,
+            message: err.message,
+            data: null,
+          });
         }
       }
       break;
     }
-    case "scanForBooks": {
-      let dirPath = await dialog.showOpenDialog({
-        properties: ["openDirectory"],
-        message: "Select the root directory containing your Audiobooks",
-      });
-
-      if (dirPath && dirPath.canceled) {
-        // Tell React it failed/canceled
-        event.reply("fromMain", { results: false });
-      } else if (dirPath) {
-        const rootPathForBooks = dirPath.filePaths[0];
-
-        // Tell React it succeeded -> React runs loader til next message
-        // Check for books and build
-        const dataFilePath = await scanBooks(rootPathForBooks); // This will take place in a sub process
-
-        // Set a new directory -> Continue loading create listener for "Done"
-        if (dataFilePath) {
-          event.reply("fromMain", { results: true, filePath: dataFilePath });
-        }
-      }
-      break;
-    }
-
-    default:
+    default: {
       console.log(`You've hit default -> ${data.type}`);
       break;
+    }
   }
-});
-
-ipcMain.on("toMain", async (event, data) => {
-  console.log("👉 -> file: electron.ts:57 -> data:", data);
-  // Channel data determines what to do and return
-
-  // let dirPath = await dialog.showOpenDialog({
-  //   properties: ["openDirectory"],
-  //   message: "Select the root directory containing your audiobooks",
-  // });
-
-  // if (dirPath && dirPath.canceled) {
-  //   // Tell React it failed/canceled
-  //   event.reply("fromMain", { results: false });
-  // } else if (dirPath) {
-  //   const rootPathForBooks = dirPath.filePaths[0];
-
-  //   // Tell React it succeeded -> React runs loader til next message
-  //   // Check for books and build
-  //   const dataFilePath = await scanBooks(rootPathForBooks); // This will take place in a sub process
-
-  //   // Set a new directory -> Continue loading create listener for "Done"
-  //   if (dataFilePath) {
-  //     event.reply("fromMain", { results: true, filePath: dataFilePath });
-  //   }
-  // }
 });
