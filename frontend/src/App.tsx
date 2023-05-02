@@ -11,7 +11,7 @@ import Library from "./components/pages/Library";
 import Folders from "./components/pages/Folders";
 import Stats from "./components/pages/Stats";
 import Settings from "./components/pages/Settings";
-import { MainResponseType } from "./types/library.types";
+// import { MainResponseType } from "./types/library.types";
 
 const router = createBrowserRouter([
   {

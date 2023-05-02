@@ -1,7 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-// Get books here
-
 let initialState: any[] = [];
 
 // Read books from settings save location

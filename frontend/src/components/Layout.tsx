@@ -11,8 +11,10 @@ import {
 } from "@heroicons/react/24/outline";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { Link, Outlet } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setBooks } from "./Library/booksSlice";
+import Loader from "./loader/Loader";
+import { RootState } from "../store";
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon, current: true },
   { name: "Library", href: "/library", icon: BuildingLibraryIcon, current: false },
@@ -27,7 +29,8 @@ function classNames(...classes: any[]) {
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, _setLoading] = useState(false);
+  // const [loading, _setLoading] = useState(false);
+  const loading = useSelector((state: RootState) => state.loader);
   const dispatch = useDispatch();
   // const router = useRouter();
   // const searchFocus = () => {};
@@ -44,7 +47,7 @@ export default function Layout() {
   return (
     <>
       {loading ? (
-        <div>Loading...</div>
+        <Loader />
       ) : (
         <div>
           <Transition.Root show={sidebarOpen} as={Fragment}>
