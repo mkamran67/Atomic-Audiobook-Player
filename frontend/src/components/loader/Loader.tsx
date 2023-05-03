@@ -1,7 +1,7 @@
 export default function Loader() {
   return (
-    <div className="inset-0 z-50">
-      <div className="flex flex-col min-h-full" role="status">
+    <div className="inset-0 z-40 w-screen h-screen">
+      <div className="flex flex-col w-full h-full m-auto" role="status">
         <svg
           aria-hidden="true"
           className="w-16 h-16 m-auto text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
@@ -18,6 +18,7 @@ export default function Loader() {
             fill="currentFill"
           />
         </svg>
+        <span className="z-50 m-auto font-mono text-center text-black text-ellipsis">Looking for books...</span>
         <span className="sr-only">Looking for books...</span>
       </div>
     </div>

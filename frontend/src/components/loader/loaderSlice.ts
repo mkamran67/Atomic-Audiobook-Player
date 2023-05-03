@@ -8,12 +8,10 @@ const loadingSlice = createSlice({
   initialState: initialState,
   reducers: {
     setLoading: (_state) => {
-      console.log("Set to True");
       return true;
     },
 
     clearLoading: (_state) => {
-      console.log("Set to False");
       return false;
     },
   },

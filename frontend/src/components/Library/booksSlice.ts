@@ -1,6 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { BookDataType } from "../../types/library.types";
 
-let initialState: any[] = [];
+interface BookState {
+  books: BookDataType[];
+  error: boolean;
+  message: string;
+}
+
+const initialState: BookState = {
+  books: [],
+  error: false,
+  message: "",
+};
 
 // Read books from settings save location
 const booksSlice = createSlice({
@@ -8,7 +19,7 @@ const booksSlice = createSlice({
   initialState: initialState,
   reducers: {
     setBooks: (_state, { payload }) => {
-      return payload;
+      return { error: payload.error, message: payload.message, books: payload.data };
     },
   },
 });

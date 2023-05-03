@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setBooks } from "./Library/booksSlice";
 import Loader from "./loader/Loader";
 import { RootState } from "../store";
+import { clearLoading } from "./loader/loaderSlice";
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon, current: true },
   { name: "Library", href: "/library", icon: BuildingLibraryIcon, current: false },
@@ -41,6 +42,7 @@ export default function Layout() {
     window.api.receive("responseFromElectron", (data: any) => {
       // TODO -> switch by type
       dispatch(setBooks(data));
+      dispatch(clearLoading());
     });
   }, []);
 
