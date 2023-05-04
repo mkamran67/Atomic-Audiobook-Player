@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import booksSlice from "./components/Library/booksSlice";
+import booksSlice from "./components/library/booksSlice";
 import LayoutSlice from "./components/LayoutSlice";
 import loadingSlice from "./components/loader/loaderSlice";
 

@@ -12,10 +12,12 @@ import {
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { Link, Outlet } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setBooks } from "./Library/booksSlice";
+import { setBooks } from "./library/booksSlice";
 import Loader from "./loader/Loader";
 import { RootState } from "../store";
 import { clearLoading } from "./loader/loaderSlice";
+import Player from "./player/Player";
+
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon, current: true },
   { name: "Library", href: "/library", icon: BuildingLibraryIcon, current: false },

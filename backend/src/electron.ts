@@ -5,7 +5,7 @@
 import os from "os";
 import scanBooks from "./electron-utils/utils";
 import path from "path";
-import { app, BrowserWindow, dialog, ipcMain, session } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, protocol, session } from "electron";
 import isDev from "electron-is-dev";
 import { INFO_FOLDER_LOCATION, BOOKS_LIST_LOCATION } from "./electron-utils/constants";
 import { existsSync, readFileSync } from "original-fs";
@@ -45,7 +45,16 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  // createWindow();
+  protocol.registerFileProtocol("image-file", (request, callback) => {
+    const url = request.url.replace("image-file://", "");
+    try {
+      return callback(url);
+    } catch (err) {
+      console.error(err);
+      return callback("404");
+    }
+  });
+
   session.defaultSession
     .loadExtension(reactDevToolsPath)
     .then(() => {

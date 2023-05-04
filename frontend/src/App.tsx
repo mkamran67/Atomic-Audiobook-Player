@@ -11,7 +11,7 @@ import Library from "./components/pages/Library";
 import Folders from "./components/pages/Folders";
 import Stats from "./components/pages/Stats";
 import Settings from "./components/pages/Settings";
-// import { MainResponseType } from "./types/library.types";
+import Player from "./components/player/Player";
 
 const router = createBrowserRouter([
   {
@@ -48,6 +48,7 @@ function App() {
     <div className="App">
       <Provider store={store}>
         <RouterProvider router={router} />
+        <Player />
       </Provider>
     </div>
   );

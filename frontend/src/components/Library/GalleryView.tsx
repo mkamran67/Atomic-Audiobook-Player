@@ -6,16 +6,39 @@ type Props = {
 };
 
 function GalleryView({ books }: Props) {
-  console.log(books);
+  let counter = 0;
 
   return (
     <>
-      {books &&
-        books.map((book: BookDataType) => (
-          <BookCard title={book.title} bookPath={book.dirPath} image={book.cover} artist={book.artist} />
-        ))}
+      <ul role="list" className="grid grid-flow-row grid-cols-6 gap-6">
+        {books &&
+          books.map((book) => {
+            counter++;
+
+            return (
+              <li key={`book-${counter}`}>
+                <BookCard artist={book.artist} title={book.title} bookPath={book.dirPath} image={book.cover} />
+              </li>
+            );
+          })}
+      </ul>
     </>
   );
 }
 
 export default GalleryView;
+
+{
+  /* <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+        {books &&
+          books.map((book) => {
+            counter++;
+
+            return (
+              <li key={`book-${counter}`}>
+                <BookCard artist={book.artist} title={book.title} bookPath={book.dirPath} image={book.cover} />
+              </li>
+            );
+          })}
+      </ul> */
+}

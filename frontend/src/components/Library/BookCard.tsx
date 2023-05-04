@@ -1,3 +1,5 @@
+import default_img from "../../assets/default-book-cover.jpg";
+
 type Props = {
   title: string;
   image: string | undefined;
@@ -7,17 +9,9 @@ type Props = {
 
 export default function BookCard({ title, image, bookPath, artist }: Props) {
   return (
-    <div className="shadow-xl card w-96 bg-base-100 image-full">
-      <figure>
-        <img src={image ? image : "C:/Users/lightberry/Downloads/default-book-cover.jpg"} alt={"Book cover"} />
-      </figure>
-      <div className="card-body">
-        <h2 className="card-title">{title}</h2>
-        <p>{bookPath}</p>
-        <div className="justify-end card-actions">
-          <button className="btn btn-primary">Play</button>
-        </div>
-      </div>
+    <div className="relative h-56 rounded-md shadow-xl cursor-pointer overflow-clip w-44 group">
+      <div className="absolute z-10 invisible w-full h-full duration-150 ease-in-out bg-black rounded-md opacity-0 hover:shadow-2xl hover:opacity-50 hover:transition-opacity group-hover:visible"></div>
+      <img className="object-center w-48 h-56" src={image ? `image-file://${image}` : default_img} alt={"Book cover"} />
     </div>
   );
 }

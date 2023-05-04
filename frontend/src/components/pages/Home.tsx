@@ -1,14 +1,8 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
-// import { useDispatch } from "react-redux";
 
 type Props = {};
 
 export default function Home({}: Props) {
-  // const state = useSelector((state) => state);
-  // const dispatch = useDispatch();
-
-  // console.log(state);
-
   return (
     <div className="w-full h-full">
       <span className="inline-flex rounded-md shadow-sm isolate">
