@@ -2,8 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   currentTime: "",
-  currentlyPlaying: "",
+  currentPlayingChapter: "",
   chapterList: [],
+  currentlyPlayingUrl: "",
+  bookCover: "",
+  bookName: "",
+  bookAuthor: "",
 };
 
 const playerSlice = createSlice({
@@ -13,15 +17,24 @@ const playerSlice = createSlice({
     setCurrentTime: (state, { payload }) => {
       return { ...state, currentTime: payload.currentTime };
     },
-    setCurrentlyPlaying: (state, { payload }) => {
+    setCurrentPlayingChapter: (state, { payload }) => {
       return { ...state, currentlyPlaying: payload.currentlyPlaying };
     },
     setChapterList: (state, { payload }) => {
       return { ...state, chapterList: payload.chapterList };
     },
+    setCurrentlyPlayingUrl: (state, { payload }) => {
+      return {
+        ...state,
+        currentlyPlayingUrl: payload.currentlyPlayingUrl,
+      };
+    },
+    setCurrentBook: (state, { payload }) => {
+      return { ...state, ...payload };
+    },
   },
 });
 
-export const {} = playerSlice.actions;
+export const { setCurrentTime, setCurrentPlayingChapter: setCurrentlyPlaying, setChapterList } = playerSlice.actions;
 
 export default playerSlice.reducer;

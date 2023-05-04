@@ -1,34 +1,34 @@
-import { PlayCircleIcon, ForwardIcon, PauseCircleIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { PlayCircleIcon, ForwardIcon, PauseCircleIcon } from "@heroicons/react/24/outline";
 import ChapterSelector from "./ChapterSelector";
+import { RootState } from "../../store";
 
-type Props = {};
+export default function Player() {
+  // 1. User selects a book to play
+  // 1A. Continue from previously played book
+  // 2. Load selected book or previously played book
+  // 3. Logic for playing - pausing, seeking, etc.
+  const [progress, setProgress] = useState(0); // Handles progress bar
+  const { currentlyPlayingUrl, currentTime } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
+  const [audio] = useState(null); //
+  const [isPlaying, setIsPlaying] = useState(false);
+  const toggle = () => setIsPlaying(!isPlaying);
 
-const useAudio = (url) => {
-  const [audio] = useState(new Audio(url));
-  const [playing, setPlaying] = useState(false);
+  // useEffect(() => {
+  //   isPlaying ? audio.play() : audio.pause();
+  // }, [isPlaying]);
 
-  const toggle = () => setPlaying(!playing);
-
-  useEffect(() => {
-    playing ? audio.play() : audio.pause();
-  }, [playing]);
-
-  useEffect(() => {
-    audio.addEventListener("ended", () => setPlaying(false));
-    return () => {
-      audio.removeEventListener("ended", () => setPlaying(false));
-    };
-  }, []);
-
-  return [playing, toggle];
-};
-
-export default function Player({}: Props) {
-  const [value, setValue] = useState(50);
+  // useEffect(() => {
+  //   audio.addEventListener("ended", () => setIsPlaying(false));
+  //   return () => {
+  //     audio.removeEventListener("ended", () => setIsPlaying(false));
+  //   };
+  // }, []);
 
   const onChange = (value: any) => {
-    setValue(value);
+    // 1. Convert selected time to % ->
+    setProgress(value);
   };
 
   return (
@@ -42,7 +42,17 @@ export default function Player({}: Props) {
             </div>
             <div className="flex">
               <ForwardIcon className="w-10 h-10 text-gray-500 rotate-180 cursor-pointer hover:text-gray-800" />
-              <PlayCircleIcon className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800" />
+              {isPlaying ? (
+                <PauseCircleIcon
+                  className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800"
+                  onClick={toggle}
+                />
+              ) : (
+                <PlayCircleIcon
+                  className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800"
+                  onClick={toggle}
+                />
+              )}
               <ForwardIcon className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800" />
             </div>
             <div className="justify-end">
@@ -53,7 +63,7 @@ export default function Player({}: Props) {
             type="range"
             min="0"
             max="100"
-            value={value}
+            value={progress}
             onChange={(e) => onChange(e.target.value)}
             className="w-full cursor-pointer range-lg range-primary"
           />

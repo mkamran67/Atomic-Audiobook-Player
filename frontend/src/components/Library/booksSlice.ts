@@ -1,11 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { BookDataType } from "../../types/library.types";
-
-interface BookState {
-  books: BookDataType[];
-  error: boolean;
-  message: string;
-}
+import { BookState } from "../../types/bookSlice.types";
 
 const initialState: BookState = {
   books: [],

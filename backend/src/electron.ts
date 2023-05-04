@@ -74,19 +74,9 @@ app.on("window-all-closed", () => {
   }
 });
 
-// app.on("activate", () => {
-//   if (BrowserWindow.getAllWindows().length === 0) {
-//     createWindow();
-//   }
-// });
-
 // ------------------------------- Event Listeners Below -------------------------------
 //
-//
 // Listeners below will be called by React.
-//
-//
-//
 //
 // This listener will send back all the books data to React
 ipcMain.on("requestToElectron", async (event, data) => {

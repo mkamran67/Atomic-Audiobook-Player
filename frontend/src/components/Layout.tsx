@@ -1,29 +1,28 @@
-import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import {
   Bars3BottomLeftIcon,
+  BuildingLibraryIcon,
   CalendarIcon,
+  Cog6ToothIcon,
   FolderIcon,
   HomeIcon,
   XMarkIcon,
-  BuildingLibraryIcon,
-  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
-import { Link, Outlet } from "react-router-dom";
+import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Link, Outlet, useLocation } from "react-router-dom";
+import { RootState } from "../store";
 import { setBooks } from "./library/booksSlice";
 import Loader from "./loader/Loader";
-import { RootState } from "../store";
 import { clearLoading } from "./loader/loaderSlice";
-import Player from "./player/Player";
 
 const navigation = [
-  { name: "Home", href: "/", icon: HomeIcon, current: true },
-  { name: "Library", href: "/library", icon: BuildingLibraryIcon, current: false },
-  { name: "Folders", href: "/folders", icon: FolderIcon, current: false },
-  { name: "Stats", href: "/stats", icon: CalendarIcon, current: false },
-  { name: "Settings", href: "/settings", icon: Cog6ToothIcon, current: false },
+  { name: "Home", href: "/", icon: HomeIcon },
+  { name: "Library", href: "/library", icon: BuildingLibraryIcon },
+  { name: "Folders", href: "/folders", icon: FolderIcon },
+  { name: "Stats", href: "/stats", icon: CalendarIcon },
+  { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
 ];
 
 function classNames(...classes: any[]) {
@@ -32,17 +31,22 @@ function classNames(...classes: any[]) {
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  // const [loading, _setLoading] = useState(false);
   const loading = useSelector((state: RootState) => state.loader);
   const dispatch = useDispatch();
-  // const router = useRouter();
-  // const searchFocus = () => {};
+  const location = useLocation(); // Used for sidebar active selection
 
   useEffect(() => {
+    // Ask Electron to reload library if it exists
     window.api.send("requestToElectron", { type: "getAllBooksSimplified", payload: null });
 
+    // Request settings information from Electron
+    window.api.send("requestToElectron", { type: "getSettings", payload: null });
+
+    // Recieve settings information from Electron
+    window.api.receive("responseFromElectron", (data: any) => {});
+
+    // Recieve library information from Electron
     window.api.receive("responseFromElectron", (data: any) => {
-      // TODO -> switch by type
       dispatch(setBooks(data));
       dispatch(clearLoading());
     });
@@ -113,7 +117,7 @@ export default function Layout() {
                             key={item.name}
                             href={item.href}
                             className={classNames(
-                              item.current
+                              location.pathname === item.href
                                 ? "bg-gray-100 text-gray-900"
                                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
                               "group flex items-center px-2 py-2 text-base font-medium rounded-md"
@@ -121,7 +125,9 @@ export default function Layout() {
                           >
                             <item.icon
                               className={classNames(
-                                item.current ? "text-gray-500" : "text-gray-400 group-hover:text-gray-500",
+                                location.pathname === item.href
+                                  ? "text-gray-500"
+                                  : "text-gray-400 group-hover:text-gray-500",
                                 "mr-4 flex-shrink-0 h-6 w-6"
                               )}
                               aria-hidden="true"
@@ -151,7 +157,7 @@ export default function Layout() {
                       key={item.name}
                       to={item.href}
                       className={classNames(
-                        item.current
+                        location.pathname === item.href
                           ? "bg-gray-100 text-gray-900"
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
                         "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
@@ -159,7 +165,7 @@ export default function Layout() {
                     >
                       <item.icon
                         className={classNames(
-                          item.current ? "text-gray-500" : "text-gray-400 group-hover:text-gray-500",
+                          location.pathname === item.href ? "text-gray-500" : "text-gray-400 group-hover:text-gray-500",
                           "mr-3 flex-shrink-0 h-6 w-6"
                         )}
                         aria-hidden="true"
