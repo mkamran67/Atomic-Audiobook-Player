@@ -222,6 +222,18 @@ function directorySearch(dirPath: string): string[] {
   return bookList;
 }
 
+export function getBookDetails(dirPath: string) {
+  // This method is different, as it gets all details about a book
+  // Cover
+  // Title
+  // Artist
+  // Chapter List
+  // Length Per Chapter
+  // Genre
+  // Tags
+  // All the information about the book
+}
+
 // 1. Starts the scan and returns the list of BookData[]
 export default async function scanBooks(rootDir: string): Promise<BookData[]> {
   // 1. Create a folder to store our book information

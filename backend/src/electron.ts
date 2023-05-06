@@ -13,6 +13,7 @@ import {
   SETTINGS_LOCATION,
   ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
   ELECTRON_RESPONSE_BOOKDATA_TYPE,
+  ELECTRON_RESPONSE_BOOK_DETAILS_TYPE,
 } from "./electron-utils/constants";
 import { existsSync, openSync, readFileSync, writeFileSync } from "original-fs";
 import getSimpleBookData from "./electron-utils/bookData";
@@ -189,6 +190,30 @@ ipcMain.on("requestToElectron", async (event, data) => {
         event.reply("responseFromElectron", results);
       }
       break;
+    }
+    // Get a books details
+    case "getBookDetails": {
+      try {
+        // TODO -> Send to child process to fetch the book details
+        const { path } = data;
+
+        if (existsSync(path)) {
+          getBookDetails(path);
+        } else {
+          throw new Error(`Did not find book at : ${path}`);
+        }
+
+        break;
+      } catch (err) {
+        console.error(err);
+        const results: ResponseFromElectronType = {
+          error: true,
+          type: ELECTRON_RESPONSE_BOOK_DETAILS_TYPE,
+          message: err.message,
+          data: null,
+        };
+        event.reply("responseFromElectron", results);
+      }
     }
     default: {
       console.log(`You've hit default -> ${data.type}`);

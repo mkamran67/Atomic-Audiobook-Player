@@ -1,4 +1,3 @@
-import { MouseEvent, MouseEventHandler } from "react";
 import default_img from "../../assets/default-book-cover.jpg";
 
 type Props = {
