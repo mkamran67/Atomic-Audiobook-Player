@@ -8,6 +8,8 @@ type Props = {
 function GalleryView({ books }: Props) {
   let counter = 0;
 
+  // TODO: Add a loading state/spinner for images
+
   return (
     <>
       <ul role="list" className="grid grid-flow-row grid-cols-6 gap-6">

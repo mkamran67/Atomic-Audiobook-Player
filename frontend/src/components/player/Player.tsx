@@ -31,6 +31,13 @@ export default function Player() {
     setProgress(value);
   };
 
+  // TODO: Add logic for playing
+  // TODO: Add logic for seeking
+  // TODO: Add logic for pausing
+  // TODO: Add logic for rewinding
+  // TODO: Add logic for forward
+  // TODO: Hide when not playing ❓
+
   return (
     <div className="fixed bottom-0 z-40 w-screen border-t h-36 bg-gray-50">
       <div className="w-full">

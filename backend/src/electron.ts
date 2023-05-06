@@ -7,8 +7,14 @@ import scanBooks from "./electron-utils/utils";
 import path from "path";
 import { app, BrowserWindow, dialog, ipcMain, protocol, session } from "electron";
 import isDev from "electron-is-dev";
-import { INFO_FOLDER_LOCATION, BOOKS_LIST_LOCATION } from "./electron-utils/constants";
-import { existsSync, readFileSync } from "original-fs";
+import {
+  INFO_FOLDER_LOCATION,
+  BOOKS_LIST_LOCATION,
+  SETTINGS_LOCATION,
+  ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
+  ELECTRON_RESPONSE_BOOKDATA_TYPE,
+} from "./electron-utils/constants";
+import { existsSync, openSync, readFileSync, writeFileSync } from "original-fs";
 import getSimpleBookData from "./electron-utils/bookData";
 import { ResponseFromElectronType } from "./types/response.type";
 import { BookData } from "./types/library.types";
@@ -87,6 +93,7 @@ ipcMain.on("requestToElectron", async (event, data) => {
       try {
         let results: ResponseFromElectronType = {
           error: false,
+          type: ELECTRON_RESPONSE_BOOKDATA_TYPE,
           message: "Successfully scanned",
           data: null,
         };
@@ -97,6 +104,7 @@ ipcMain.on("requestToElectron", async (event, data) => {
         console.error(err);
         let results: ResponseFromElectronType = {
           error: true,
+          type: ELECTRON_RESPONSE_BOOKDATA_TYPE,
           message: err.message,
           data: null,
         };
@@ -116,6 +124,7 @@ ipcMain.on("requestToElectron", async (event, data) => {
         // Tell React it failed/canceled
         const results: ResponseFromElectronType = {
           error: true,
+          type: ELECTRON_RESPONSE_BOOKDATA_TYPE,
           message: "Failed to get a directory",
           data: null,
         };
@@ -131,6 +140,7 @@ ipcMain.on("requestToElectron", async (event, data) => {
 
           const results: ResponseFromElectronType = {
             error: false,
+            type: ELECTRON_RESPONSE_BOOKDATA_TYPE,
             message: "Successfully scanned",
             data: arrayOfBooks,
           };
@@ -146,6 +156,37 @@ ipcMain.on("requestToElectron", async (event, data) => {
             data: null,
           });
         }
+      }
+      break;
+    }
+    // Get settings from file
+    case "getSettings": {
+      try {
+        let settings = {};
+
+        // 1. Get settings from settings file
+        if (existsSync(SETTINGS_LOCATION)) {
+          settings = readFileSync(SETTINGS_LOCATION);
+        } else {
+          // create settings file and return an empty object
+          writeFileSync(SETTINGS_LOCATION, "w");
+          const results: ResponseFromElectronType = {
+            error: false,
+            type: ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
+            message: "Failed to get a directory",
+            data: null,
+          };
+          event.reply("responseFromElectron", results);
+        }
+      } catch (err) {
+        console.error(err);
+        const results: ResponseFromElectronType = {
+          error: true,
+          type: ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
+          message: err.message,
+          data: null,
+        };
+        event.reply("responseFromElectron", results);
       }
       break;
     }

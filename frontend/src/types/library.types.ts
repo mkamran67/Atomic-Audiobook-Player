@@ -9,3 +9,18 @@ export interface BookDataType {
   cover?: string;
   dirPath: string;
 }
+
+export interface BookData {
+  title: string;
+  artist?: string;
+  cover?: string;
+  dirPath: string;
+  length?: number;
+}
+
+export interface ResponseFromElectronType {
+  error: boolean;
+  message: string;
+  type: string;
+  data: null | BookData[] | {};
+}

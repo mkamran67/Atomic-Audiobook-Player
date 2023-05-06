@@ -16,6 +16,8 @@ import { RootState } from "../store";
 import { setBooks } from "./library/booksSlice";
 import Loader from "./loader/Loader";
 import { clearLoading } from "./loader/loaderSlice";
+import { setSettings } from "./Settings/settingsSlice";
+import { ResponseFromElectronType } from "../types/library.types";
 
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon },
@@ -42,13 +44,22 @@ export default function Layout() {
     // Request settings information from Electron
     window.api.send("requestToElectron", { type: "getSettings", payload: null });
 
-    // Recieve settings information from Electron
-    window.api.receive("responseFromElectron", (data: any) => {});
-
     // Recieve library information from Electron
-    window.api.receive("responseFromElectron", (data: any) => {
-      dispatch(setBooks(data));
-      dispatch(clearLoading());
+    window.api.receive("responseFromElectron", (data: ResponseFromElectronType) => {
+      switch (data.type) {
+        case "bookData": {
+          dispatch(setBooks(data));
+          dispatch(clearLoading());
+          break;
+        }
+        case "settingsData": {
+          dispatch(setSettings(data));
+          break;
+        }
+        default: {
+          break;
+        }
+      }
     });
   }, []);
 

@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import { LayoutState } from "../types/layout.types";
 
 // Handles Loading and Error states
-
 let initialState: LayoutState = {
   error: false,
   loading: false,
@@ -17,6 +16,7 @@ const layoutSlice = createSlice({
     setError: (state, { payload }) => {
       // if state has errors already
       if (state.error) {
+        // REVIEW : lookie here
       }
 
       return { ...state, error: payload.error, message: payload.message };

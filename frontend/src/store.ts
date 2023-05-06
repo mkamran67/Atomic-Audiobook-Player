@@ -3,6 +3,7 @@ import booksSlice from "./components/library/booksSlice";
 import LayoutSlice from "./components/LayoutSlice";
 import loadingSlice from "./components/loader/loaderSlice";
 import playerSlice from "./components/player/playerSlice";
+import settingsSlice from "./components/Settings/settingsSlice";
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     layout: LayoutSlice,
     loader: loadingSlice,
     player: playerSlice,
+    settings: settingsSlice,
   },
 });
 
