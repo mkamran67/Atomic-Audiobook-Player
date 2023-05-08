@@ -3,7 +3,7 @@
 // const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 // const isDev = require("electron-is-dev");
 import os from "os";
-import scanBooks from "./electron-utils/utils";
+import scanBooks, { getBookDetails } from "./electron-utils/utils";
 import path from "path";
 import { app, BrowserWindow, dialog, ipcMain, protocol, session } from "electron";
 import isDev from "electron-is-dev";
@@ -195,7 +195,9 @@ ipcMain.on("requestToElectron", async (event, data) => {
     case "getBookDetails": {
       try {
         // TODO -> Send to child process to fetch the book details
-        const { path } = data;
+        const {
+          data: { path },
+        } = data;
 
         if (existsSync(path)) {
           getBookDetails(path);

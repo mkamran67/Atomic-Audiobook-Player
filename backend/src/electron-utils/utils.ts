@@ -2,8 +2,9 @@ import { app } from "electron";
 import { existsSync, readdirSync, mkdirSync, writeFileSync, readFileSync } from "fs";
 import path from "node:path";
 import * as jsmediatags from "jsmediatags";
-import { BOOKS_LIST_LOCATION, INFO_FOLDER_LOCATION, imgExtensions, mediaExtensions } from "./constants";
-import { BookData } from "../types/library.types";
+import { BOOKS_LIST_LOCATION, INFO_FOLDER_LOCATION, IMG_EXTENSIONS, MEDIA_EXTENSIONS } from "./constants";
+import { BookData, BookDetails } from "../types/library.types";
+import { statSync } from "original-fs";
 
 async function getTags(fullFilePath: string): Promise<{ title: string; artist: string }> {
   try {
@@ -110,7 +111,7 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
       let fullFilePath = path.join(bookPath, theFile); // Path to file
 
       // if 'audiobook' hasn't been checked && is a supported extension
-      if (!checked && mediaExtensions.includes(fileExtension)) {
+      if (!checked && MEDIA_EXTENSIONS.includes(fileExtension)) {
         // get tags
         let results = await getTags(fullFilePath);
 
@@ -130,7 +131,7 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
         }
 
         checked = true;
-      } else if (!coverFound && imgExtensions.includes(fileExtension)) {
+      } else if (!coverFound && IMG_EXTENSIONS.includes(fileExtension)) {
         bookData.cover = fullFilePath;
         coverFound = true;
       } // else if
@@ -222,7 +223,42 @@ function directorySearch(dirPath: string): string[] {
   return bookList;
 }
 
-export function getBookDetails(dirPath: string) {
+async function getAllDetailsOfAMediaFile(mediaPath: string): Promise<BookDetails | boolean> {
+  try {
+    const bookDetails: BookDetails = await new Promise((resolve, reject) => {
+      jsmediatags.read(mediaPath, {
+        onSuccess: (read_info: any) => {
+          // console.log(read_info);
+
+          const currentTrack = read_info.tags.track ? read_info.tags.track.split("/")[0] : 1;
+          const totalTracks = read_info.tags.track ? read_info.tags.track.split("/")[1] : 1;
+
+          resolve({
+            title: read_info.tags.title,
+            artist: read_info.tags.artist,
+            year: read_info.tags.year,
+            track: currentTrack,
+            totalTrack: totalTracks,
+            chapterPath: mediaPath,
+            size: read_info.size,
+          });
+        },
+        onError: (err) => {
+          reject(err);
+        },
+      });
+    });
+
+    if (bookDetails) {
+      return bookDetails;
+    }
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
+export async function getBookDetails(dirPath: string) {
   // This method is different, as it gets all details about a book
   // Cover
   // Title
@@ -232,6 +268,50 @@ export function getBookDetails(dirPath: string) {
   // Genre
   // Tags
   // All the information about the book
+
+  const listOfFiles = readdirSync(dirPath, { withFileTypes: true });
+
+  let chapters: string[] = [];
+  let cover = "";
+  let chapterData = [];
+
+  // Get files from the book directory
+
+  for (let index = 0; index < listOfFiles.length; index++) {
+    const file = listOfFiles[index];
+    if (file.isFile()) {
+      let name = file.name;
+      let fileSplit = name.split(".");
+      let extension = fileSplit[fileSplit.length - 1];
+
+      if (MEDIA_EXTENSIONS.includes(extension)) {
+        chapters.push(name);
+      } else if (IMG_EXTENSIONS.includes(extension)) {
+        // Store the larger cover - hopefully better quality
+        if (cover && statSync(path.join(dirPath, file.name)) > statSync(path.join(dirPath, cover))) {
+          cover = file.name;
+        } else if (!cover) {
+          cover = file.name;
+        }
+      } else {
+        // TODO -> Log here for testing
+        console.log("File type not supported");
+      }
+    } else {
+      console.log(`Not a file`);
+    }
+  }
+
+  // Accumalte Chapter data
+  for (const chapter of chapters) {
+    const chPath = path.join(dirPath, chapter);
+
+    chapterData.push(await getAllDetailsOfAMediaFile(chPath));
+  }
+
+  if (chapterData) {
+    console.log(chapterData);
+  }
 }
 
 // 1. Starts the scan and returns the list of BookData[]
