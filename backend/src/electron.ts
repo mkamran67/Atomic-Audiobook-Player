@@ -231,6 +231,10 @@ ipcMain.on("requestToElectron", async (event, data) => {
         event.reply("responseFromElectron", results);
       }
     }
+    // Save current book progress
+    case "saveBookProgress": {
+      break;
+    }
     default: {
       console.log(`You've hit default -> ${data.type}`);
       break;

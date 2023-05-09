@@ -224,6 +224,13 @@ function directorySearch(dirPath: string): string[] {
   return bookList;
 }
 
+/**
+ *
+ * @param mediaPath Path to media file
+ * @param totalSize size in bytes
+ * @param totalLength length in durations
+ * @returns returns BookDetails object
+ */
 async function getAllDetailsOfAMediaFile(
   mediaPath: string,
   totalSize: number = 0,
@@ -243,11 +250,14 @@ async function getAllDetailsOfAMediaFile(
 
           totalLength += currentChapterLength; // Seconds
 
-          const data: BookDetails = {
+          const bookData: BookDetails = {
             totalTracks: totalTracks,
             title: read_info.tags.title,
             author: read_info.tags.artist,
             year: read_info.tags.year,
+            currentTime: 0,
+            currentTrack: 1,
+            currentChapter: mediaPath,
             chapterList: [
               {
                 length: totalLength,
@@ -256,7 +266,7 @@ async function getAllDetailsOfAMediaFile(
             ],
           };
 
-          resolve(data);
+          resolve(bookData);
         },
         onError: (err) => {
           reject(err);

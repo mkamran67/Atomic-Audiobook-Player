@@ -1,8 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { BookDetails } from "../../types/book.types";
+
+const initialState: BookDetails = {
+  currentChapter: "",
+  currentTrack: 0,
+  currentTime: 0,
+  totalTracks: 0,
+  chapterList: [],
+};
 
 const playerSlice = createSlice({
-  name: "playerStats",
-  initialState: {},
+  name: "player",
+  initialState: initialState,
   reducers: {
     setCurrentTime: (state, { payload }) => {
       return { ...state, currentTime: payload.currentTime };

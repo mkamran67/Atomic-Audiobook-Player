@@ -10,21 +10,42 @@ export default function Player() {
   // 2. Load selected book or previously played book
   // 3. Logic for playing - pausing, seeking, etc.
   const [progress, setProgress] = useState(0); // Handles progress bar
-  const { currentlyPlayingUrl, currentTime } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
-  const [audio] = useState(null); //
+  const { currentChapter, currentTime } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
+  // console.log("👉 -> file: Player.tsx:14 -> currentChapter:", currentChapter);
+  const [audio] = useState(
+    () => {
+      if (currentChapter) {
+        return new Audio(`image-file://${currentChapter}`);
+      } else {
+        return new Audio("../src/assets/sample.mp3");
+      }
+    }
+    // currentChapter ? new Audio(`image-file://${currentChapter}`) : new Audio("../src/assets/sample.mp3")
+  );
   const [isPlaying, setIsPlaying] = useState(false);
-  const toggle = () => setIsPlaying(!isPlaying);
+  // const toggle = () => setIsPlaying(!isPlaying);
 
-  // useEffect(() => {
-  //   isPlaying ? audio.play() : audio.pause();
-  // }, [isPlaying]);
+  // change audio
+  useEffect(() => {
+    if (currentChapter) {
+      audio.pause();
+      audio.src = `image-file://${currentChapter}`;
+      audio.play();
+    } else {
+      audio.src = "../src/assets/sample.mp3";
+    }
+  }, [currentChapter]);
 
-  // useEffect(() => {
-  //   audio.addEventListener("ended", () => setIsPlaying(false));
-  //   return () => {
-  //     audio.removeEventListener("ended", () => setIsPlaying(false));
-  //   };
-  // }, []);
+  useEffect(() => {
+    isPlaying ? audio.play() : audio.pause();
+  }, [isPlaying, audio]);
+
+  useEffect(() => {
+    audio.addEventListener("ended", () => setIsPlaying(false));
+    return () => {
+      audio.removeEventListener("ended", () => setIsPlaying(false));
+    };
+  }, []);
 
   const onChange = (value: any) => {
     // 1. Convert selected time to % ->
@@ -52,12 +73,12 @@ export default function Player() {
               {isPlaying ? (
                 <PauseCircleIcon
                   className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800"
-                  onClick={toggle}
+                  onClick={() => setIsPlaying(false)}
                 />
               ) : (
                 <PlayCircleIcon
                   className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800"
-                  onClick={toggle}
+                  onClick={() => setIsPlaying(true)}
                 />
               )}
               <ForwardIcon className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800" />

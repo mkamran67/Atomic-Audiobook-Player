@@ -10,18 +10,15 @@ export interface MinimumChapterDetails {
 }
 
 export interface BookDetails {
+  currentChapter: string;
+  currentTrack: number;
   currentTime: number;
-  currentPlayingChapter: string;
-  size: number;
+  totalTracks: number;
+  chapterList: MinimumChapterDetails[];
   title?: string;
   author?: string;
   year?: number;
   cover?: string;
-  chapterPath: string;
-  length?: number;
-  totalLength?: number;
-  currentlyPlayingUrl?: string;
-  totalTracks: number;
-  chapterList: MinimumChapterDetails[];
   totalSize?: number;
+  totalLength?: number;
 }
