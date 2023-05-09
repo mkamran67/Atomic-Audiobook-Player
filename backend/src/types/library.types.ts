@@ -1,18 +1,36 @@
 export interface BookData {
   title: string;
-  artist?: string;
+  author?: string;
   cover?: string;
   dirPath: string;
   length?: number;
 }
 
+export interface MinimumChapterDetails {
+  path: string;
+  length: number;
+}
 export interface BookDetails {
-  size: number;
+  totalTracks: number;
+  chapterList: MinimumChapterDetails[];
+  totalLength?: number;
   title?: string;
-  artist?: string;
+  author?: string;
   year?: number;
   cover?: string;
-  chapterPath: string;
-  track: number;
-  totalTrack: number;
+  totalSize?: number;
+}
+
+export interface PreviouslyPlayedBook {
+  currentChapter: string;
+  currentTrack: number;
+  currentTime: number;
+  totalTracks: number;
+  title?: string;
+  author?: string;
+  year?: number;
+  cover?: string;
+  totalSize: number;
+  chapterList: string[];
+  totalLength?: number;
 }

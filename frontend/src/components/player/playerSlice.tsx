@@ -1,18 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-  currentTime: "",
-  currentPlayingChapter: "",
-  chapterList: [],
-  currentlyPlayingUrl: "",
-  bookCover: "",
-  bookName: "",
-  bookAuthor: "",
-};
-
 const playerSlice = createSlice({
   name: "playerStats",
-  initialState,
+  initialState: {},
   reducers: {
     setCurrentTime: (state, { payload }) => {
       return { ...state, currentTime: payload.currentTime };
@@ -30,11 +20,11 @@ const playerSlice = createSlice({
       };
     },
     setCurrentBook: (state, { payload }) => {
-      return { ...state, ...payload };
+      return { ...state, ...payload.data };
     },
   },
 });
 
-export const { setCurrentTime, setCurrentPlayingChapter: setCurrentlyPlaying, setChapterList } = playerSlice.actions;
+export const { setCurrentBook, setCurrentTime, setCurrentPlayingChapter, setChapterList } = playerSlice.actions;
 
 export default playerSlice.reducer;

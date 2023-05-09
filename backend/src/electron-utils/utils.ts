@@ -3,8 +3,9 @@ import { existsSync, readdirSync, mkdirSync, writeFileSync, readFileSync } from 
 import path from "node:path";
 import * as jsmediatags from "jsmediatags";
 import { BOOKS_LIST_LOCATION, INFO_FOLDER_LOCATION, IMG_EXTENSIONS, MEDIA_EXTENSIONS } from "./constants";
-import { BookData, BookDetails } from "../types/library.types";
+import { BookData, BookDetails, MinimumChapterDetails } from "../types/library.types";
 import { statSync } from "original-fs";
+import getAudioDurationInSeconds from "get-audio-duration";
 
 async function getTags(fullFilePath: string): Promise<{ title: string; artist: string }> {
   try {
@@ -92,7 +93,7 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
 
     let bookData: BookData = {
       title: "",
-      artist: "",
+      author: "",
       cover: "",
       dirPath: bookPath,
     };
@@ -125,9 +126,9 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
 
         // if no artist
         if (results.artist == "skip") {
-          bookData.artist = "DNF";
+          bookData.author = "DNF";
         } else {
-          bookData.artist = results.artist;
+          bookData.author = results.artist;
         }
 
         checked = true;
@@ -208,7 +209,7 @@ function directorySearch(dirPath: string): string[] {
       withFileTypes: true,
     });
   } catch (err) {
-    console.error(err);
+    throw new Error(err);
   }
 
   if (currentDirectories && currentDirectories.length > 0) {
@@ -223,25 +224,39 @@ function directorySearch(dirPath: string): string[] {
   return bookList;
 }
 
-async function getAllDetailsOfAMediaFile(mediaPath: string): Promise<BookDetails | boolean> {
+async function getAllDetailsOfAMediaFile(
+  mediaPath: string,
+  totalSize: number = 0,
+  totalLength: number = 0
+): Promise<[BookDetails, number, number]> {
   try {
     const bookDetails: BookDetails = await new Promise((resolve, reject) => {
       jsmediatags.read(mediaPath, {
-        onSuccess: (read_info: any) => {
-          // console.log(read_info);
-
-          const currentTrack = read_info.tags.track ? read_info.tags.track.split("/")[0] : 1;
+        onSuccess: async (read_info: any) => {
+          let currentChapterLength = 0;
           const totalTracks = read_info.tags.track ? read_info.tags.track.split("/")[1] : 1;
 
-          resolve({
-            title: read_info.tags.title,
-            artist: read_info.tags.artist,
-            year: read_info.tags.year,
-            track: currentTrack,
-            totalTrack: totalTracks,
-            chapterPath: mediaPath,
-            size: read_info.size,
+          totalSize += statSync(mediaPath).size;
+          await getAudioDurationInSeconds(mediaPath).then((duration) => {
+            currentChapterLength = duration;
           });
+
+          totalLength += currentChapterLength; // Seconds
+
+          const data: BookDetails = {
+            totalTracks: totalTracks,
+            title: read_info.tags.title,
+            author: read_info.tags.artist,
+            year: read_info.tags.year,
+            chapterList: [
+              {
+                length: totalLength,
+                path: mediaPath,
+              },
+            ],
+          };
+
+          resolve(data);
         },
         onError: (err) => {
           reject(err);
@@ -250,67 +265,114 @@ async function getAllDetailsOfAMediaFile(mediaPath: string): Promise<BookDetails
     });
 
     if (bookDetails) {
-      return bookDetails;
+      return [bookDetails, totalSize, totalLength];
     }
   } catch (err) {
-    console.error(err);
-    return false;
+    throw new Error(err);
   }
 }
 
-export async function getBookDetails(dirPath: string) {
-  // This method is different, as it gets all details about a book
-  // Cover
-  // Title
-  // Artist
-  // Chapter List
-  // Length Per Chapter
-  // Genre
-  // Tags
-  // All the information about the book
+async function getChapterDetails(
+  mediaPath: string,
+  totalSize: number = 0,
+  totalLength: number = 0
+): Promise<[MinimumChapterDetails, number, number]> {
+  try {
+    let currentChapterLength = 0;
 
-  const listOfFiles = readdirSync(dirPath, { withFileTypes: true });
+    totalSize += statSync(mediaPath).size;
+    await getAudioDurationInSeconds(mediaPath).then((duration) => {
+      currentChapterLength = duration;
+    });
 
-  let chapters: string[] = [];
-  let cover = "";
-  let chapterData = [];
+    totalLength += currentChapterLength; // Seconds
+    console.log("👉 -> file: utils.ts:291 -> totalLength:", totalLength);
 
-  // Get files from the book directory
+    const chapterDetails: MinimumChapterDetails = {
+      path: mediaPath,
+      length: currentChapterLength,
+    };
 
-  for (let index = 0; index < listOfFiles.length; index++) {
-    const file = listOfFiles[index];
-    if (file.isFile()) {
-      let name = file.name;
-      let fileSplit = name.split(".");
-      let extension = fileSplit[fileSplit.length - 1];
+    if (chapterDetails) {
+      return [chapterDetails, totalSize, totalLength];
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
 
-      if (MEDIA_EXTENSIONS.includes(extension)) {
-        chapters.push(name);
-      } else if (IMG_EXTENSIONS.includes(extension)) {
-        // Store the larger cover - hopefully better quality
-        if (cover && statSync(path.join(dirPath, file.name)) > statSync(path.join(dirPath, cover))) {
-          cover = file.name;
-        } else if (!cover) {
-          cover = file.name;
+/**
+ *
+ * @param dirPath -> Path to Book directory
+ * @returns A book object with book details and chapters
+ */
+export async function getBookDetails(dirPath: string): Promise<BookDetails> {
+  try {
+    const listOfFiles = readdirSync(dirPath, { withFileTypes: true });
+
+    let chapters: string[] = [];
+    let totalSize: number = 0;
+    let totalLength: number = 0;
+    let cover = "";
+    let bookDetails: BookDetails;
+    let bookDataTrigger: boolean = true; // If true means we don't have information about the book yet.
+
+    // Get files from the book directory
+    for (let index = 0; index < listOfFiles.length; index++) {
+      const file = listOfFiles[index];
+
+      if (file.isFile()) {
+        let name = file.name;
+        let fileSplit = name.split(".");
+        let extension = fileSplit[fileSplit.length - 1];
+
+        if (MEDIA_EXTENSIONS.includes(extension)) {
+          chapters.push(name);
+        } else if (IMG_EXTENSIONS.includes(extension)) {
+          // Store the larger cover - hopefully better quality
+          if (cover && statSync(path.join(dirPath, file.name)) > statSync(path.join(dirPath, cover))) {
+            cover = file.name;
+          } else if (!cover) {
+            cover = file.name;
+          }
+        } else {
+          // TODO -> Log here for testing
+          console.log("File type not supported");
         }
       } else {
-        // TODO -> Log here for testing
-        console.log("File type not supported");
+        console.log(`Not a file`);
       }
-    } else {
-      console.log(`Not a file`);
     }
-  }
 
-  // Accumalte Chapter data
-  for (const chapter of chapters) {
-    const chPath = path.join(dirPath, chapter);
+    // Accumalte Chapter data and book information
+    for (const chapter of chapters) {
+      const chapterPath = path.join(dirPath, chapter);
 
-    chapterData.push(await getAllDetailsOfAMediaFile(chPath));
-  }
+      if (bookDataTrigger) {
+        const [results, size, length] = await getAllDetailsOfAMediaFile(chapterPath);
+        // bookDetails = await getAllDetailsOfAMediaFile(chapterPath, totalSize, totalLength);
+        bookDetails = results;
+        totalSize += size;
+        totalLength += length;
+        bookDataTrigger = false;
+      } else {
+        // bookDetails.chapterList.push(await getChapterDetails(chapterPath, totalSize, totalLength));
 
-  if (chapterData) {
-    console.log(chapterData);
+        const [results, size, length] = await getChapterDetails(chapterPath, totalSize, totalLength);
+        bookDetails.chapterList.push(results);
+        totalSize += size;
+        totalLength += length;
+      }
+    }
+
+    bookDetails.totalLength = totalLength;
+    bookDetails.totalSize = totalSize;
+
+    if (bookDetails) {
+      return bookDetails;
+    }
+  } catch (err) {
+    throw new Error(err);
   }
 }
 

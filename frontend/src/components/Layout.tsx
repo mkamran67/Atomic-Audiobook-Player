@@ -18,6 +18,8 @@ import Loader from "./loader/Loader";
 import { clearLoading } from "./loader/loaderSlice";
 import { setSettings } from "./Settings/settingsSlice";
 import { ResponseFromElectronType } from "../types/library.types";
+import { setCurrentBook } from "./player/playerSlice";
+import { setError } from "./LayoutSlice";
 
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon },
@@ -56,7 +58,17 @@ export default function Layout() {
           dispatch(setSettings(data));
           break;
         }
+        case "bookDetails": {
+          dispatch(setCurrentBook(data));
+          break;
+        }
+        case "error_type": {
+          dispatch(clearLoading());
+          dispatch(setError(data));
+          break;
+        }
         default: {
+          console.log(`You've hit default case in Layout.js ${data.type}`);
           break;
         }
       }

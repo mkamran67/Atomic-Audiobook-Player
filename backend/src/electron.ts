@@ -14,11 +14,12 @@ import {
   ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
   ELECTRON_RESPONSE_BOOKDATA_TYPE,
   ELECTRON_RESPONSE_BOOK_DETAILS_TYPE,
+  ELECTRON_HAD_A_BOO_BOO,
 } from "./electron-utils/constants";
 import { existsSync, openSync, readFileSync, writeFileSync } from "original-fs";
 import getSimpleBookData from "./electron-utils/bookData";
 import { ResponseFromElectronType } from "./types/response.type";
-import { BookData } from "./types/library.types";
+import { BookData, BookDetails } from "./types/library.types";
 
 const reactDevToolsPath = path.join(
   os.homedir(),
@@ -105,7 +106,7 @@ ipcMain.on("requestToElectron", async (event, data) => {
         console.error(err);
         let results: ResponseFromElectronType = {
           error: true,
-          type: ELECTRON_RESPONSE_BOOKDATA_TYPE,
+          type: ELECTRON_HAD_A_BOO_BOO,
           message: err.message,
           data: null,
         };
@@ -125,7 +126,7 @@ ipcMain.on("requestToElectron", async (event, data) => {
         // Tell React it failed/canceled
         const results: ResponseFromElectronType = {
           error: true,
-          type: ELECTRON_RESPONSE_BOOKDATA_TYPE,
+          type: ELECTRON_HAD_A_BOO_BOO,
           message: "Failed to get a directory",
           data: null,
         };
@@ -153,7 +154,7 @@ ipcMain.on("requestToElectron", async (event, data) => {
         } catch (err) {
           event.reply("responseFromElectron", {
             error: true,
-            message: err.message,
+            message: err.ELECTRON_HAD_A_BOO_BOO,
             data: null,
           });
         }
@@ -183,7 +184,7 @@ ipcMain.on("requestToElectron", async (event, data) => {
         console.error(err);
         const results: ResponseFromElectronType = {
           error: true,
-          type: ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
+          type: ELECTRON_HAD_A_BOO_BOO,
           message: err.message,
           data: null,
         };
@@ -200,7 +201,20 @@ ipcMain.on("requestToElectron", async (event, data) => {
         } = data;
 
         if (existsSync(path)) {
-          getBookDetails(path);
+          const results: BookDetails = await getBookDetails(path);
+
+          if (results) {
+            console.log(`Replying to React`);
+
+            const reply: ResponseFromElectronType = {
+              error: false,
+              type: ELECTRON_RESPONSE_BOOK_DETAILS_TYPE,
+              message: "Successfully fetched details",
+              data: results,
+            };
+
+            event.reply("responseFromElectron", reply);
+          }
         } else {
           throw new Error(`Did not find book at : ${path}`);
         }
@@ -210,7 +224,7 @@ ipcMain.on("requestToElectron", async (event, data) => {
         console.error(err);
         const results: ResponseFromElectronType = {
           error: true,
-          type: ELECTRON_RESPONSE_BOOK_DETAILS_TYPE,
+          type: ELECTRON_HAD_A_BOO_BOO,
           message: err.message,
           data: null,
         };
