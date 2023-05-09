@@ -43,19 +43,21 @@ export default function Layout() {
     // Ask Electron to reload library if it exists
     window.api.send("requestToElectron", { type: "getAllBooksSimplified", payload: null });
 
-    // Request settings information from Electron
+    // Request settings/history information from Electron
     window.api.send("requestToElectron", { type: "getSettings", payload: null });
 
     // Recieve library information from Electron
-    window.api.receive("responseFromElectron", (data: ResponseFromElectronType) => {
-      switch (data.type) {
+    window.api.receive("responseFromElectron", (res: ResponseFromElectronType) => {
+      const { type, data } = res;
+
+      switch (type) {
         case "bookData": {
           dispatch(setBooks(data));
           dispatch(clearLoading());
           break;
         }
         case "settingsData": {
-          dispatch(setSettings(data));
+          console.log("👉 -> file: Layout.tsx:61 -> data:", data);
           break;
         }
         case "bookDetails": {
@@ -63,12 +65,13 @@ export default function Layout() {
           break;
         }
         case "error_type": {
+          console.log("👉 -> file: Layout.tsx:70 -> data:", data);
           dispatch(clearLoading());
           dispatch(setError(data));
           break;
         }
         default: {
-          console.log(`You've hit default case in Layout.js ${data.type}`);
+          console.log(`You've hit default case in Layout.js ${type}`);
           break;
         }
       }

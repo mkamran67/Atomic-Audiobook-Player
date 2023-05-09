@@ -14,12 +14,13 @@ import {
   ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
   ELECTRON_RESPONSE_BOOKDATA_TYPE,
   ELECTRON_RESPONSE_BOOK_DETAILS_TYPE,
-  ELECTRON_HAD_A_BOO_BOO,
+  ELECTRON_ERROR,
 } from "./electron-utils/constants";
 import { existsSync, openSync, readFileSync, writeFileSync } from "original-fs";
 import getSimpleBookData from "./electron-utils/bookData";
-import { ResponseFromElectronType } from "./types/response.type";
+import { RequestFromReactType, ResponseFromElectronType } from "./types/response.type";
 import { BookData, BookDetails } from "./types/library.types";
+import { handleSettings } from "./electron-utils/settings";
 
 const reactDevToolsPath = path.join(
   os.homedir(),
@@ -83,32 +84,24 @@ app.on("window-all-closed", () => {
 });
 
 // ------------------------------- Event Listeners Below -------------------------------
-//
-// Listeners below will be called by React.
-//
-// This listener will send back all the books data to React
-ipcMain.on("requestToElectron", async (event, data) => {
+ipcMain.on("requestToElectron", async (event, req: RequestFromReactType) => {
+  const { type, data } = req;
+
   // Determines what actions to take
-  switch (data.type) {
+  switch (type) {
     // Returns the Library data to React -> Does not Scan or ReScan.
     case "getAllBooksSimplified": {
       try {
-        let results: ResponseFromElectronType = {
-          error: false,
+        const results: ResponseFromElectronType = {
           type: ELECTRON_RESPONSE_BOOKDATA_TYPE,
-          message: "Successfully scanned",
-          data: null,
+          data: getSimpleBookData(),
         };
 
-        results.data = getSimpleBookData();
         event.reply("responseFromElectron", results);
       } catch (err) {
-        console.error(err);
-        let results: ResponseFromElectronType = {
-          error: true,
-          type: ELECTRON_HAD_A_BOO_BOO,
-          message: err.message,
-          data: null,
+        const results: ResponseFromElectronType = {
+          type: ELECTRON_ERROR,
+          data: err,
         };
         event.reply("responseFromElectron", results);
       }
@@ -119,16 +112,16 @@ ipcMain.on("requestToElectron", async (event, data) => {
       // Get directory path from user
       const dirPath = await dialog.showOpenDialog({
         properties: ["openDirectory"],
-        message: "Select the root directory containing your Audiobooks",
+        message: "Select the root directory containing your audiobooks",
       });
 
       if (dirPath && dirPath.canceled) {
         // Tell React it failed/canceled
         const results: ResponseFromElectronType = {
-          error: true,
-          type: ELECTRON_HAD_A_BOO_BOO,
-          message: "Failed to get a directory",
-          data: null,
+          type: ELECTRON_ERROR,
+          data: {
+            message: "Failed to get a directory",
+          },
         };
 
         event.reply("responseFromElectron", results);
@@ -141,22 +134,23 @@ ipcMain.on("requestToElectron", async (event, data) => {
           const arrayOfBooks: BookData[] = await scanBooks(rootPathForBooks);
 
           const results: ResponseFromElectronType = {
-            error: false,
             type: ELECTRON_RESPONSE_BOOKDATA_TYPE,
-            message: "Successfully scanned",
             data: arrayOfBooks,
           };
 
           if (arrayOfBooks) {
-            console.log(`Replying to React`);
+            console.log(`Updating Settings ->`);
+            await handleSettings("update", arrayOfBooks);
+            console.log(`Replying to React ->`);
             event.reply("responseFromElectron", results);
           }
         } catch (err) {
-          event.reply("responseFromElectron", {
-            error: true,
-            message: err.ELECTRON_HAD_A_BOO_BOO,
-            data: null,
-          });
+          const results: ResponseFromElectronType = {
+            type: ELECTRON_ERROR,
+            data: err,
+          };
+
+          event.reply("responseFromElectron", results);
         }
       }
       break;
@@ -164,29 +158,19 @@ ipcMain.on("requestToElectron", async (event, data) => {
     // Get settings from file
     case "getSettings": {
       try {
-        let settings = {};
+        const res = await handleSettings("read", data);
 
-        // 1. Get settings from settings file
-        if (existsSync(SETTINGS_LOCATION)) {
-          settings = readFileSync(SETTINGS_LOCATION);
-        } else {
-          // create settings file and return an empty object
-          writeFileSync(SETTINGS_LOCATION, "w");
+        if (res) {
           const results: ResponseFromElectronType = {
-            error: false,
             type: ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
-            message: "Failed to get a directory",
-            data: null,
+            data: res,
           };
           event.reply("responseFromElectron", results);
         }
       } catch (err) {
-        console.error(err);
         const results: ResponseFromElectronType = {
-          error: true,
-          type: ELECTRON_HAD_A_BOO_BOO,
-          message: err.message,
-          data: null,
+          type: ELECTRON_ERROR,
+          data: err,
         };
         event.reply("responseFromElectron", results);
       }
@@ -195,10 +179,9 @@ ipcMain.on("requestToElectron", async (event, data) => {
     // Get a books details
     case "getBookDetails": {
       try {
+        console.log(data);
         // TODO -> Send to child process to fetch the book details
-        const {
-          data: { path },
-        } = data;
+        const { path } = data;
 
         if (existsSync(path)) {
           const results: BookDetails = await getBookDetails(path);
@@ -207,9 +190,7 @@ ipcMain.on("requestToElectron", async (event, data) => {
             console.log(`Replying to React`);
 
             const reply: ResponseFromElectronType = {
-              error: false,
               type: ELECTRON_RESPONSE_BOOK_DETAILS_TYPE,
-              message: "Successfully fetched details",
               data: results,
             };
 
@@ -218,25 +199,24 @@ ipcMain.on("requestToElectron", async (event, data) => {
         } else {
           throw new Error(`Did not find book at : ${path}`);
         }
-
-        break;
       } catch (err) {
-        console.error(err);
         const results: ResponseFromElectronType = {
-          error: true,
-          type: ELECTRON_HAD_A_BOO_BOO,
-          message: err.message,
-          data: null,
+          type: ELECTRON_ERROR,
+          data: err,
         };
         event.reply("responseFromElectron", results);
       }
+      break;
     }
     // Save current book progress
     case "saveBookProgress": {
+      console.log(`You've hit ${type}`);
+      console.log(data);
       break;
     }
+    // get book history
     default: {
-      console.log(`You've hit default -> ${data.type}`);
+      console.log(`You've hit default -> ${type}`);
       break;
     }
   }

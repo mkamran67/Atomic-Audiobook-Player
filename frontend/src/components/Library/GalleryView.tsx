@@ -15,8 +15,6 @@ function GalleryView({ books }: Props) {
   const setPlaying = (e: any, bookPath: string) => {
     e.preventDefault();
 
-    console.log(bookPath);
-
     // Request book from Electron
     try {
       // Request settings information from Electron

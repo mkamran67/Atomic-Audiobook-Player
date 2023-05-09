@@ -7,11 +7,11 @@ const initialState: BookState = {
 
 // Read books from settings save location
 const booksSlice = createSlice({
-  name: "books",
+  name: "library",
   initialState: initialState,
   reducers: {
     setBooks: (_state, { payload }) => {
-      return { books: payload.data };
+      return { books: payload };
     },
     clearBooks: (_state) => {
       return { books: [] };

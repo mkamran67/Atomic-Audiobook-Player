@@ -29,7 +29,7 @@ const playerSlice = createSlice({
       };
     },
     setCurrentBook: (state, { payload }) => {
-      return { ...state, ...payload.data };
+      return { ...state, ...payload };
     },
   },
 });

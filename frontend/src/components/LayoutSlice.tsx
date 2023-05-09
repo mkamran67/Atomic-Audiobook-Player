@@ -20,7 +20,7 @@ const layoutSlice = createSlice({
         // TODO : handle error in UI
       }
 
-      return { ...state, error: payload.error, message: payload.message };
+      return { ...state, ...payload };
     },
 
     clearError: (state) => {
