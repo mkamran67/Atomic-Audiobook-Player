@@ -2,8 +2,10 @@ import { app } from "electron";
 import { existsSync, readdirSync, mkdirSync, writeFileSync, readFileSync } from "fs";
 import path from "node:path";
 import * as jsmediatags from "jsmediatags";
-import { BOOKS_LIST_LOCATION, INFO_FOLDER_LOCATION, imgExtensions, mediaExtensions } from "./constants";
-import { BookData } from "../types/library.types";
+import { BOOKS_LIST_LOCATION, INFO_FOLDER_LOCATION, IMG_EXTENSIONS, MEDIA_EXTENSIONS } from "./constants";
+import { BookData, BookDetails, MinimumChapterDetails } from "../types/library.types";
+import { statSync } from "original-fs";
+import getAudioDurationInSeconds from "get-audio-duration";
 
 async function getTags(fullFilePath: string): Promise<{ title: string; artist: string }> {
   try {
@@ -91,7 +93,7 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
 
     let bookData: BookData = {
       title: "",
-      artist: "",
+      author: "",
       cover: "",
       dirPath: bookPath,
     };
@@ -110,7 +112,7 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
       let fullFilePath = path.join(bookPath, theFile); // Path to file
 
       // if 'audiobook' hasn't been checked && is a supported extension
-      if (!checked && mediaExtensions.includes(fileExtension)) {
+      if (!checked && MEDIA_EXTENSIONS.includes(fileExtension)) {
         // get tags
         let results = await getTags(fullFilePath);
 
@@ -124,13 +126,13 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
 
         // if no artist
         if (results.artist == "skip") {
-          bookData.artist = "DNF";
+          bookData.author = "DNF";
         } else {
-          bookData.artist = results.artist;
+          bookData.author = results.artist;
         }
 
         checked = true;
-      } else if (!coverFound && imgExtensions.includes(fileExtension)) {
+      } else if (!coverFound && IMG_EXTENSIONS.includes(fileExtension)) {
         bookData.cover = fullFilePath;
         coverFound = true;
       } // else if
@@ -207,7 +209,7 @@ function directorySearch(dirPath: string): string[] {
       withFileTypes: true,
     });
   } catch (err) {
-    console.error(err);
+    throw new Error(err);
   }
 
   if (currentDirectories && currentDirectories.length > 0) {
@@ -220,6 +222,168 @@ function directorySearch(dirPath: string): string[] {
   }
 
   return bookList;
+}
+
+/**
+ *
+ * @param mediaPath Path to media file
+ * @param totalSize size in bytes
+ * @param totalLength length in durations
+ * @returns returns BookDetails object
+ */
+async function getAllDetailsOfAMediaFile(
+  mediaPath: string,
+  totalSize: number = 0,
+  totalLength: number = 0
+): Promise<[BookDetails, number, number]> {
+  try {
+    const bookDetails: BookDetails = await new Promise((resolve, reject) => {
+      jsmediatags.read(mediaPath, {
+        onSuccess: async (read_info: any) => {
+          let currentChapterLength = 0;
+          const totalTracks = read_info.tags.track ? read_info.tags.track.split("/")[1] : 1;
+
+          totalSize += statSync(mediaPath).size;
+          await getAudioDurationInSeconds(mediaPath).then((duration) => {
+            currentChapterLength = duration;
+          });
+
+          totalLength += currentChapterLength; // Seconds
+
+          const bookData: BookDetails = {
+            totalTracks: totalTracks,
+            title: read_info.tags.title,
+            author: read_info.tags.artist,
+            year: read_info.tags.year,
+            currentTime: 0,
+            currentTrack: 1,
+            currentChapter: mediaPath,
+            chapterList: [
+              {
+                length: totalLength,
+                path: mediaPath,
+              },
+            ],
+          };
+
+          resolve(bookData);
+        },
+        onError: (err) => {
+          reject(err);
+        },
+      });
+    });
+
+    if (bookDetails) {
+      return [bookDetails, totalSize, totalLength];
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+async function getChapterDetails(
+  mediaPath: string,
+  totalSize: number = 0,
+  totalLength: number = 0
+): Promise<[MinimumChapterDetails, number, number]> {
+  try {
+    let currentChapterLength = 0;
+
+    totalSize += statSync(mediaPath).size;
+    await getAudioDurationInSeconds(mediaPath).then((duration) => {
+      currentChapterLength = duration;
+    });
+
+    totalLength += currentChapterLength; // Seconds
+    console.log("👉 -> file: utils.ts:291 -> totalLength:", totalLength);
+
+    const chapterDetails: MinimumChapterDetails = {
+      path: mediaPath,
+      length: currentChapterLength,
+    };
+
+    if (chapterDetails) {
+      return [chapterDetails, totalSize, totalLength];
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+/**
+ *
+ * @param dirPath -> Path to Book directory
+ * @returns A book object with book details and chapters
+ */
+export async function getBookDetails(dirPath: string): Promise<BookDetails> {
+  try {
+    const listOfFiles = readdirSync(dirPath, { withFileTypes: true });
+
+    let chapters: string[] = [];
+    let totalSize: number = 0;
+    let totalLength: number = 0;
+    let cover = "";
+    let bookDetails: BookDetails;
+    let bookDataTrigger: boolean = true; // If true means we don't have information about the book yet.
+
+    // Get files from the book directory
+    for (let index = 0; index < listOfFiles.length; index++) {
+      const file = listOfFiles[index];
+
+      if (file.isFile()) {
+        let name = file.name;
+        let fileSplit = name.split(".");
+        let extension = fileSplit[fileSplit.length - 1];
+
+        if (MEDIA_EXTENSIONS.includes(extension)) {
+          chapters.push(name);
+        } else if (IMG_EXTENSIONS.includes(extension)) {
+          // Store the larger cover - hopefully better quality
+          if (cover && statSync(path.join(dirPath, file.name)) > statSync(path.join(dirPath, cover))) {
+            cover = file.name;
+          } else if (!cover) {
+            cover = file.name;
+          }
+        } else {
+          // TODO -> Log here for testing
+          console.log("File type not supported");
+        }
+      } else {
+        console.log(`Not a file`);
+      }
+    }
+
+    // Accumalte Chapter data and book information
+    for (const chapter of chapters) {
+      const chapterPath = path.join(dirPath, chapter);
+
+      if (bookDataTrigger) {
+        const [results, size, length] = await getAllDetailsOfAMediaFile(chapterPath);
+        // bookDetails = await getAllDetailsOfAMediaFile(chapterPath, totalSize, totalLength);
+        bookDetails = results;
+        totalSize += size;
+        totalLength += length;
+        bookDataTrigger = false;
+      } else {
+        // bookDetails.chapterList.push(await getChapterDetails(chapterPath, totalSize, totalLength));
+
+        const [results, size, length] = await getChapterDetails(chapterPath, totalSize, totalLength);
+        bookDetails.chapterList.push(results);
+        totalSize += size;
+        totalLength += length;
+      }
+    }
+
+    bookDetails.totalLength = totalLength;
+    bookDetails.totalSize = totalSize;
+
+    if (bookDetails) {
+      return bookDetails;
+    }
+  } catch (err) {
+    throw new Error(err);
+  }
 }
 
 // 1. Starts the scan and returns the list of BookData[]

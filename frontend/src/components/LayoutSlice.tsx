@@ -17,9 +17,10 @@ const layoutSlice = createSlice({
       // if state has errors already
       if (state.error) {
         // REVIEW : lookie here
+        // TODO : handle error in UI
       }
 
-      return { ...state, error: payload.error, message: payload.message };
+      return { ...state, ...payload };
     },
 
     clearError: (state) => {

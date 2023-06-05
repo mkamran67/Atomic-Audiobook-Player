@@ -9,6 +9,26 @@ function GalleryView({ books }: Props) {
   let counter = 0;
 
   // TODO: Add a loading state/spinner for images
+  // TODO: Change first click to view more info of the book rather than playing it.
+
+  // 1. onClick set the clicked book as currentPlaying
+  const setPlaying = (e: any, bookPath: string) => {
+    e.preventDefault();
+
+    // Request book from Electron
+    try {
+      // Request settings information from Electron
+      window.api.send("requestToElectron", {
+        type: "getBookDetails",
+        data: {
+          path: bookPath,
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      // TODO: Handle error with UI element
+    }
+  };
 
   return (
     <>
@@ -19,7 +39,13 @@ function GalleryView({ books }: Props) {
 
             return (
               <li key={`book-${counter}`}>
-                <BookCard artist={book.artist} title={book.title} bookPath={book.dirPath} image={book.cover} />
+                <BookCard
+                  artist={book.artist}
+                  title={book.title}
+                  bookPath={book.dirPath}
+                  image={book.cover}
+                  setPlaying={setPlaying}
+                />
               </li>
             );
           })}

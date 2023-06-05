@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "atomic": "file:..",
+    "get-audio-duration": "4.0.0",
     "jsmediatags": "3.9.7"
   }
 }

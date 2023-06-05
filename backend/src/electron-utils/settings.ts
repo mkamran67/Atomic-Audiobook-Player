@@ -1,13 +1,51 @@
-import { existsSync, readFileSync, writeFileSync } from "original-fs";
-import { INFO_FOLDER_LOCATION, SETTINGS_LOCATION } from "./constants";
+import fs from "fs";
+import { SETTINGS_LOCATION } from "./constants";
 
-export default function getSettings() {
-  // 1. Get settings from settings file
-  if (existsSync(SETTINGS_LOCATION)) {
-    const data = readFileSync(SETTINGS_LOCATION, { encoding: "utf8" });
-    return JSON.parse(data);
-  } else {
-    // create settings file and return an empty object
-    writeFileSync(SETTINGS_LOCATION, "{}", { encoding: "utf8", flag: "w" });
+interface SettingsStructureType {
+  rootDirectory: string;
+}
+
+async function saveSettings(data: SettingsStructureType) {
+  try {
+    fs.writeFile(SETTINGS_LOCATION, JSON.stringify(data), () => {
+      console.log("Settings saved");
+    });
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+async function readSettings() {
+  try {
+    return fs.readFileSync(SETTINGS_LOCATION, "utf8");
+  } catch (err) {
+    throw new Error(err);
+  }
+}
+
+export async function handleSettings(operation: string, data: any): Promise<any> {
+  switch (operation) {
+    case "save": {
+      await saveSettings(data);
+      break;
+    }
+    case "update": {
+      break;
+    }
+    case "delete": {
+      break;
+    }
+    case "default": {
+      break;
+    }
+    case "read": {
+      await readSettings();
+      break;
+    }
+
+    default: {
+      console.log(`You've hit default`);
+      break;
+    }
   }
 }

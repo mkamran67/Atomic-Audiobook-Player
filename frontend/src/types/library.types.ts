@@ -19,8 +19,6 @@ export interface BookData {
 }
 
 export interface ResponseFromElectronType {
-  error: boolean;
-  message: string;
   type: string;
-  data: null | BookData[] | {};
+  data: any;
 }

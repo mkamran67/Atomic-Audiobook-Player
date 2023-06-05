@@ -7,7 +7,7 @@ import settingsSlice from "./components/Settings/settingsSlice";
 
 const store = configureStore({
   reducer: {
-    books: booksSlice,
+    library: booksSlice,
     layout: LayoutSlice,
     loader: loadingSlice,
     player: playerSlice,

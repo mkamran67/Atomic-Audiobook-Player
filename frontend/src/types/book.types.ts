@@ -1,9 +1,7 @@
-export interface BookData {
-  title: string;
-  author?: string;
-  cover?: string;
-  dirPath: string;
-  length?: number;
+import { BookDataType } from "./library.types";
+
+export interface BookState {
+  books: BookDataType[];
 }
 
 export interface MinimumChapterDetails {
