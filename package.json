@@ -5,10 +5,10 @@
   "author": "Muhammad Kamran <me@mkamran.us>",
   "license": "MIT",
   "scripts": {
-    "dev": "concurrently \"yarn --cwd ./frontend dev\" \"yarn --cwd ./backend dev\"",
-    "setup": "yarn --cwd ./frontend && yarn --cwd ./backend"
+    "dev": "concurrently \"npm --prefix ./frontend run dev\" \"npm --prefix ./backend run dev\"",
+    "setup": "npm --prefix ./frontend  install && npm --prefix ./backend  install"
   },
   "devDependencies": {
-    "concurrently": "^7.4.0"
+    "concurrently": "7.4.0"
   }
 }

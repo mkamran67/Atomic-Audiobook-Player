@@ -1,28 +1,18 @@
-// const { scanBooks } = require("./electron-utils/utils");
-// const path = require("path");
-// const { app, BrowserWindow, dialog, ipcMain } = require("electron");
-// const isDev = require("electron-is-dev");
-import os from "os";
-import scanBooks from "./electron-utils/utils";
-import path from "path";
-import { app, BrowserWindow, dialog, ipcMain, protocol, session } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, net, protocol, session } from "electron";
 import isDev from "electron-is-dev";
-import {
-  INFO_FOLDER_LOCATION,
-  BOOKS_LIST_LOCATION,
-  SETTINGS_LOCATION,
-  ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
-  ELECTRON_RESPONSE_BOOKDATA_TYPE,
-} from "./electron-utils/constants";
-import { existsSync, openSync, readFileSync, writeFileSync } from "original-fs";
+import path from "path";
 import getSimpleBookData from "./electron-utils/bookData";
-import { ResponseFromElectronType } from "./types/response.type";
+import {
+  ELECTRON_RESPONSE_BOOKDATA_TYPE,
+  ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
+  INFO_FOLDER_LOCATION,
+} from "./electron-utils/constants";
+import getSettings from "./electron-utils/settings";
+import scanBooks from "./electron-utils/utils";
 import { BookData } from "./types/library.types";
-
-const reactDevToolsPath = path.join(
-  os.homedir(),
-  "AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\lmhkpmbekcpmknklioeibfkpmmfibljd\\3.0.19_0"
-);
+import { ResponseFromElectronType } from "./types/response.type";
+import { createReadStream, existsSync, mkdirSync, readFileSync } from "original-fs";
+import * as url from "url";
 
 function createWindow() {
   // Create the browser window.
@@ -47,28 +37,29 @@ function createWindow() {
   }
 }
 
+protocol.registerSchemesAsPrivileged([{ scheme: "image", privileges: { secure: true, standard: true, stream: true } }]);
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  protocol.registerFileProtocol("image-file", (request, callback) => {
-    const url = request.url.replace("image-file://", "");
-    try {
-      return callback(url);
-    } catch (err) {
-      console.error(err);
-      return callback("404");
-    }
+  protocol.handle("image", (request) => {
+    const normURI = path.normalize(decodeURI(request.url).slice("image://".length));
+    const url = `file://${normURI[0]}:${normURI.slice(1, normURI.length)}`;
+    return net.fetch(url);
   });
 
-  session.defaultSession
-    .loadExtension(reactDevToolsPath)
-    .then(() => {
-      createWindow();
-    })
-    .catch((err) => {
-      console.error(err);
-    });
+  if (isDev) {
+    // const reactDT = path.join(__dirname, "..", "extensions", "react", "4.27.8_0");
+    const reduxDT = path.join(__dirname, "..", "extensions", "redux", "3.0.19_0");
+
+    // REVIEW -> This Extension is not working
+    // await session.defaultSession.loadExtension(reactDT);
+    await session.defaultSession.loadExtension(reduxDT);
+    createWindow();
+  } else {
+    createWindow();
+  }
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -79,6 +70,12 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
+
+// Create appData folder if it does not exist
+
+if (!existsSync(INFO_FOLDER_LOCATION)) {
+  mkdirSync(INFO_FOLDER_LOCATION);
+}
 
 // ------------------------------- Event Listeners Below -------------------------------
 //
@@ -162,22 +159,15 @@ ipcMain.on("requestToElectron", async (event, data) => {
     // Get settings from file
     case "getSettings": {
       try {
-        let settings = {};
+        const data = getSettings();
 
-        // 1. Get settings from settings file
-        if (existsSync(SETTINGS_LOCATION)) {
-          settings = readFileSync(SETTINGS_LOCATION);
-        } else {
-          // create settings file and return an empty object
-          writeFileSync(SETTINGS_LOCATION, "w");
-          const results: ResponseFromElectronType = {
-            error: false,
-            type: ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
-            message: "Failed to get a directory",
-            data: null,
-          };
-          event.reply("responseFromElectron", results);
-        }
+        const results: ResponseFromElectronType = {
+          error: false,
+          type: ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
+          message: "Settings Data Retrieved Successfully",
+          data: data,
+        };
+        event.reply("responseFromElectron", results);
       } catch (err) {
         console.error(err);
         const results: ResponseFromElectronType = {
