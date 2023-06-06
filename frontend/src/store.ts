@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import booksSlice from "./components/library/booksSlice";
 import LayoutSlice from "./components/LayoutSlice";
 import loadingSlice from "./components/loader/loaderSlice";
 import playerSlice from "./components/player/playerSlice";
 import settingsSlice from "./components/Settings/settingsSlice";
+import booksSlice from "./components/library/booksSlice";
 
 const store = configureStore({
   reducer: {

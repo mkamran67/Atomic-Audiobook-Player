@@ -12,8 +12,8 @@ function getTimeLeft(timeInSeconds: number, totalLengthInSeconds: number): strin
   const timeLeftInSeconds = totalLengthInSeconds - timeInSeconds;
 
   const seconds = Math.floor(timeLeftInSeconds % 60);
-  const hours = Math.floor(timeLeftInSeconds / 3600);
   const minutes = Math.floor((timeLeftInSeconds % 3600) / 60);
+  const hours = Math.floor(timeLeftInSeconds / 3600);
 
   const fixedMinutes = minutes < 10 ? `0${minutes}` : minutes;
   const fixedSeconds = seconds < 10 ? `0${seconds}` : seconds;
@@ -23,8 +23,8 @@ function getTimeLeft(timeInSeconds: number, totalLengthInSeconds: number): strin
 }
 
 function convertSecondsToString(timeInSeconds: number) {
-  const minutes = Math.floor(timeInSeconds / 60);
   const seconds = Math.floor(timeInSeconds % 60);
+  const minutes = Math.floor(timeInSeconds / 60);
   const hours = Math.floor(timeInSeconds / 3600);
 
   const fixedMinutes = minutes < 10 ? `0${minutes}` : minutes;
@@ -34,7 +34,16 @@ function convertSecondsToString(timeInSeconds: number) {
   return `${fixedHours}:${fixedMinutes}:${fixedSeconds}`;
 }
 
-function getProgressBar() {}
+function getPercentFromTime(newProgress: number, timeLeftInSeconds: number): number {
+  if (Number.isNaN(newProgress) || Number.isNaN(timeLeftInSeconds)) {
+    return 0;
+  }
+
+  // 50/100 = .50 * 14000
+  const timeInSeconds = (newProgress / 100) * timeLeftInSeconds;
+
+  return timeInSeconds;
+}
 
 export default function Player() {
   // 1. User selects a book to play ✅
@@ -50,7 +59,7 @@ export default function Player() {
   // TODO: Hide when not playing ❓
 
   const [progress, setProgress] = useState(0); // Handles progress bar
-  const { currentChapter } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
+  const { currentChapter, totalLength } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
   const [currentTime, setCurrentTime] = useState("--:--:--");
   const [currentChapterTimeLeft, setCurrentChapterTimeLeft] = useState("--:--:--");
   const [audio] = useState(
@@ -60,11 +69,11 @@ export default function Player() {
 
   useEffect(() => {
     if (audio) {
-      audio.addEventListener("timeupdate", () => {
+      audio.addEventListener("timeupdate", function () {
         setCurrentTime(convertSecondsToString(audio.currentTime));
       });
 
-      setCurrentChapterTimeLeft(getTimeLeft(audio.currentTime, audio.duration));
+      setCurrentChapterTimeLeft(getTimeLeft(audio.currentTime, Number(totalLength)));
     }
 
     return () => {
@@ -78,6 +87,7 @@ export default function Player() {
     if (currentChapter) {
       audio.pause();
       setIsPlaying(false);
+      // REVIEW - proper protocol
       audio.src = `image://${currentChapter}`;
       setCurrentTime(convertSecondsToString(audio.currentTime));
       audio.play();
@@ -101,6 +111,14 @@ export default function Player() {
       audio.removeEventListener("ended", () => setIsPlaying(false));
     };
   }, []);
+
+  // Updates time by progress bar
+  useEffect(() => {
+    if (audio) {
+      // convert percentage to seconds
+      audio.currentTime = getPercentFromTime(progress, Number(currentChapterTimeLeft));
+    }
+  }, [progress]);
 
   const onChange = (value: any) => {
     // 1. Convert selected time to % ->
