@@ -42,14 +42,14 @@ function createWindow() {
   }
 }
 
-protocol.registerSchemesAsPrivileged([{ scheme: "image", privileges: { secure: true, standard: true, stream: true } }]);
+protocol.registerSchemesAsPrivileged([{ scheme: "get-file", privileges: { secure: true, standard: true, stream: true } }]);
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  protocol.handle("image", (request) => {
-    const normURI = path.normalize(decodeURI(request.url).slice("image://".length));
+  protocol.handle("get-file", (request) => {
+    const normURI = path.normalize(decodeURI(request.url).slice("get-file://".length));
     const url = `file://${normURI[0]}:${normURI.slice(1, normURI.length)}`;
     return net.fetch(url);
   });
@@ -178,13 +178,12 @@ ipcMain.on("requestToElectron", async (event, req: RequestFromReactType) => {
     // Get a books details
     case "getBookDetails": {
       try {
-        console.log(data);
         // TODO -> Send to child process to fetch the book details
         const { path } = data;
 
         if (existsSync(path)) {
           const results: BookDetails = await getBookDetails(path);
-
+          
           if (results) {
             console.log(`Replying to React`);
 

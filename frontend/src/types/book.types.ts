@@ -6,6 +6,7 @@ export interface BookState {
 
 export interface MinimumChapterDetails {
   path: string;
+  name: string;
   length: number;
 }
 

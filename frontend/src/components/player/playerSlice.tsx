@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { BookDetails } from "../../types/book.types";
 
+
 const initialState: BookDetails = {
   currentChapter: "",
   currentTrack: 0,
@@ -20,7 +21,17 @@ const playerSlice = createSlice({
       return { ...state, currentlyPlaying: payload.currentlyPlaying };
     },
     setChapterList: (state, { payload }) => {
-      return { ...state, chapterList: payload.chapterList };
+
+      const chapters = payload.chapterList.map((chapter : string) => {
+        const names = chapter.split("/");
+
+        return {
+          name: chapter.split("/")[names.length - 1],
+          path: chapter,
+        };
+      });
+
+      return { ...state, chapterList: chapters };
     },
     setCurrentlyPlayingUrl: (state, { payload }) => {
       return {

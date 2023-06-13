@@ -81,7 +81,6 @@ async function getTags(fullFilePath: string): Promise<{ title: string; artist: s
 // }
 
 // NOTE - Might use this later
-
 async function getBookInformation(bookDirectories: string[]): Promise<BookData[]> {
   let anArrayOfBookData: BookData[] = [];
 
@@ -248,7 +247,7 @@ async function getAllDetailsOfAMediaFile(
             currentChapterLength = duration;
           });
 
-          totalLength += currentChapterLength; // Seconds
+          totalLength += currentChapterLength; // Seconds 
 
           const bookData: BookDetails = {
             totalTracks: totalTracks,
@@ -296,7 +295,6 @@ async function getChapterDetails(
     });
 
     totalLength += currentChapterLength; // Seconds
-    console.log("👉 -> file: utils.ts:291 -> totalLength:", totalLength);
 
     const chapterDetails: MinimumChapterDetails = {
       path: mediaPath,
@@ -367,7 +365,6 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
         bookDataTrigger = false;
       } else {
         // bookDetails.chapterList.push(await getChapterDetails(chapterPath, totalSize, totalLength));
-
         const [results, size, length] = await getChapterDetails(chapterPath, totalSize, totalLength);
         bookDetails.chapterList.push(results);
         totalSize += size;
