@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { PlayCircleIcon, ForwardIcon, PauseCircleIcon } from "@heroicons/react/24/outline";
 import ChapterSelector from "./ChapterSelector";
 import { RootState } from "../../store";
 import { MinimumChapterDetails } from "../../types/book.types";
+import ButtonGroup from "./ButtonGroup";
 
 function getTimeLeft(timeInSeconds: number, totalLengthInSeconds: number): string {
   if (Number.isNaN(timeInSeconds) || Number.isNaN(totalLengthInSeconds)) {
@@ -36,10 +36,10 @@ function convertSecondsToString(timeInSeconds: number) {
 }
 
 function getPercentFromTime(currentTime: number, totalTrackDuration: number): number {
-  return (currentTime / 100) * totalTrackDuration;
+  return (currentTime / totalTrackDuration) * 100;
 }
 
-function getNextChapter(currentChapter : string, chapterList: MinimumChapterDetails[]) {
+function getNextChapter(currentChapter: string, chapterList: MinimumChapterDetails[]) {
   console.log("👉 -> file: Player.tsx:50 -> chapterList:", chapterList)
   console.log("👉 -> file: Player.tsx:50 -> currentChapter:", currentChapter)
 }
@@ -54,18 +54,18 @@ export default function Player() {
   // 3. Logic for playing - pausing, seeking, etc.
 
   // 0. Get state from store
-  const { 
-    currentChapter, 
-    chapterList, 
-    title, 
-    currentTime : currentTrackTime, 
-    currentTrack, 
+  const {
+    currentChapter,
+    chapterList,
+    title,
+    currentTime: currentTrackTime,
+    currentTrack,
     totalTracks
   } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
 
   // TODO: 1. Add logic for playing & pausing
   const [audio, setAudio] = useState(
-    currentChapter ? new Audio(`get-file://${currentChapter}`) : null);
+    currentChapter !== "" ? new Audio(`get-file://${currentChapter}`) : null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTimeInSeconds, setCurrentTimeInSeconds] = useState("00:00:00");
   const [currentTimeLeftInSeconds, setCurrentTimeLeftInSeconds] = useState("00:00:00");
@@ -73,15 +73,15 @@ export default function Player() {
   const [progressBar, setProgressBar] = useState(0)
 
   useEffect(() => {
-    if(audio) {
-      if(isPlaying){
+    if (audio) {
+      if (isPlaying) {
         audio.play();
       } else {
         audio.pause();
       }
     }
   }, [isPlaying])
-  
+
   useEffect(() => {
     if (audio) {
       audio.addEventListener("ended", () => {
@@ -97,18 +97,18 @@ export default function Player() {
         setCurrentTimeLeftInSeconds(convertSecondsToString(audio.duration - audio.currentTime));
       });
     }
-  
+
     return () => {
-      if(audio) {
-        audio.removeEventListener("ended", () => {})
-        audio.removeEventListener("timeupdate", () => {})
+      if (audio) {
+        audio.removeEventListener("ended", () => { })
+        audio.removeEventListener("timeupdate", () => { })
       }
     }
   }, [audio])
 
   // Handles Audio source change
   useEffect(() => {
-    if(!audio){
+    if (!audio && currentChapter !== "") {
       setAudio(new Audio(`get-file://${currentChapter}`));
     }
 
@@ -116,10 +116,10 @@ export default function Player() {
       setIsPlaying(false);
       audio.src = `get-file://${currentChapter}`;
       audio.load();
-      if(audio.duration == Infinity || isNaN(audio.duration)) {
-        audio.currentTime = 24*60*60;
-      }  
-      
+      if (audio.duration == Infinity || isNaN(audio.duration)) {
+        audio.currentTime = 24 * 60 * 60 * 80;
+      }
+
       setTimeout(() => {
         audio.currentTime = currentTrackTime ? currentTrackTime : 0;
       }, 1000);
@@ -128,8 +128,22 @@ export default function Player() {
 
 
 
-  // TODO: Add logic for rewinding
-  // TODO: Add logic for forward
+  // TODO: Add logic skipping around
+  function steppingAround(amount: number, direction: string) {
+    if (audio) {
+      if (direction === "forward") {
+        audio.currentTime += amount;
+      } else if (direction === "backward") {
+        audio.currentTime -= amount;
+      }
+    }
+  }
+
+  function seek(amount: string) {
+    console.log("👉 -> file: Player.tsx:143 -> amount:", amount)
+
+  }
+
 
   const setNewChapter = (newChapter: string) => {
     console.log(newChapter)
@@ -144,35 +158,21 @@ export default function Player() {
             <div>
               <p className="w-48 text-center truncate">{title}</p>
             </div>
-            <div className="flex">
-              <ForwardIcon className="w-10 h-10 text-gray-500 rotate-180 cursor-pointer hover:text-gray-800" />
-              {isPlaying ? (
-                <PauseCircleIcon
-                  className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800"
-                  onClick={() => setIsPlaying(false)}
-                />
-              ) : (
-                <PlayCircleIcon
-                  className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800"
-                  onClick={() => setIsPlaying(true)}
-                />
-              )}
-              <ForwardIcon className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800" />
-            </div>
+            <ButtonGroup isPlaying={isPlaying} steppingAround={steppingAround} isThereAudio={audio ? true : false} setIsPlaying={setIsPlaying} />
             <div className="justify-end">
               <ChapterSelector chapterList={chapterList} currentChapter={currentChapter} setNewChapter={setNewChapter} />
             </div>
           </div>
           <div className="flex flex-row items-center text-center justify-evenly">
             <p className="pr-2">{currentTimeInSeconds}</p>
-            {/* <input
+            <input
               type="range"
               min="0"
               max="100"
-              value="0"
-              // onChange={(e) => onChange(e.target.value)}
+              value={progressBar}
+              onChange={(e) => seek(e.target.value)}
               className="w-full cursor-pointer range-lg range-primary"
-            /> */}
+            />
             <p className="pl-2">-{currentTimeLeftInSeconds}</p>
           </div>
         </div>

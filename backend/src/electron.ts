@@ -183,7 +183,7 @@ ipcMain.on("requestToElectron", async (event, req: RequestFromReactType) => {
 
         if (existsSync(path)) {
           const results: BookDetails = await getBookDetails(path);
-          
+
           if (results) {
             console.log(`Replying to React`);
 
