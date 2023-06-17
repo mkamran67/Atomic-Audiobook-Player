@@ -2,13 +2,13 @@ import { PlayCircleIcon, ForwardIcon, PauseCircleIcon } from "@heroicons/react/2
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, EllipsisHorizontalCircleIcon } from "@heroicons/react/20/solid";
 
 type Props = {
-  setIsPlaying: (stateChange: boolean) => void,
+  handlePlayPause: (stateChange: boolean) => void,
   isPlaying: boolean,
   isThereAudio: boolean,
   steppingAround: (amount: number, direction: string) => void,
 }
 
-function ButtonGroup({ setIsPlaying, isPlaying, isThereAudio, steppingAround }: Props) {
+function ButtonGroup({ handlePlayPause, isPlaying, isThereAudio, steppingAround }: Props) {
 
 
   if (!isThereAudio) {
@@ -33,12 +33,12 @@ function ButtonGroup({ setIsPlaying, isPlaying, isThereAudio, steppingAround }: 
       {isPlaying ? (
         <PauseCircleIcon
           className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800"
-          onClick={() => setIsPlaying(false)}
+          onClick={handlePlayPause}
         />
       ) : (
         <PlayCircleIcon
           className={"w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800"}
-          onClick={() => setIsPlaying(true)}
+          onClick={handlePlayPause}
         />
       )}
       <div className="tooltip" data-tip="10 Seconds Forward">

@@ -56,8 +56,7 @@ export default function Player() {
     currentTime: currentTrackTime,
     currentTrack,
     totalTracks,
-    totalLength,
-
+    totalLength
   } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
 
   // TODO: 1. Add logic for playing & pausing
@@ -68,53 +67,45 @@ export default function Player() {
   const [currentTimeLeftInSeconds, setCurrentTimeLeftInSeconds] = useState("00:00:00");
   const trackProgress = useRef(0);
   const [progressBar, setProgressBar] = useState(0)
-  // const audioDurationInSeconds = useRef(0);
-  // const renderCounter = useRef(0);
 
-  const handlePlayPause = () => {
-    console.log(`CLicked PlayPause ${isPlaying}`)
-    if (audio && !isPlaying) {
-      setIsPlaying(true);
-      audio.play();
-    } else if (audio) {
-      setIsPlaying(false);
-      audio.pause();
+  function getDuration(): number {
+
+    if (audio && (audio.duration == Infinity || isNaN(audio.duration))) {
+      audio.addEventListener("durationchange", function (e) {
+        if (this.duration != Infinity) {
+          var duration = this.duration
+          audio.remove();
+          return duration;
+        };
+      }, false);
+      audio.load();
+      audio.currentTime = 24 * 60 * 60; //fake big time
+      // audio.volume = 0;
+      // audio.play();
     }
   }
 
-
-  // function getDuration(this: any) {
-  //   if (audio) {
-  //     audio.currentTime = 0
-  //     this.voice.removeEventListener('timeupdate', getDuration)
-  //     console.log(audio.duration)
-  //   }
-  // }
-
-  // audio.addEventListener('loadedmetadata', () => {
-  //   if (audio.duration === Infinity || isNaN(Number(audio.duration)) {
-  //     audio.currentTime = 1e101
-  //     audio.addEventListener('timeupdate', getDuration)
-  //   }
-  // })
-
-  // Handles Audio source change
   useEffect(() => {
-    // 1. If no audio is playing, set new audio
-    if (!audio && currentChapter) {
-      setAudio(new Audio(`get-file://${currentChapter}`));
-    } else if (audio && currentChapter) {
+    if (audio) {
+      if (isPlaying) {
+        audio.currentTime = currentTrackTime !== 0 ? currentTrackTime : trackProgress.current;
+        audio.play();
+      } else {
+        audio.pause();
+      }
+    }
+  }, [isPlaying])
 
-      setIsPlaying(false);
-      audio.src = `get-file://${currentChapter}`;
+  useEffect(() => {
+    if (audio) {
       audio.load();
-
-      // Check if duration is Infinity or NaN -> bugged Electron
+      console.log(`Audio Loaded - audio useEffect`)
       if (audio.duration == Infinity || isNaN(audio.duration)) {
+        console.log("👉 -> file: Player.tsx:88 -> audio.duration:", audio.duration)
         audio.currentTime = 1000000000.0;
         setTimeout(() => {
           audio.currentTime = currentTrackTime ? currentTrackTime : 0;
-        }, 1000);
+        }, 100);
       }
 
       audio.addEventListener("ended", () => {
@@ -129,6 +120,7 @@ export default function Player() {
 
         if (isNaN(audio.duration) || audio.duration == Infinity) {
           setProgressBar(getPercentFromTime(audio.currentTime, totalLength));
+          // setCurrentTimeLeftInSeconds("00:00:00");
           setCurrentTimeLeftInSeconds(convertSecondsToString(audio.duration - audio.currentTime));
 
         } else {
@@ -142,11 +134,34 @@ export default function Player() {
       if (audio) {
         audio.removeEventListener("ended", () => { })
         audio.removeEventListener("timeupdate", () => { })
-        audio.removeEventListener("durationchange", () => { })
       }
     }
-  }, [audio, currentChapter])
+  }, [audio])
 
+  // Handles Audio source change
+  useEffect(() => {
+    if (!audio && currentChapter !== "") {
+      setAudio(new Audio(`get-file://${currentChapter}`));
+    }
+
+    if (audio && currentChapter) {
+      setIsPlaying(false);
+      audio.src = `get-file://${currentChapter}`;
+      audio.load();
+      console.log(`Audio Loaded - currentChapter useEffect`)
+      if (audio.duration == Infinity || isNaN(audio.duration)) {
+        console.log("👉 -> file: Player.tsx:64 -> audio.duration:", audio.duration)
+        audio.currentTime = 1000000000.0;
+        setTimeout(() => {
+          audio.currentTime = currentTrackTime ? currentTrackTime : 0;
+        }, 100);
+      }
+    }
+  }, [currentChapter]);
+
+
+
+  // TODO: Add logic skipping around
   function steppingAround(amount: number, direction: string) {
     if (audio) {
       if (direction === "forward") {
@@ -159,7 +174,9 @@ export default function Player() {
 
   function onSeek(amount: string) {
     console.log("👉 -> file: Player.tsx:143 -> amount:", amount)
+
   }
+
 
   const setNewChapter = (newChapter: string) => {
     console.log(newChapter)
@@ -174,7 +191,7 @@ export default function Player() {
             <div>
               <p className="w-48 text-center truncate">{title}</p>
             </div>
-            <ButtonGroup isPlaying={isPlaying} steppingAround={steppingAround} isThereAudio={audio ? true : false} handlePlayPause={handlePlayPause} />
+            <ButtonGroup isPlaying={isPlaying} steppingAround={steppingAround} isThereAudio={audio ? true : false} setIsPlaying={setIsPlaying} />
             <div className="justify-end">
               <ChapterSelector chapterList={chapterList} currentChapter={currentChapter} setNewChapter={setNewChapter} />
             </div>
