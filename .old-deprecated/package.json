@@ -1,0 +1,15 @@
+{
+  "name": "atomic",
+  "version": "1.0.0",
+  "repository": "git@github.com:mkamran67/Atomic-Audiobook-Player.git",
+  "author": "Muhammad Kamran <me@mkamran.us>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "concurrently \"npm --prefix ./frontend run dev\" \"npm --prefix ./backend run dev\"",
+    "setup": "npm --prefix ./frontend  install && npm --prefix ./backend  install",
+    "clean": "npm --prefix ./frontend run clean && npm --prefix ./backend run clean"
+  },
+  "devDependencies": {
+    "concurrently": "8.2.0"
+  }
+}
