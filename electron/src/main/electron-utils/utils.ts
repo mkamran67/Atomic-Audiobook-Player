@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "fs";
-import getAudioDurationInSeconds from "get-audio-duration";
+// import getAudioDurationInSeconds from "get-audio-duration";
 import * as jsmediatags from "jsmediatags";
 import path from "node:path";
 import { statSync } from "original-fs";
@@ -7,23 +7,21 @@ import { BookData, BookDetails, MinimumChapterDetails } from "../types/library.t
 import { BOOKS_LIST_LOCATION, IMG_EXTENSIONS, INFO_FOLDER_LOCATION, MEDIA_EXTENSIONS } from "./constants";
 
 
-async function getTags(fullFilePath: string): Promise<{ title: string; artist: string }> {
+async function getTags(fullFilePath: string): Promise<{ title: string; artist: string } | undefined> {
   try {
     const res: any = await new Promise((resolve, reject) => {
       new jsmediatags.Reader(fullFilePath).read({
-        onSuccess: (tag) => {
+        onSuccess: (tag: any) => {
           resolve(tag);
         },
-        onError: (error) => {
+        onError: (error: any) => {
           reject(error);
         },
       });
     });
 
-    if (res) {
-      return { title: res.tags.title, artist: res.tags.artist };
-    }
-  } catch (err) {
+    return { title: res.tags.title, artist: res.tags.artist };
+  } catch (err: any) {
     if (err.type == "tagFormat") {
       return { title: "skip", artist: "skip" };
     }
