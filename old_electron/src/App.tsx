@@ -1,6 +1,9 @@
 // Modules / Dependencies
 import { Provider } from "react-redux";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider
+} from "react-router-dom";
 
 // Local imports
 import Layout from "./components/Layout";
