@@ -1,10 +1,10 @@
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from "fs";
-// import getAudioDurationInSeconds from "get-audio-duration";
+import { existsSync, mkdirSync, readdirSync, writeFileSync, statSync } from "fs";
+import getAudioDurationInSeconds from "get-audio-duration";
 import * as jsmediatags from "jsmediatags";
 import path from "node:path";
-import { statSync } from "original-fs";
 import { BookData, BookDetails, MinimumChapterDetails } from "../types/library.types";
 import { BOOKS_LIST_LOCATION, IMG_EXTENSIONS, INFO_FOLDER_LOCATION, MEDIA_EXTENSIONS } from "./constants";
+// import { jsmediatagsError } from "jsmediatags/types";
 
 
 async function getTags(fullFilePath: string): Promise<{ title: string; artist: string } | undefined> {
@@ -113,19 +113,21 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
         // get tags
         let results = await getTags(fullFilePath);
 
-        // if no title
-        if (results.title == "skip") {
-          let splitPath = bookPath.split(path.sep); // Split bookPath at \ or /
-          bookData.title = splitPath[splitPath.length - 1]; // Since no tag was found we use the directory as the name
-        } else {
-          bookData.title = results.title;
-        }
+        if (results) {
+          // if no title
+          if (results.title == "skip") {
+            let splitPath = bookPath.split(path.sep); // Split bookPath at \ or /
+            bookData.title = splitPath[splitPath.length - 1]; // Since no tag was found we use the directory as the name
+          } else {
+            bookData.title = results.title;
+          }
 
-        // if no artist
-        if (results.artist == "skip") {
-          bookData.author = "DNF";
-        } else {
-          bookData.author = results.artist;
+          // if no artist
+          if (results.artist == "skip") {
+            bookData.author = "DNF";
+          } else {
+            bookData.author = results.artist;
+          }
         }
 
         checked = true;
@@ -145,17 +147,17 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
   return anArrayOfBookData;
 }
 
-async function buildSimpleBookData(listOfBooks: BookData[], bookDirectories: string[]) {
-  // This function will build a list containing only
-  // Title - Cover Path - Directory Path
+// async function buildSimpleBookData(listOfBooks: BookData[], bookDirectories: string[]) {
+//   // This function will build a list containing only
+//   // Title - Cover Path - Directory Path
 
-  for (let index = 0; index < bookDirectories.length; index++) {
-    const book = bookDirectories[index];
+//   for (let index = 0; index < bookDirectories.length; index++) {
+//     const book = bookDirectories[index];
 
-    // 1. Get book title
-    let results = await getTags(book);
-  }
-}
+//     // 1. Get book title
+//     let results = await getTags(book);
+//   }
+// }
 
 async function writeToDisk(anArrayOfBookData: BookData[]): Promise<boolean | string> {
   try {
@@ -205,7 +207,7 @@ function directorySearch(dirPath: string): string[] {
     currentDirectories = readdirSync(dirPath, {
       withFileTypes: true,
     });
-  } catch (err) {
+  } catch (err: any) {
     throw new Error(err);
   }
 
@@ -252,13 +254,6 @@ function directorySearch(dirPath: string): string[] {
 // },
 
 
-/**
- *
- * @param mediaPath Path to media file
- * @param totalSize size in bytes
- * @param totalLength length in durations
- * @returns returns BookDetails object
- */
 async function getAllDetailsOfAMediaFile(
   mediaPath: string,
   totalSize: number = 0,
@@ -266,13 +261,14 @@ async function getAllDetailsOfAMediaFile(
 ): Promise<[BookDetails, number, number]> {
   try {
     const bookDetails: BookDetails = await new Promise((resolve, reject) => {
+
       jsmediatags.read(mediaPath, {
         onSuccess: async (read_info: any) => {
           let currentChapterLength = 0;
           const totalTracks = read_info.tags.track ? read_info.tags.track.split("/")[1] : 1;
 
           totalSize += statSync(mediaPath).size;
-          // Fix the duration of the audio file
+          // FIXME - Fix the duration of the audio file
           await getAudioDurationInSeconds(mediaPath).then((duration) => {
             currentChapterLength = duration;
             console.log("👉 -> file: utils.ts:248 -> currentChapterLength:", currentChapterLength)
@@ -307,10 +303,10 @@ async function getAllDetailsOfAMediaFile(
       });
     });
 
-    if (bookDetails) {
-      return [bookDetails, totalSize, totalLength];
-    }
-  } catch (err) {
+    // if (bookDetails) {
+    return [bookDetails, totalSize, totalLength];
+    // }
+  } catch (err: any) {
     throw new Error(err);
   }
 }
@@ -335,10 +331,10 @@ async function getChapterDetails(
       length: currentChapterLength,
     };
 
-    if (chapterDetails) {
-      return [chapterDetails, totalSize, totalLength];
-    }
-  } catch (err) {
+    // if (chapterDetails) {
+    return [chapterDetails, totalSize, totalLength];
+    // }
+  } catch (err: any) {
     throw new Error(err);
   }
 }
@@ -356,7 +352,16 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
     let totalSize: number = 0;
     let totalLength: number = 0;
     let cover = "";
-    let bookDetails: BookDetails;
+
+    // REVIEW -> Skeleton needed?
+    let bookDetails: BookDetails = {
+      chapterList: [],
+      currentChapter: "",
+      currentTrack: 0,
+      currentTime: 0,
+      totalTracks: 0,
+      title: "",
+    };
     let bookDataTrigger: boolean = true; // If true means we don't have information about the book yet.
 
     // Get files from the book directory
@@ -409,10 +414,10 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
     bookDetails.totalLength = totalLength;
     bookDetails.totalSize = totalSize;
 
-    if (bookDetails) {
-      return bookDetails;
-    }
-  } catch (err) {
+    // if (bookDetails) {
+    return bookDetails;
+    // }
+  } catch (err: any) {
     throw new Error(err);
   }
 }

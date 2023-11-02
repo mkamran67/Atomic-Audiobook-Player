@@ -36,7 +36,7 @@ function getPercentFromTime(currentTime: number, totalTrackDuration: number | un
   return (currentTime / totalTrackDuration) * 100;
 }
 
-function getNextChapter(currentChapter: string, chapterList: MinimumChapterDetails[]) {
+function getNextChapter(_currentChapter: string, chapterList: MinimumChapterDetails[]) {
   console.log("👉 -> file: Player.tsx:50 -> chapterList:", chapterList)
   // console.log("👉 -> file: Player.tsx:50 -> currentChapter:", currentChapter)
 }
@@ -54,8 +54,6 @@ export default function Player() {
     chapterList,
     title,
     currentTime: currentTrackTime,
-    currentTrack,
-    totalTracks,
     totalLength,
 
   } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
@@ -174,7 +172,7 @@ export default function Player() {
               min="0"
               max="100.0"
               value={progressBar}
-              onChange={(e) => onSeek(e.target.value)}
+              onChange={(e) => onSeek(Number(e.target.value))}
               className="w-full cursor-pointer range-lg range-primary"
             />
             <p className="pl-2">-{currentTimeLeftInSeconds}</p>

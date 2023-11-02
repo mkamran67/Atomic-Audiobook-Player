@@ -8,7 +8,7 @@ type Props = {
   setPlaying: (arg0: any, arg1: string) => void;
 };
 
-export default function BookCard({ title, image, bookPath, artist, setPlaying }: Props) {
+export default function BookCard({ image, bookPath, setPlaying }: Props) {
   return (
     <div
       className="relative h-56 rounded-md shadow-xl cursor-pointer overflow-clip w-44 group "

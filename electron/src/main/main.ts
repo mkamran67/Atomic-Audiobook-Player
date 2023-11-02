@@ -1,9 +1,23 @@
-import { app, BrowserWindow, dialog, ipcMain, net, protocol, session } from "electron";
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  net,
+  protocol,
+  session
+} from "electron";
 import isDev from "electron-is-dev";
 import { existsSync, mkdirSync } from "fs";
 import path from 'node:path';
 import getSimpleBookData from "./electron-utils/bookData";
-import { ELECTRON_ERROR, ELECTRON_RESPONSE_BOOK_DETAILS_TYPE, ELECTRON_RESPONSE_BOOKDATA_TYPE, ELECTRON_RESPONSE_SETTINGSDATA_TYPE, INFO_FOLDER_LOCATION } from "./electron-utils/constants";
+import {
+  ELECTRON_ERROR,
+  ELECTRON_RESPONSE_BOOK_DETAILS_TYPE,
+  ELECTRON_RESPONSE_BOOKDATA_TYPE,
+  ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
+  INFO_FOLDER_LOCATION
+} from "./electron-utils/constants";
 import { handleSettings } from "./electron-utils/settings";
 import scanBooks, { getBookDetails } from "./electron-utils/utils";
 import { BookData, BookDetails } from "./types/library.types";

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "original-fs";
+import { existsSync, readFileSync } from "fs";
 import { BOOKS_LIST_LOCATION, INFO_FOLDER_LOCATION } from "./constants";
 
 export default function getSimpleBookData() {
@@ -12,7 +12,7 @@ export default function getSimpleBookData() {
         const results = JSON.parse(readFileSync(BOOKS_LIST_LOCATION, { encoding: "utf-8" }));
         return results;
       } catch (err) {
-        return new Error(err);
+        return new Error(String(err));
       }
     }
   }

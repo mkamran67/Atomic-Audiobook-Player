@@ -10,7 +10,7 @@ async function saveSettings(data: SettingsStructureType) {
     fs.writeFile(SETTINGS_LOCATION, JSON.stringify(data), () => {
       console.log("Settings saved");
     });
-  } catch (err) {
+  } catch (err: any) {
     throw new Error(err);
   }
 }
@@ -18,7 +18,7 @@ async function saveSettings(data: SettingsStructureType) {
 async function readSettings() {
   try {
     return fs.readFileSync(SETTINGS_LOCATION, "utf8");
-  } catch (err) {
+  } catch (err: any) {
     throw new Error(err);
   }
 }

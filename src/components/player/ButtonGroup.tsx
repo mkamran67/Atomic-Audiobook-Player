@@ -33,12 +33,12 @@ function ButtonGroup({ handlePlayPause, isPlaying, isThereAudio, steppingAround 
       {isPlaying ? (
         <PauseCircleIcon
           className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800"
-          onClick={handlePlayPause}
+          onClick={(event) => handlePlayPause(event.type === "click")}
         />
       ) : (
         <PlayCircleIcon
           className={"w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800"}
-          onClick={handlePlayPause}
+          onClick={(event) => handlePlayPause(event.type === "click")}
         />
       )}
       <div className="tooltip" data-tip="10 Seconds Forward">

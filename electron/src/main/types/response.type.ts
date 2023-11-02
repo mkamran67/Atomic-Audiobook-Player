@@ -2,7 +2,7 @@ import { BookData } from "./library.types";
 
 export interface ResponseFromElectronType {
   type: string;
-  data: null | BookData[] | {};
+  data: null | BookData[] | {} | any;
 }
 
 export interface RequestFromReactType {
