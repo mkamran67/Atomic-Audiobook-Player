@@ -27,6 +27,5 @@
  */
 
 import './index.css';
-import './front/app'
 
 console.log('👋 This message is being logged by "renderer.js", included via webpack');
