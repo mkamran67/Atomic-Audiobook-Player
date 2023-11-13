@@ -42,24 +42,6 @@ const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
 function createWindow() {
 
-  // Create the browser window.
-  // const win = new BrowserWindow({
-  //   width: 800,
-  //   height: 600,
-  //   webPreferences: {
-  //     nodeIntegration: false,
-  //     contextIsolation: true,
-  //     sandbox: true,
-  //     preload: path.join(__dirname, "electron-utils", "preload.js"),
-  //   },
-  //   autoHideMenuBar: true,
-  // });
-
-  // and load the index.html of the app.
-  // win.loadFile("index.html");
-  // win.loadURL(isDev ? "http://localhost:5173" : `file://${path.join(__dirname, "../build/index.html")}`);
-
-
   win = new BrowserWindow({
     icon: path.join(process.env.PUBLIC, 'electron-vite.svg'),
     webPreferences: {
@@ -96,19 +78,23 @@ protocol.registerSchemesAsPrivileged([{ scheme: "get-file", privileges: { secure
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
+
   protocol.handle("get-file", (request) => {
+    console.log("👉 -> file: main.ts:100 -> request:", request.url)
     const normURI = path.normalize(decodeURI(request.url).slice("get-file://".length));
     const url = `file://${normURI[0]}:${normURI.slice(1, normURI.length)}`;
+
+    console.log("👉 -> file: main.ts:103 -> url:", url)
     return net.fetch(url);
   });
 
   if (isDev) {
     // const reactDT = path.join(__dirname, "..", "extensions", "react", "4.27.8_0");
-    const reduxDT = path.join(__dirname, "..", "extensions", "redux", "3.0.19_0");
+    // const reduxDT = path.join(__dirname, "..", "extensions", "redux", "3.0.19_0");
 
     // REVIEW -> This Extension is not working
     // await session.defaultSession.loadExtension(reactDT);
-    await session.defaultSession.loadExtension(reduxDT);
+    // await session.defaultSession.loadExtension(reduxDT);
     createWindow();
   } else {
     createWindow();
@@ -125,7 +111,6 @@ app.on("window-all-closed", () => {
 });
 
 // Create appData folder if it does not exist
-
 if (!existsSync(INFO_FOLDER_LOCATION)) {
   mkdirSync(INFO_FOLDER_LOCATION);
 }

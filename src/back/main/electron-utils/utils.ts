@@ -79,14 +79,17 @@ async function getTags(fullFilePath: string): Promise<{ title: string; artist: s
 // }
 
 // NOTE - Might use this later
+
 async function getBookInformation(bookDirectories: string[]): Promise<BookData[]> {
   let anArrayOfBookData: BookData[] = [];
 
   console.log("\n\n");
+  let fileTypeData: any = {};
 
   // iterate through directories
   for (let index = 0; index < bookDirectories.length; index++) {
     const bookPath = bookDirectories[index]; // Path to book directory
+
 
     let bookData: BookData = {
       title: "",
@@ -106,6 +109,13 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
     for (let i = 0; i < bookDirectoryContents.length; i++) {
       let theFile = bookDirectoryContents[i]; // File name
       let fileExtension = bookDirectoryContents[i].split(".")[1]; // File extension
+
+      if (fileTypeData.hasOwnProperty(fileExtension)) {
+        fileTypeData[`${fileExtension}`]++;
+      } else {
+        fileTypeData[`${fileExtension}`] = 1;
+      }
+
       let fullFilePath = path.join(bookPath, theFile); // Path to file
 
       // if 'audiobook' hasn't been checked && is a supported extension
@@ -143,6 +153,9 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
     } // for 2
     anArrayOfBookData.push(bookData);
   } // for 1
+
+  // FIXME - Not getting all the proper file extensions
+  // console.log("👉 -> file: utils.ts:159 -> fileTypeData:", fileTypeData)
 
   return anArrayOfBookData;
 }
