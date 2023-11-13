@@ -1,23 +1,16 @@
-// Modules / Dependencies
-import { Provider } from "react-redux";
-import {
-  createBrowserRouter,
-  RouterProvider,
-  HashRouter,
-  Route,
-  createHashRouter
-} from "react-router-dom";
+import { Provider } from 'react-redux';
+import { createHashRouter, RouterProvider } from 'react-router-dom';
 
 // Local imports
-import Layout from "./components/Layout";
-import ErrorPage from "./components/pages/ErrorPage";
-import Folders from "./components/pages/Folders";
-import Home from "./components/pages/Home";
-import Library from "./components/pages/Library";
-import Settings from "./components/pages/Settings";
-import Stats from "./components/pages/Stats";
-import Player from "./components/player/Player";
-import store from "./store";
+import Layout from './components/Layout';
+import ErrorPage from './components/pages/ErrorPage';
+import Folders from './components/pages/Folders';
+import Home from './components/pages/Home';
+import Library from './components/pages/Library';
+import Settings from './components/pages/Settings';
+import Stats from './components/pages/Stats';
+import Player from './components/player/Player';
+import store from './store';
 
 const router = createHashRouter([
   {
