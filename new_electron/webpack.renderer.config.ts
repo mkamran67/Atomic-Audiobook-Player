@@ -2,10 +2,15 @@ import type { Configuration } from 'webpack';
 
 import { rules } from './webpack.rules';
 import { plugins } from './webpack.plugins';
+// import 'tailwindcss/tailwind.css'; // Import Tailwind CSS styles
 
 rules.push({
-  test: /\.css$/,
-  use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
+  test: /\.s?css$/,
+  use: [
+    'style-loader',
+    'css-loader',
+    'postcss-loader',
+  ],
 });
 
 export const rendererConfig: Configuration = {
