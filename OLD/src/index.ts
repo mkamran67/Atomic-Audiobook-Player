@@ -30,6 +30,11 @@ if (!existsSync(INFO_FOLDER_LOCATION)) {
   mkdirSync(INFO_FOLDER_LOCATION);
 }
 
+// make sure this listener is set before your renderer.js code is called
+// ipcMain.on('get-preload-path', (e) => {
+//   e.returnValue = WINDOW_PRELOAD_WEBPACK_ENTRY;
+// });
+
 const createWindow = (): void => {
   // Create the browser window.
   // REVIEW add your own icon
@@ -38,6 +43,9 @@ const createWindow = (): void => {
     width: 800,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      // nodeIntegration: true,
+      // contextIsolation: true,
+      sandbox: false,
     },
   });
 

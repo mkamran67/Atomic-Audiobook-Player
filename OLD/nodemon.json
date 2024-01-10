@@ -1,0 +1,15 @@
+{
+  "ignore": [".git", "node_modules/**/node_modules"],
+  "verbose": true,
+  "watch": ["index.ts", "renderer.ts", "preload.ts", "src/back/**/*"],
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "ext": "ts",
+  "exec": "npm run start",
+  "webpack": {
+    "entry": {
+      "preload": "./preload.ts"
+    }
+  }
+}

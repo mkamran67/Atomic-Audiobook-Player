@@ -9,9 +9,9 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "lint": "eslint --ext .ts,.tsx .",
+    "dev": "nodemon"
   },
-  "keywords": [],
   "author": {
     "name": "Muhammad Kamran",
     "email": "mkamran1967@gmail.com"
@@ -39,6 +39,7 @@
     "file-loader": "^6.2.0",
     "fork-ts-checker-webpack-plugin": "^7.2.13",
     "node-loader": "^2.0.0",
+    "nodemon": "^3.0.2",
     "postcss": "^8.4.31",
     "postcss-loader": "^7.3.3",
     "style-loader": "^3.0.0",
