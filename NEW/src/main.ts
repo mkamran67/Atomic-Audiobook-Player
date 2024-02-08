@@ -1,9 +1,17 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain, net, protocol } from 'electron';
 import path from 'path';
+import isDev from 'electron-is-dev';
+import fs from 'node:fs'
+import { INFO_FOLDER_LOCATION } from './backend/constants';
+// import { existsSync, mkdirSync } from 'node:original-fs';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();
+}
+
+if (!fs.existsSync(INFO_FOLDER_LOCATION)) {
+  fs.mkdirSync(INFO_FOLDER_LOCATION);
 }
 
 const createWindow = () => {
@@ -23,9 +31,31 @@ const createWindow = () => {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  if (isDev) {
+    mainWindow.webContents.openDevTools({
+      mode: 'detach'
+    });
+  }
 };
+
+protocol.registerSchemesAsPrivileged([{
+  scheme: 'get-file',
+  privileges: { secure: true, standard: true, stream: true }
+}])
+
+app.whenReady().then(async () => {
+  protocol.handle("get-file", (request) => {
+    console.log("👉 -> file: index.ts:62 -> request:", request.url)
+
+    try {
+      const normURI = path.normalize(decodeURI(request.url).slice("get-file://".length));
+      const url = `file://${normURI[0]}:${normURI.slice(1, normURI.length)}`;
+      return net.fetch(url);
+    } catch (error: any) {
+      console.log("👉 -> file: index.ts:69 -> error:", error)
+    }
+  })
+})
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -51,3 +81,10 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+
+ipcMain.on("requestToElectron", async (event, request) => {
+  console.log("👉 -> request:", request)
+  console.log("👉 -> event:", event)
+  // await handleRequestFromReact(event, request)
+});
