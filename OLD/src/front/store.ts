@@ -10,7 +10,10 @@ const store = configureStore({
     library: booksSlice,
     layout: LayoutSlice,
     loader: loadingSlice,
-    player: playerSlice,
+    player: playerSlice, Layout
+    potato
+    
+    Player
     settings: settingsSlice,
   },
 });

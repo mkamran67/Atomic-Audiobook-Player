@@ -1,37 +1,51 @@
-import electronLogo from './assets/electron.svg'
+
+import { Provider } from 'react-redux';
+import { createHashRouter, RouterProvider } from 'react-router-dom';
+
+import Layout from './components/Layout';
+import ErrorPage from './components/pages/ErrorPage';
+import Home from './components/pages/Home';
+import Library from './components/pages/Library';
+import Settings from './components/pages/Settings';
+import Stats from './components/pages/Stats';
+import Player from './components/player/Player';
+import store from './store';
+
+const router = createHashRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "/library",
+        element: <Library />,
+      },
+      {
+        path: "/stats",
+        element: <Stats />,
+      },
+      {
+        path: "/settings",
+        element: <Settings />,
+      },
+    ],
+  },
+]);
 
 function App(): JSX.Element {
-
-  const ipcHandle = (): void => window.api.send('requestToElectron', {
-    type: 'ipc',
-    data: 'Hello from renderer'
-  });
-
   return (
-    <>
-      <img alt="logo" className="logo" src={electronLogo} />
-      <div className="creator">Powered by electron-vite</div>
-      <div className="text">
-        Build an Electron app with <span className="react">React</span>
-        &nbsp;and <span className="ts">TypeScript</span>
-      </div>
-      <p className="tip">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
-      <div className="actions">
-        <div className="action">
-          <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
-            Documentation
-          </a>
-        </div>
-        <div className="action">
-          <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
-            Send IPC
-          </a>
-        </div>
-      </div>
-    </>
-  )
+    <div className="App">
+      <Provider store={store}>
+        <RouterProvider router={router} />
+        <Player />
+      </Provider>
+    </div>
+  );
 }
 
-export default App
+export default App;
