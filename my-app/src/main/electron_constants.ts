@@ -10,10 +10,14 @@ const INFO_FOLDER_LOCATION = path.join(app.getPath('appData'), 'Atomic Audiobook
 const SETTINGS_LOCATION = path.join(INFO_FOLDER_LOCATION, 'settings.txt')
 const ELECTRON_CONFIG_LOCATION = path.join(INFO_FOLDER_LOCATION, 'config.txt')
 const BOOKS_LIST_LOCATION = path.join(INFO_FOLDER_LOCATION, 'library.txt')
+const INFO_LOG_LOCATION = path.join(INFO_FOLDER_LOCATION, 'info.log')
+const ERROR_LOG_LOCATION = path.join(INFO_FOLDER_LOCATION, 'error.log')
+const EXCEPTION_LOG_LOCATION = path.join(INFO_FOLDER_LOCATION, 'exceptions.log')
 
 // The below is for response consistency
 // ELECTRON_RESPONSE -> is what React is expecting
 // Response constants from Electron - strings
+// REVIEW -> Remove -> Migrate to shared/constants
 const ELECTRON_RESPONSE_SETTINGSDATA_TYPE = 'settingsData'
 const ELECTRON_RESPONSE_BOOKDATA_TYPE = 'bookData'
 const ELECTRON_RESPONSE_BOOK_DETAILS_TYPE = 'bookDetails'
@@ -21,13 +25,16 @@ const ELECTRON_ERROR = 'error_type'
 
 export {
   MEDIA_EXTENSIONS,
+  EXCEPTION_LOG_LOCATION,
   IMG_EXTENSIONS,
-  SETTINGS_LOCATION,
-  BOOKS_LIST_LOCATION,
   INFO_FOLDER_LOCATION,
+  SETTINGS_LOCATION,
+  ELECTRON_CONFIG_LOCATION,
+  BOOKS_LIST_LOCATION,
+  INFO_LOG_LOCATION,
+  ERROR_LOG_LOCATION,
   ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
   ELECTRON_RESPONSE_BOOKDATA_TYPE,
-  ELECTRON_CONFIG_LOCATION,
   ELECTRON_RESPONSE_BOOK_DETAILS_TYPE,
   ELECTRON_ERROR
 }

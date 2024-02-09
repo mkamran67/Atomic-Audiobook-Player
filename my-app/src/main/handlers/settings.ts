@@ -1,8 +1,13 @@
 import fs from 'fs'
-import { SETTINGS_LOCATION } from './library_constants'
+import { SETTINGS_LOCATION } from '../electron_constants'
+import { readAndParseTextFile } from '../utils/diskReader'
 
 interface SettingsStructureType {
-  rootDirectory: string
+  rootDirectories: string[]
+  theme?: string
+  themeMode: 'dark' | 'light' | 'system'
+  fontSize?: number
+  previoousBookDirectory: string
 }
 
 async function saveSettings(data: SettingsStructureType) {
@@ -15,9 +20,17 @@ async function saveSettings(data: SettingsStructureType) {
   }
 }
 
-async function readSettings() {
+async function readSettings(): SettingsStructureType {
   try {
-    return fs.readFileSync(SETTINGS_LOCATION, 'utf8')
+    const settings = readAndParseTextFile(SETTINGS_LOCATION)
+  } catch (err: any) {
+    throw new Error(err)
+  }
+}
+
+export async function createSettingsFile(): boolean {
+  try {
+    fs.writeFileSync(SETTINGS_LOCATION, JSON.stringify({ rootDirectory: '' }), 'utf8')
   } catch (err: any) {
     throw new Error(err)
   }

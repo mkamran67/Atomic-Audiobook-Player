@@ -7,6 +7,17 @@ import icon from '../../resources/icon.png?asset'
 import { getFileFromDisk } from './handlers/file_reader'
 import { handleRendererRequest } from './handlers/library'
 
+// Create Config files
+// 1. Settings file
+// 2. Library file
+// 3. Stats file
+
+function setupConfigFiles() {
+  // Create settings file
+  // Create library file
+  // Create stats file
+}
+
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({

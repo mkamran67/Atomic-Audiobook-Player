@@ -8,7 +8,7 @@ import {
   WRITE_SETTINGS_FILE
 } from '../../shared/constants'
 import { checkIfDirectoryExists, readAndParseTextFile } from '../utils/diskReader'
-import { SETTINGS_LOCATION } from './library_constants'
+import { SETTINGS_LOCATION } from '../electron_constants'
 import { handleSettings } from './settings'
 export interface RequestFromReactType {
   type: string

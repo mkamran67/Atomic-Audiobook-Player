@@ -9,7 +9,7 @@ import {
   INFO_FOLDER_LOCATION,
   MEDIA_EXTENSIONS,
   SETTINGS_LOCATION
-} from '../handlers/library_constants'
+} from '../electron_constants'
 
 // import { jsmediatagsError } from "jsmediatags/types";
 import { BookData } from '../../renderer/src/types/library.types'

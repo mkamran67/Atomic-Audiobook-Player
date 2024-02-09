@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'fs'
-import { BOOKS_LIST_LOCATION, INFO_FOLDER_LOCATION } from './library_constants'
+import { BOOKS_LIST_LOCATION, INFO_FOLDER_LOCATION } from '../electron_constants'
 
 export default function getSimpleBookData() {
   // 1. Check if directory exists
