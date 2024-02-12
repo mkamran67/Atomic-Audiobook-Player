@@ -1,3 +1,4 @@
+import { dialog } from 'electron';
 import {
 	ADD_BOOK_DIRECTORY,
 	GET_BOOK_COVERS,
@@ -7,10 +8,13 @@ import {
 	SAVE_BOOK_PROGRESS,
 	WRITE_SETTINGS_FILE
 } from '../../shared/constants';
-import { LIBRARY_FILE_LOCATION, SETTINGS_LOCATION, STATS_FILE_LOCATION } from '../electron_constants';
-import { checkIfDirectoryExists, checkIfFileExists, readAndParseTextFile } from '../utils/diskReader';
+import { LIBRARY_FILE_LOCATION, STATS_FILE_LOCATION } from '../electron_constants';
+import { checkIfFileExists } from '../utils/diskReader';
 import { writeToDisk } from '../utils/diskWriter';
-import { handleSettings } from './settings';
+import logger from '../utils/logger';
+import { checkForDuplicateRootDirectories, handleSettings } from './settings';
+import path from 'node:path';
+import { searchDirectoryForBooks } from './bookData';
 
 export interface RequestFromReactType {
 	type: string;
@@ -42,43 +46,74 @@ export function createStatsFile(): boolean {
 async function handleRendererRequest(event: any, request: RequestFromReactType) {
 	const { type, data } = request;
 
-	switch (type) {
-		case READ_LIBRARY_FILE: {
-			break;
-		}
-		case READ_SETTINGS_FILE: {
-			break;
-		}
-		case WRITE_SETTINGS_FILE: {
-			break;
-		}
-		case ADD_BOOK_DIRECTORY: {
-			// 1. Add the new directory to settings file
-			if (checkIfDirectoryExists(data)) {
-				event.reply(RESPONSE_FROM_ELECTRON, { type: 'error', data: 'Directory already exists.' });
+	try {
+		switch (type) {
+			case READ_LIBRARY_FILE: {
+				logger.info('Reading library file.');
+				break;
 			}
+			case READ_SETTINGS_FILE: {
+				logger.info('Reading settings file.');
+				break;
+			}
+			case WRITE_SETTINGS_FILE: {
+				logger.info('Writing settings file.');
+				break;
+			}
+			case ADD_BOOK_DIRECTORY: {
+				logger.info('Adding new directory.');
+				// 0. Show pop up for directory selection
+				const { canceled, filePaths } = await dialog.showOpenDialog({
+					title: 'Select a directory',
+					properties: ['openDirectory']
+				});
 
-			const settingsFile = readAndParseTextFile(SETTINGS_LOCATION);
-			// 2. Push the new directory to the settings file
-			let directories = settingsFile.directories;
-			await handleSettings('update', directories.push(data));
-			// 3. Read the new directory
-			const listOfBooks = await readRootDirectory(data);
-			// 4. Return the new book files
+				if (canceled) {
+					event.reply(RESPONSE_FROM_ELECTRON, { type: 'error', data: 'No directory selected.' });
+					return;
+				}
 
-			//*. Check for duplicates
-			break;
+				const rootDirPath = '' + path.normalize(filePaths[0]);
+
+				// 1. Add the new rootDirectory to the settings file
+				if (checkForDuplicateRootDirectories(rootDirPath)) {
+					logger.error('Directory already exists.');
+					event.reply(RESPONSE_FROM_ELECTRON, { type: 'error', data: 'Directory already exists.' });
+					return;
+				}
+				// 2. Read the new rootDirectory
+				const listOfbooks = await searchDirectoryForBooks(rootDirPath);
+				console.log('👉 -> listOfbooks:', listOfbooks[0]);
+
+				if (listOfbooks.length > 0) {
+					await handleSettings('update', {
+						rootDirectories: filePaths
+					});
+				}
+
+				// 4. Return the new book files
+				event.reply(RESPONSE_FROM_ELECTRON, { type: 'newBooks', data: listOfbooks });
+
+				//*. Check for duplicates
+				break;
+			}
+			case SAVE_BOOK_PROGRESS: {
+				logger.info('Saving book progress for book:');
+				break;
+			}
+			case GET_BOOK_COVERS: {
+				logger.info('Getting book covers.');
+				break;
+			}
+			default: {
+				console.log(`You've hit default case in handleRendererRequest with type: ${type} and data: ${data}`);
+				break;
+			}
 		}
-		case SAVE_BOOK_PROGRESS: {
-			break;
-		}
-		case GET_BOOK_COVERS: {
-			break;
-		}
-		default: {
-			console.log(`You've hit default case in handleRendererRequest with type: ${type} and data: ${data}`);
-			break;
-		}
+	} catch (error: any) {
+		logger.error('Error in handleRendererRequest');
+		logger.error(error.stack);
+		event.reply(RESPONSE_FROM_ELECTRON, { type: 'error', data: error });
 	}
 }
 
