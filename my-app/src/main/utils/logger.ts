@@ -1,4 +1,4 @@
-import winston, { LeveledLogMethod, createLogger, format, transports } from 'winston'
+import winston, { createLogger, format, transports } from 'winston'
 import {
   ERROR_LOG_LOCATION,
   EXCEPTION_LOG_LOCATION,
@@ -23,15 +23,15 @@ class Logger {
     })
   }
 
-  public info(message: LeveledLogMethod): void {
+  public info(message: string): void {
     this.logger.info(message)
   }
 
-  public error(message: LeveledLogMethod): void {
+  public error(message: string): void {
     this.logger.error(message)
   }
 
-  public warn(message: LeveledLogMethod): void {
+  public warn(message: string): void {
     this.logger.warn(message)
   }
 }

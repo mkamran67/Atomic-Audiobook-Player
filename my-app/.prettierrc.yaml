@@ -1,4 +1,5 @@
 singleQuote: true
-semi: false
-printWidth: 100
+semi: true
+printWidth: 120
 trailingComma: none
+useTabs: true
