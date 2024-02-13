@@ -2,9 +2,17 @@ import { existsSync, readFileSync, readdirSync } from 'fs';
 import * as jsmediatags from 'jsmediatags';
 import path from 'path';
 import { BookData } from '../../renderer/src/types/library.types';
-import { IMG_EXTENSIONS, INFO_FOLDER_LOCATION, LIBRARY_FILE_LOCATION, MEDIA_EXTENSIONS } from '../electron_constants';
-import { directorySearch } from '../utils/diskReader';
+import {
+	IMG_EXTENSIONS,
+	INFO_FOLDER_LOCATION,
+	LIBRARY_FILE_LOCATION,
+	MEDIA_EXTENSIONS,
+	SETTINGS_LOCATION
+} from '../electron_constants';
+import { directorySearch, readAndParseTextFile } from '../utils/diskReader';
 import { writeToDiskAsync } from '../utils/diskWriter';
+import spawnAsync from '../utils/childProcesses';
+import logger from '../utils/logger';
 
 export default function getSimpleBookData() {
 	// 1. Check if directory exists
@@ -48,6 +56,23 @@ async function getTags(fullFilePath: string): Promise<{ title: string; artist: s
 	}
 }
 
+export async function checkDuplicatesBooks() {
+	const rootDirectories = readAndParseTextFile(SETTINGS_LOCATION).rootDirectories;
+
+	if (rootDirectories.length > 0) {
+		try {
+			const scriptPath = path.join(__dirname, 'subProcesses.ts');
+			const args = [scriptPath, LIBRARY_FILE_LOCATION];
+
+			const results = await spawnAsync('node', args);
+			console.log('👉 -> file: bookData.ts:68 -> results:', results);
+			logger.info('Checking Duplicates Done.');
+		} catch (error) {
+			logger.error('Error in checkDuplicatesBooks');
+		}
+	}
+}
+
 async function getBookInformation(bookDirectories: string[]): Promise<BookData[]> {
 	let anArrayOfBookData: BookData[] = [];
 
@@ -61,7 +86,8 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
 			title: '',
 			author: '',
 			cover: '',
-			dirPath: bookPath
+			dirPath: bookPath,
+			isDuplicate: false
 		};
 
 		// 1. Get current directory content & build bookData

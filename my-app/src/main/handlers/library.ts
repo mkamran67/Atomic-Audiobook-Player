@@ -10,11 +10,12 @@ import {
 } from '../../shared/constants';
 import { LIBRARY_FILE_LOCATION, STATS_FILE_LOCATION } from '../electron_constants';
 import { checkIfFileExists } from '../utils/diskReader';
-import { writeToDisk } from '../utils/diskWriter';
+import { writeToDisk, writeToDiskAsync } from '../utils/diskWriter';
 import logger from '../utils/logger';
 import { checkForDuplicateRootDirectories, handleSettings } from './settings';
 import path from 'node:path';
-import { searchDirectoryForBooks } from './bookData';
+import { checkDuplicatesBooks, searchDirectoryForBooks } from './bookData';
+import { spawn } from 'node:child_process';
 
 export interface RequestFromReactType {
 	type: string;
@@ -62,6 +63,7 @@ async function handleRendererRequest(event: any, request: RequestFromReactType) 
 			}
 			case ADD_BOOK_DIRECTORY: {
 				logger.info('Adding new directory.');
+
 				// 0. Show pop up for directory selection
 				const { canceled, filePaths } = await dialog.showOpenDialog({
 					title: 'Select a directory',
@@ -69,7 +71,7 @@ async function handleRendererRequest(event: any, request: RequestFromReactType) 
 				});
 
 				if (canceled) {
-					event.reply(RESPONSE_FROM_ELECTRON, { type: 'error', data: 'No directory selected.' });
+					event.reply(RESPONSE_FROM_ELECTRON, { type: 'error', data: 'Cancelled directory selection.' });
 					return;
 				}
 
@@ -77,24 +79,34 @@ async function handleRendererRequest(event: any, request: RequestFromReactType) 
 
 				// 1. Add the new rootDirectory to the settings file
 				if (checkForDuplicateRootDirectories(rootDirPath)) {
-					logger.error('Directory already exists.');
+					logger.error(`Directory already exists : ${rootDirPath}`);
 					event.reply(RESPONSE_FROM_ELECTRON, { type: 'error', data: 'Directory already exists.' });
-					return;
+					break;
 				}
+
 				// 2. Read the new rootDirectory
 				const listOfbooks = await searchDirectoryForBooks(rootDirPath);
-				console.log('👉 -> listOfbooks:', listOfbooks[0]);
 
+				// 3. Check if there are any books in the directory
+				// Update settings file with new rootDirectory
+				// Save new books to Library file
 				if (listOfbooks.length > 0) {
-					await handleSettings('update', {
-						rootDirectories: filePaths
-					});
+					await handleSettings('update', { rootDirectories: filePaths });
+					await writeToDiskAsync(LIBRARY_FILE_LOCATION, listOfbooks, true);
+					// 4. Return the new book files
+					event.reply(RESPONSE_FROM_ELECTRON, { type: 'newBooks', data: listOfbooks });
+				} else {
+					event.reply(RESPONSE_FROM_ELECTRON, { type: 'warning', data: 'No books found in directory.' });
 				}
 
-				// 4. Return the new book files
-				event.reply(RESPONSE_FROM_ELECTRON, { type: 'newBooks', data: listOfbooks });
+				const res = await checkDuplicatesBooks();
 
-				//*. Check for duplicates
+				if (!res.error) {
+					event.reply(RESPONSE_FROM_ELECTRON, { type: 'newBooks', data: res });
+				} else {
+					event.reply(RESPONSE_FROM_ELECTRON, res);
+				}
+
 				break;
 			}
 			case SAVE_BOOK_PROGRESS: {

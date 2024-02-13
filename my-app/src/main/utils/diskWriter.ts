@@ -24,7 +24,6 @@ export function writeToDisk(filePath: string, data: any, shouldAppend: boolean =
 	} else {
 		convergedData = data;
 	}
-	console.log('👉 -> file: diskWriter.ts:26 -> convergedData:', convergedData);
 
 	const jsonString = JSON.stringify(convergedData);
 
@@ -53,7 +52,7 @@ export async function writeToDiskAsync(
 	data: any,
 	shouldAppend: boolean = false
 ): Promise<void | ErrorType> {
-	let convergedData;
+	let convergedData: unknown;
 
 	if (shouldAppend) {
 		try {

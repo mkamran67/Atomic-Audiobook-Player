@@ -1,24 +1,25 @@
 export interface MainResponseType {
-  results: boolean
-  filePath: string
+	results: boolean;
+	filePath: string;
 }
 
 export interface BookDataType {
-  title: string
-  author: string
-  cover?: string
-  dirPath: string
+	title: string;
+	author: string;
+	cover?: string;
+	dirPath: string;
 }
 
 export interface BookData {
-  title: string
-  author?: string
-  cover?: string
-  dirPath: string
-  length?: number
+	title: string;
+	author?: string;
+	cover?: string;
+	dirPath: string;
+	length?: number;
+	isDuplicate?: boolean;
 }
 
 export interface ResponseFromElectronType {
-  type: string
-  data: any
+	type: string;
+	data: any;
 }
