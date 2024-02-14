@@ -1,4 +1,5 @@
 import { dialog } from 'electron';
+import path from 'node:path';
 import {
 	ADD_BOOK_DIRECTORY,
 	GET_BOOK_COVERS,
@@ -12,10 +13,8 @@ import { LIBRARY_FILE_LOCATION, STATS_FILE_LOCATION } from '../electron_constant
 import { checkIfFileExists } from '../utils/diskReader';
 import { writeToDisk, writeToDiskAsync } from '../utils/diskWriter';
 import logger from '../utils/logger';
-import { checkForDuplicateRootDirectories, handleSettings } from './settings';
-import path from 'node:path';
 import { checkDuplicatesBooks, searchDirectoryForBooks } from './bookData';
-import { spawn } from 'node:child_process';
+import { checkForDuplicateRootDirectories, handleSettings } from './settings';
 
 export interface RequestFromReactType {
 	type: string;

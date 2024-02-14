@@ -61,7 +61,8 @@ export async function checkDuplicatesBooks() {
 
 	if (rootDirectories.length > 0) {
 		try {
-			const scriptPath = path.join(__dirname, 'subProcesses.ts');
+			const scriptPath = path.join(__dirname, '..', 'utils', 'dupeScript.ts');
+			console.log('\n\n\n👉 -> file: bookData.ts:65 -> scriptPath:', scriptPath);
 			const args = [scriptPath, LIBRARY_FILE_LOCATION];
 
 			const results = await spawnAsync('node', args);

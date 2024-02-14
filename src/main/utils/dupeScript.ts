@@ -30,7 +30,7 @@ async function checkDuplicatesScript() {
 }
 
 async function main() {
-	console.log('👉 -> file: dupeScript.ts:34 -> argv:', process.argv);
+	console.log('\n\n\n👉 -> file: dupeScript.ts:34 -> argv:', process.argv);
 	// const libraryPath = process.argv[2];
 
 	return 0;
