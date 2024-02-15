@@ -2,41 +2,31 @@
 // Paths, static variables
 import path from 'path';
 import { app } from 'electron';
-const MEDIA_EXTENSIONS = ['mp3', 'm4b'];
-const IMG_EXTENSIONS = ['img', 'jpeg', 'jpg', 'png'];
+export const MEDIA_EXTENSIONS = ['mp3', 'm4b'];
+export const IMG_EXTENSIONS = ['img', 'jpeg', 'jpg', 'png'];
 
 // Somewhat Constants -> that are system-generated <OS_TYPICAL> but will function the same.
-const INFO_FOLDER_LOCATION = path.join(app.getPath('appData'), 'Atomic Audiobook Player');
-const SETTINGS_LOCATION = path.join(INFO_FOLDER_LOCATION, 'settings.txt');
-const ELECTRON_CONFIG_LOCATION = path.join(INFO_FOLDER_LOCATION, 'config.txt');
-const LIBRARY_FILE_LOCATION = path.join(INFO_FOLDER_LOCATION, 'library.txt');
-const STATS_FILE_LOCATION = path.join(INFO_FOLDER_LOCATION, 'stats.txt');
-const INFO_LOG_LOCATION = path.join(INFO_FOLDER_LOCATION, 'info.log');
-const ERROR_LOG_LOCATION = path.join(INFO_FOLDER_LOCATION, 'error.log');
-const EXCEPTION_LOG_LOCATION = path.join(INFO_FOLDER_LOCATION, 'exceptions.log');
+export const INFO_FOLDER_LOCATION = path.join(app.getPath('appData'), 'Atomic Audiobook Player');
+export const SETTINGS_LOCATION = path.join(INFO_FOLDER_LOCATION, 'settings.txt');
+export const ELECTRON_CONFIG_LOCATION = path.join(INFO_FOLDER_LOCATION, 'config.txt');
+export const LIBRARY_FILE_LOCATION = path.join(INFO_FOLDER_LOCATION, 'library.txt');
+export const STATS_FILE_LOCATION = path.join(INFO_FOLDER_LOCATION, 'stats.txt');
+export const INFO_LOG_LOCATION = path.join(INFO_FOLDER_LOCATION, 'info.log');
+export const ERROR_LOG_LOCATION = path.join(INFO_FOLDER_LOCATION, 'error.log');
+export const EXCEPTION_LOG_LOCATION = path.join(INFO_FOLDER_LOCATION, 'exceptions.log');
 
-// The below is for response consistency
-// ELECTRON_RESPONSE -> is what React is expecting
-// Response constants from Electron - strings
-// REVIEW -> Remove -> Migrate to shared/constants
-const ELECTRON_RESPONSE_SETTINGSDATA_TYPE = 'settingsData';
-const ELECTRON_RESPONSE_BOOKDATA_TYPE = 'bookData';
-const ELECTRON_RESPONSE_BOOK_DETAILS_TYPE = 'bookDetails';
-const ELECTRON_ERROR = 'error_type';
+// API Request channels
+export const REQUEST_TO_ELECTRON = 'requestToElectron';
+export const RESPONSE_FROM_ELECTRON = 'responseFromElectron';
 
-export {
-	MEDIA_EXTENSIONS,
-	STATS_FILE_LOCATION,
-	EXCEPTION_LOG_LOCATION,
-	IMG_EXTENSIONS,
-	INFO_FOLDER_LOCATION,
-	SETTINGS_LOCATION,
-	ELECTRON_CONFIG_LOCATION,
-	LIBRARY_FILE_LOCATION,
-	INFO_LOG_LOCATION,
-	ERROR_LOG_LOCATION,
-	ELECTRON_RESPONSE_SETTINGSDATA_TYPE,
-	ELECTRON_RESPONSE_BOOKDATA_TYPE,
-	ELECTRON_RESPONSE_BOOK_DETAILS_TYPE,
-	ELECTRON_ERROR
-};
+// API Request types
+export const READ_LIBRARY_FILE = 'readLibraryFile';
+export const READ_SETTINGS_FILE = 'readSettingsFile';
+export const WRITE_SETTINGS_FILE = 'writeSettingsFile';
+export const ADD_BOOK_DIRECTORY = 'addBookDirectory';
+export const SAVE_BOOK_PROGRESS = 'saveBookProgress';
+export const GET_BOOK_COVERS = 'getbookCovers';
+export const ELECTRON_ERROR = 'electronError';
+export const ELECTRON_WARNING = 'electronWarning';
+export const APPEND_BOOKS = 'appendBooks';
+export const GET_BOOK_DETAILS = 'getBookDetails';

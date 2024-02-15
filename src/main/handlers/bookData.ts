@@ -56,6 +56,8 @@ async function getTags(fullFilePath: string): Promise<{ title: string; artist: s
 	}
 }
 
+// REVIEW - This function is not being used
+// Will implement later with a function sun process
 // @ts-ignore
 export async function checkDuplicatesBooks() {
 	const rootDirectories = readAndParseTextFile(SETTINGS_LOCATION).rootDirectories;

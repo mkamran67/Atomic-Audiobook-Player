@@ -1,19 +1,21 @@
 import { Fragment, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+
 
 import { Dialog, Transition } from '@headlessui/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import {
   Bars3BottomLeftIcon, BuildingLibraryIcon, CalendarIcon, Cog6ToothIcon, HomeIcon, XMarkIcon
 } from '@heroicons/react/24/outline';
-import { handleIncomingInformation } from '@renderer/utils/handler';
 
-import {
-  READ_LIBRARY_FILE, READ_SETTINGS_FILE, REQUEST_TO_ELECTRON, RESPONSE_FROM_ELECTRON
-} from '../../../shared/constants';
+
+import { APPEND_BOOKS, ELECTRON_ERROR, ELECTRON_WARNING, GET_BOOK_DETAILS, READ_LIBRARY_FILE, READ_SETTINGS_FILE, REQUEST_TO_ELECTRON, RESPONSE_FROM_ELECTRON } from '@renderer/utils/react_constants';
 import { RootState } from '../store';
 import Loader from './loader/Loader';
+import { ErrorType } from '../../../main/types/util.types';
+import { clearLoading } from './loader/loaderSlice';
+import { setError } from './LayoutSlice';
 
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon },
@@ -26,10 +28,14 @@ function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+
+
 export default function Layout() {
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const loading = useSelector((state: RootState) => state.loader);
   const location = useLocation(); // Used for sidebar active selection
+  const dispatch = useDispatch();
 
   useEffect(() => {
     // Requesting data from Electron -> Listeners
@@ -50,7 +56,44 @@ export default function Layout() {
     );
 
     // Recieve information from Electron -> Listeners
-    window.api.receive(RESPONSE_FROM_ELECTRON, handleIncomingInformation);
+    window.api.receive(RESPONSE_FROM_ELECTRON, async (res) => {
+      const { type, data } = res;
+
+
+      switch (type) {
+        case APPEND_BOOKS: {
+          console.log('👉 -> file: handler.ts:27 -> data:', data);
+          // dispatch(setBooks(data));
+          // dispatch(clearLoading());
+          break;
+        }
+        case READ_SETTINGS_FILE: {
+          console.log('👉 -> file: Layout.tsx:61 -> data:', data);
+          break;
+        }
+        case GET_BOOK_DETAILS: {
+          console.log('👉 -> file: handler.ts:35 -> data:', data);
+          // dispatch(setCurrentBook(data));
+          break;
+        }
+        case ELECTRON_ERROR: {
+          console.log('👉 -> file: Layout.tsx:74 -> data:', data);
+          // dispatch(clearLoading());
+          // dispatch(setError(data));
+          break;
+        }
+        case ELECTRON_WARNING: {
+          console.log('👉 -> file: Layout.tsx:80 -> data:', data);
+          dispatch(clearLoading());
+          dispatch(setError(data));
+          break;
+        }
+        default: {
+          console.log(`You've hit default case in Layout.js ${type}`);
+          break;
+        }
+      }
+    });
 
   }, []);
 

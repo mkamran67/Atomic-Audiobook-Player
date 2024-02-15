@@ -2,18 +2,21 @@ import { dialog } from 'electron';
 import path from 'node:path';
 import {
 	ADD_BOOK_DIRECTORY,
+	APPEND_BOOKS,
+	ELECTRON_ERROR,
+	ELECTRON_WARNING,
 	GET_BOOK_COVERS,
 	READ_LIBRARY_FILE,
 	READ_SETTINGS_FILE,
 	RESPONSE_FROM_ELECTRON,
 	SAVE_BOOK_PROGRESS,
 	WRITE_SETTINGS_FILE
-} from '../../shared/constants';
-import { LIBRARY_FILE_LOCATION, STATS_FILE_LOCATION } from '../electron_constants';
+} from '../electron_constants';
+import { INFO_FOLDER_LOCATION, LIBRARY_FILE_LOCATION, STATS_FILE_LOCATION } from '../electron_constants';
 import { checkIfFileExists } from '../utils/diskReader';
 import { writeToDisk, writeToDiskAsync } from '../utils/diskWriter';
 import logger from '../utils/logger';
-import { checkDuplicatesBooks, searchDirectoryForBooks } from './bookData';
+import { searchDirectoryForBooks } from './bookData';
 import { checkForDuplicateRootDirectories, handleSettings } from './settings';
 
 export interface RequestFromReactType {
@@ -70,7 +73,7 @@ async function handleRendererRequest(event: any, request: RequestFromReactType) 
 				});
 
 				if (canceled) {
-					event.reply(RESPONSE_FROM_ELECTRON, { type: 'error', data: 'Cancelled directory selection.' });
+					event.reply(RESPONSE_FROM_ELECTRON, { type: ELECTRON_WARNING, data: 'Cancelled directory selection.' });
 					return;
 				}
 
@@ -79,7 +82,7 @@ async function handleRendererRequest(event: any, request: RequestFromReactType) 
 				// 1. Add the new rootDirectory to the settings file
 				if (checkForDuplicateRootDirectories(rootDirPath)) {
 					logger.error(`Directory already exists : ${rootDirPath}`);
-					event.reply(RESPONSE_FROM_ELECTRON, { type: 'error', data: 'Directory already exists.' });
+					event.reply(RESPONSE_FROM_ELECTRON, { type: ELECTRON_WARNING, data: 'Directory already exists.' });
 					break;
 				}
 
@@ -93,17 +96,9 @@ async function handleRendererRequest(event: any, request: RequestFromReactType) 
 					await handleSettings('update', { rootDirectories: filePaths });
 					await writeToDiskAsync(LIBRARY_FILE_LOCATION, listOfbooks, true);
 					// 4. Return the new book files
-					event.reply(RESPONSE_FROM_ELECTRON, { type: 'newBooks', data: listOfbooks });
+					event.reply(RESPONSE_FROM_ELECTRON, { type: APPEND_BOOKS, data: listOfbooks });
 				} else {
-					event.reply(RESPONSE_FROM_ELECTRON, { type: 'warning', data: 'No books found in directory.' });
-				}
-
-				const res = await checkDuplicatesBooks();
-
-				if (!res.error) {
-					event.reply(RESPONSE_FROM_ELECTRON, { type: 'newBooks', data: res });
-				} else {
-					event.reply(RESPONSE_FROM_ELECTRON, res);
+					event.reply(RESPONSE_FROM_ELECTRON, { type: ELECTRON_WARNING, data: 'No books found in directory.' });
 				}
 
 				break;
@@ -118,6 +113,10 @@ async function handleRendererRequest(event: any, request: RequestFromReactType) 
 			}
 			default: {
 				console.log(`You've hit default case in handleRendererRequest with type: ${type} and data: ${data}`);
+				event.reply(RESPONSE_FROM_ELECTRON, {
+					type: ELECTRON_ERROR,
+					data: `Whoa! Something went wrong! Check logs ${INFO_FOLDER_LOCATION}`
+				});
 				break;
 			}
 		}

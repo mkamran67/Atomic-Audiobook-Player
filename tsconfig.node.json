@@ -5,7 +5,8 @@
 		"src/main/**/*",
 		"src/preload/**/*",
 		"src/types/*",
-		"src/main/utils/dupeScript.ts"
+		"src/main/utils/dupeScript.ts",
+		"src/shared/**/*"
 	],
 	"compilerOptions": {
 		"composite": true,

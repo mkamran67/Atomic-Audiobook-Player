@@ -1,4 +1,7 @@
 {
-	"files": ["src/shared/constants.ts", "src/main/utils/dupeScript.ts"],
+	"compilerOptions": {
+		"isolatedModules": true,
+		"listFiles": true
+	},
 	"references": [{ "path": "./tsconfig.node.json" }, { "path": "./tsconfig.web.json" }]
 }
