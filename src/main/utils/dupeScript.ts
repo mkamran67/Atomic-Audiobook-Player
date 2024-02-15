@@ -1,17 +1,19 @@
-import { BookData } from '../../renderer/src/types/library.types';
+// import { BookData } from '../../renderer/src/types/library.types';
 import { LIBRARY_FILE_LOCATION } from '../electron_constants';
 import { readAndParseTextFile } from './diskReader';
 
-type DuplicateBooksType = {
-	title: {
-		index: number[];
-		dirPaths: string[];
-	};
-};
+// type DuplicateBooksType = {
+// 	title: {
+// 		index: number[];
+// 		dirPaths: string[];
+// 	};
+// };
 
 async function checkDuplicatesScript() {
-	const bookList: BookData[] = await readAndParseTextFile(LIBRARY_FILE_LOCATION);
-	let duplicateBooks: DuplicateBooksType | {} = {}; // Initialize duplicateBooks as an empty object
+	const bookList = await readAndParseTextFile(LIBRARY_FILE_LOCATION);
+	let duplicateBooks = {}; // Initialize duplicateBooks as an empty object
+	// const bookList: BookData[] = await readAndParseTextFile(LIBRARY_FILE_LOCATION);
+	// let duplicateBooks: DuplicateBooksType | {} = {}; // Initialize duplicateBooks as an empty object
 
 	for (let index = 0; index < bookList.length; index++) {
 		// Check if object has the book
@@ -31,7 +33,12 @@ async function checkDuplicatesScript() {
 
 async function main() {
 	console.log('\n\n\n👉 -> file: dupeScript.ts:34 -> argv:', process.argv);
-	// const libraryPath = process.argv[2];
+
+	process.parentPort.once('message', (e) => {
+		const [port] = e.ports;
+
+		port.postMessage({ message: 'hello -bing bing' });
+	});
 
 	return 0;
 }

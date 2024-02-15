@@ -11,7 +11,7 @@ import {
 } from '../electron_constants';
 import { directorySearch, readAndParseTextFile } from '../utils/diskReader';
 import { writeToDiskAsync } from '../utils/diskWriter';
-import spawnAsync from '../utils/childProcesses';
+import { forkAsync } from '../utils/childProcesses';
 import logger from '../utils/logger';
 
 export default function getSimpleBookData() {
@@ -56,18 +56,19 @@ async function getTags(fullFilePath: string): Promise<{ title: string; artist: s
 	}
 }
 
+// @ts-ignore
 export async function checkDuplicatesBooks() {
 	const rootDirectories = readAndParseTextFile(SETTINGS_LOCATION).rootDirectories;
 
 	if (rootDirectories.length > 0) {
 		try {
 			const scriptPath = path.join(__dirname, '..', 'utils', 'dupeScript.ts');
-			console.log('\n\n\n👉 -> file: bookData.ts:65 -> scriptPath:', scriptPath);
-			const args = [scriptPath, LIBRARY_FILE_LOCATION];
+			const argvs = [LIBRARY_FILE_LOCATION];
 
-			const results = await spawnAsync('node', args);
-			console.log('👉 -> file: bookData.ts:68 -> results:', results);
-			logger.info('Checking Duplicates Done.');
+			const results = await forkAsync(scriptPath, argvs);
+			logger.info('Checking Duplicates...');
+
+			return results;
 		} catch (error) {
 			logger.error('Error in checkDuplicatesBooks');
 		}
