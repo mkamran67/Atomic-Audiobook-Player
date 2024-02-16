@@ -40,7 +40,7 @@ function GalleryView({ books }: Props) {
             return (
               <li key={`book-${counter}`}>
                 <BookCard
-                  artist={book.artist}
+                  author={book.author}
                   title={book.title}
                   bookPath={book.dirPath}
                   image={book.cover}

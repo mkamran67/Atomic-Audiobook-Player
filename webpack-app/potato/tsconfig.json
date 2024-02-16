@@ -6,15 +6,26 @@
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "isolatedModules": true,
     "noImplicitAny": true,
     "sourceMap": true,
-    "baseUrl": ".",
     "outDir": "dist",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
+
+// "@renderer/assets": ["./src/renderer/src/assets/*"],
+// "@renderer/components": ["./src/renderer/src/components/*"],
+// "@renderer/types": ["./src/renderer/src/types/*"],
+// "@renderer/utils": ["./src/renderer/src/utils/*"],
+// "@main": ["./src/main/*"],
+// "@main/handlers": ["./src/main/handlers/*"],
+// "@main/types": ["./src/main/types/*"],
+// "@main/utils": ["./src/main/utils/*"],

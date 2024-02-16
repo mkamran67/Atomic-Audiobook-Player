@@ -38,4 +38,9 @@ export const rules: Required<ModuleOptions>['rules'] = [
       },
     },
   },
+  {
+    test: /\.(png|jpg|gif|svg|glb)$/,
+    type: 'asset/resource'
+  }
+
 ];

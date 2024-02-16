@@ -11,7 +11,7 @@ import { readAndParseTextFile } from './diskReader';
 
 async function checkDuplicatesScript() {
 	const bookList = await readAndParseTextFile(LIBRARY_FILE_LOCATION);
-	let duplicateBooks = {}; // Initialize duplicateBooks as an empty object
+	let duplicateBooks: any = {}; // Initialize duplicateBooks as an empty object
 	// const bookList: BookData[] = await readAndParseTextFile(LIBRARY_FILE_LOCATION);
 	// let duplicateBooks: DuplicateBooksType | {} = {}; // Initialize duplicateBooks as an empty object
 

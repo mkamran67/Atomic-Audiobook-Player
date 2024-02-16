@@ -1,21 +1,18 @@
 import { Fragment, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link, Outlet, useLocation } from 'react-router-dom';
-
-
-import { Dialog, Transition } from '@headlessui/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import {
   Bars3BottomLeftIcon, BuildingLibraryIcon, CalendarIcon, Cog6ToothIcon, HomeIcon, XMarkIcon
 } from '@heroicons/react/24/outline';
-
-
-import { APPEND_BOOKS, ELECTRON_ERROR, ELECTRON_WARNING, GET_BOOK_DETAILS, READ_LIBRARY_FILE, READ_SETTINGS_FILE, REQUEST_TO_ELECTRON, RESPONSE_FROM_ELECTRON } from '@renderer/utils/react_constants';
+import { APPEND_BOOKS, ELECTRON_ERROR, ELECTRON_WARNING, GET_BOOK_DETAILS, READ_LIBRARY_FILE, READ_SETTINGS_FILE, REQUEST_TO_ELECTRON, RESPONSE_FROM_ELECTRON } from '../../../shared/constants';
 import { RootState } from '../store';
-import Loader from './loader/Loader';
-import { ErrorType } from '../../../main/types/util.types';
-import { clearLoading } from './loader/loaderSlice';
+import { IncomingElectronResponseType } from '../types/layout.types';
 import { setError } from './LayoutSlice';
+import Loader from './loader/Loader';
+import { clearLoading } from './loader/loaderSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Dialog, Transition } from '@headlessui/react';
+
 
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon },
@@ -55,8 +52,10 @@ export default function Layout() {
       }
     );
 
+
+
     // Recieve information from Electron -> Listeners
-    window.api.receive(RESPONSE_FROM_ELECTRON, async (res) => {
+    window.api.receive(RESPONSE_FROM_ELECTRON, async (res: IncomingElectronResponseType) => {
       const { type, data } = res;
 
 

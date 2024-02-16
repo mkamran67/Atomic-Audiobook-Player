@@ -1,12 +1,10 @@
-import default_img from "../../assets/default-book-cover.jpg";
-// import default_img from "images/default-book-cover.jpg";
-
+import default_img from '../../assets/default-book-cover.jpg';
 
 type Props = {
   title: string;
   image: string | undefined;
   bookPath: string;
-  artist: string;
+  author: string;
   setPlaying: (arg0: any, arg1: string) => void;
 };
 

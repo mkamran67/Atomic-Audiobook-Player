@@ -1,7 +1,7 @@
 import { net } from 'electron';
 import path from 'path';
 
-export const getFileFromDisk = async (request) => {
+export const getFileFromDisk = async (request: any) => {
 	console.log('👉 -> file: index.ts:62 -> request:', request.url);
 
 	try {

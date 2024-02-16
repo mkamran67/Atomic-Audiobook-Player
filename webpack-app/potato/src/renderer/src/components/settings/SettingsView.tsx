@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../loader/loaderSlice";
 import { RootState } from "../../store";
 import SettingsButton from "./SettingsButton";
-import { ADD_BOOK_DIRECTORY, REQUEST_TO_ELECTRON } from "@renderer/utils/react_constants";
+import { ADD_BOOK_DIRECTORY, REQUEST_TO_ELECTRON } from "../../../../shared/constants";
 
 
 export default function SettingsView() {

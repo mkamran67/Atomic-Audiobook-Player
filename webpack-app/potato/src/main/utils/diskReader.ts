@@ -86,7 +86,7 @@ async function getAllDetailsOfAMediaFile(
 
 					totalSize += statSync(mediaPath).size;
 					// REVIEW - Fix the duration of the audio file
-					await getAudioDurationInSeconds(mediaPath).then((duration) => {
+					await getAudioDurationInSeconds(mediaPath).then((duration: number) => {
 						currentChapterLength = duration;
 						console.log('👉 -> file: utils.ts:248 -> currentChapterLength:', currentChapterLength);
 					});
@@ -136,7 +136,7 @@ async function getChapterDetails(
 		let currentChapterLength = 0;
 
 		totalSize += statSync(mediaPath).size;
-		await getAudioDurationInSeconds(mediaPath).then((duration) => {
+		await getAudioDurationInSeconds(mediaPath).then((duration: number) => {
 			currentChapterLength = duration;
 		});
 

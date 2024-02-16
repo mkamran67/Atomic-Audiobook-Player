@@ -11,7 +11,7 @@ import {
 	RESPONSE_FROM_ELECTRON,
 	SAVE_BOOK_PROGRESS,
 	WRITE_SETTINGS_FILE
-} from '../electron_constants';
+} from '../../shared/constants';
 import { INFO_FOLDER_LOCATION, LIBRARY_FILE_LOCATION, STATS_FILE_LOCATION } from '../electron_constants';
 import { checkIfFileExists } from '../utils/diskReader';
 import { writeToDisk, writeToDiskAsync } from '../utils/diskWriter';
@@ -28,7 +28,7 @@ export function createLibraryFile(): boolean {
 	if (checkIfFileExists(LIBRARY_FILE_LOCATION)) {
 		return true;
 	} else {
-		const emptyLibraryFile = [];
+		let emptyLibraryFile: unknown;
 
 		writeToDisk(LIBRARY_FILE_LOCATION, emptyLibraryFile);
 		return true;

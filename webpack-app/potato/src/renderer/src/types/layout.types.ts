@@ -3,3 +3,9 @@ export interface LayoutState {
   loading: boolean
   message?: string
 }
+
+
+export type IncomingElectronResponseType {
+  type: string
+  data: any
+}
