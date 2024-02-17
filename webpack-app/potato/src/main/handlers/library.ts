@@ -98,7 +98,9 @@ async function handleRendererRequest(event: any, request: RequestFromReactType) 
 					// 4. Return the new book files
 					event.reply(RESPONSE_FROM_ELECTRON, { type: APPEND_BOOKS, data: listOfbooks });
 				} else {
-					event.reply(RESPONSE_FROM_ELECTRON, { type: ELECTRON_WARNING, data: 'No books found in directory.' });
+					event.reply(RESPONSE_FROM_ELECTRON, {
+						type: ELECTRON_WARNING, data: 'No books found in directory.'
+					});
 				}
 
 				break;

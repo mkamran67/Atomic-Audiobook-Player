@@ -1,14 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit'
-import LayoutSlice from './components/LayoutSlice'
-import loadingSlice from './components/loader/loaderSlice'
-import playerSlice from './components/player/playerSlice'
-import settingsSlice from './components/settings/settingsSlice'
-import booksSlice from './components/library/booksSlice'
+import loadingSlice from './slices/loaderSlice'
+import playerSlice from './slices/playerSlice'
+import settingsSlice from '../components/settings/settingsSlice'
+import booksSlice from './slices/booksSlice'
+import layoutSlice from './slices/layoutSlice'
 
 const store = configureStore({
   reducer: {
     library: booksSlice,
-    layout: LayoutSlice,
+    layout: layoutSlice,
     loader: loadingSlice,
     player: playerSlice,
     settings: settingsSlice

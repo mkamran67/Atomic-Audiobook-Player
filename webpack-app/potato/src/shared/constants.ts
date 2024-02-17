@@ -13,5 +13,7 @@ export const SAVE_BOOK_PROGRESS = 'saveBookProgress';
 export const GET_BOOK_COVERS = 'getbookCovers';
 export const ELECTRON_ERROR = 'electronError';
 export const ELECTRON_WARNING = 'electronWarning';
+export const ELECTRON_INFO = 'electronInfo';
 export const APPEND_BOOKS = 'appendBooks';
 export const GET_BOOK_DETAILS = 'getBookDetails';
+export const REACT_ERROR = 'reactError';

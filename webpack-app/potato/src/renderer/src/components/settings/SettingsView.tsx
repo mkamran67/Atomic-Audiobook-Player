@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
-import { setLoading } from "../loader/loaderSlice";
-import { RootState } from "../../store";
+import { setLoading } from "../../state/slices/loaderSlice";
+import { RootState } from "../../state/store";
 import SettingsButton from "./SettingsButton";
 import { ADD_BOOK_DIRECTORY, REQUEST_TO_ELECTRON } from "../../../../shared/constants";
 

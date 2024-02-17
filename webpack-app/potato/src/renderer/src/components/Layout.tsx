@@ -1,17 +1,23 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import {
-  Bars3BottomLeftIcon, BuildingLibraryIcon, CalendarIcon, Cog6ToothIcon, HomeIcon, XMarkIcon
+  Bars3BottomLeftIcon,
+  BuildingLibraryIcon,
+  CalendarIcon,
+  Cog6ToothIcon,
+  HomeIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
-import { APPEND_BOOKS, ELECTRON_ERROR, ELECTRON_WARNING, GET_BOOK_DETAILS, READ_LIBRARY_FILE, READ_SETTINGS_FILE, REQUEST_TO_ELECTRON, RESPONSE_FROM_ELECTRON } from '../../../shared/constants';
-import { RootState } from '../store';
-import { IncomingElectronResponseType } from '../types/layout.types';
-import { setError } from './LayoutSlice';
-import Loader from './loader/Loader';
-import { clearLoading } from './loader/loaderSlice';
+import { Fragment, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Dialog, Transition } from '@headlessui/react';
+import { APPEND_BOOKS, ELECTRON_ERROR, ELECTRON_INFO, ELECTRON_WARNING, GET_BOOK_DETAILS, READ_LIBRARY_FILE, READ_SETTINGS_FILE, REQUEST_TO_ELECTRON, RESPONSE_FROM_ELECTRON } from '../../../shared/constants';
+import { clearLoading } from '../state/slices/loaderSlice';
+import { RootState } from '../state/store';
+import Loader from './loader/Loader';
+import Notifications from './notifications/Notifications';
+import { IncomingElectronResponseType } from '../types/layout.types';
+import { clearError, setError } from '../state/slices/layoutSlice';
 
 
 const navigation = [
@@ -25,12 +31,16 @@ function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-
-
 export default function Layout() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const loading = useSelector((state: RootState) => state.loader);
+  const { error, type, message } = useSelector((state: RootState) => state.layout);
+  console.log("👉 -> file: Layout.tsx:39 -> message:", message);
+  console.log("👉 -> file: Layout.tsx:39 -> type:", type);
+  console.log("👉 -> file: Layout.tsx:39 -> error:", error);
+
+
   const location = useLocation(); // Used for sidebar active selection
   const dispatch = useDispatch();
 
@@ -51,8 +61,6 @@ export default function Layout() {
         payload: null
       }
     );
-
-
 
     // Recieve information from Electron -> Listeners
     window.api.receive(RESPONSE_FROM_ELECTRON, async (res: IncomingElectronResponseType) => {
@@ -77,14 +85,29 @@ export default function Layout() {
         }
         case ELECTRON_ERROR: {
           console.log('👉 -> file: Layout.tsx:74 -> data:', data);
-          // dispatch(clearLoading());
-          // dispatch(setError(data));
+          dispatch(clearLoading());
+          dispatch(setError({ error: true, type: 'error', message: data }));
+          // setTimeout(() => {
+          //   dispatch(clearError());
+          // }, 5000);
           break;
         }
         case ELECTRON_WARNING: {
           console.log('👉 -> file: Layout.tsx:80 -> data:', data);
           dispatch(clearLoading());
-          dispatch(setError(data));
+          dispatch(setError({ error: true, type: 'warning', message: data }));
+          // setTimeout(() => {
+          //   dispatch(clearError());
+          // }, 5000);
+          break;
+        }
+        case ELECTRON_INFO: {
+          console.log('👉 -> file: Layout.tsx:80 -> data:', data);
+          dispatch(clearLoading());
+          dispatch(setError({ error: true, type: 'info', message: data }));
+          // setTimeout(() => {
+          //   dispatch(clearError());
+          // }, 5000);
           break;
         }
         default: {
@@ -115,7 +138,6 @@ export default function Layout() {
               >
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-75" />
               </Transition.Child>
-
               <div className="fixed inset-0 z-40 flex">
                 <Transition.Child
                   as={Fragment}

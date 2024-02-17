@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import ChapterSelector from "./ChapterSelector";
-import { RootState } from "../../store";
+import { RootState } from "../../state/store";
 import { MinimumChapterDetails } from "../../types/book.types";
 import ButtonGroup from "./ButtonGroup";
 
