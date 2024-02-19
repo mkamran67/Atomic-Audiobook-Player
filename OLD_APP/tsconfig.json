@@ -1,7 +1,0 @@
-{
-	"compilerOptions": {
-		"isolatedModules": true,
-		"listFiles": true
-	},
-	"references": [{ "path": "./tsconfig.node.json" }, { "path": "./tsconfig.web.json" }]
-}
