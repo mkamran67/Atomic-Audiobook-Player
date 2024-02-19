@@ -16,6 +16,7 @@
     "name": "Muhammad Kamran",
     "email": "mkamran1967@gmail.com"
   },
+  "devContentSecurityPolicy": "default-src 'self' 'unsafe-eval' 'unsafe-inline' http://localhost:* ws://localhost:*;",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.23.9",
@@ -59,6 +60,7 @@
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.1.1",
     "@reduxjs/toolkit": "^2.2.1",
+    "@tailwindcss/forms": "^0.5.7",
     "daisyui": "^4.7.2",
     "electron-squirrel-startup": "^1.0.0",
     "get-audio-duration": "^4.0.1",

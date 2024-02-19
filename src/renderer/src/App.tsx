@@ -1,6 +1,6 @@
 
 import { Provider } from 'react-redux';
-import { createHashRouter, RouterProvider } from 'react-router-dom';
+import { createHashRouter, createMemoryRouter, HashRouter, Route, RouterProvider, Routes } from 'react-router-dom';
 
 import Layout from './components/layout/Layout';
 import ErrorPage from './components/pages/ErrorPage';
@@ -10,12 +10,15 @@ import Settings from './components/pages/Settings';
 import Stats from './components/pages/Stats';
 import Player from './components/player/Player';
 import store from './state/store';
+import Loader from './components/loader/Loader';
+
 
 const router = createHashRouter([
   {
     path: "/",
     element: <Layout />,
     errorElement: <ErrorPage />,
+    loader: Loader,
     children: [
       {
         path: "/",
@@ -42,7 +45,6 @@ function App(): JSX.Element {
     <div className="App">
       <Provider store={store}>
         <RouterProvider router={router} />
-        <Player />
       </Provider>
     </div>
   );

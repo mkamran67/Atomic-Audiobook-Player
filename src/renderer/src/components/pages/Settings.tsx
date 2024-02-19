@@ -1,5 +1,5 @@
 import SettingsView from "../settings/SettingsView";
 
 export default function Settings() {
-  return <SettingsView />;
+  return <div>Settings</div>
 }
