@@ -5,8 +5,15 @@ import {
   BuildingLibraryIcon,
   CalendarIcon, Cog6ToothIcon, HomeIcon, XMarkIcon
 } from '@heroicons/react/24/outline';
-import { Fragment, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import appLogo from '../../assets/app-icon.png'
+import Breadcrumbs from './Breadcrumbs';
+import { APPEND_BOOKS, ELECTRON_ERROR, ELECTRON_INFO, ELECTRON_WARNING, GET_BOOK_DETAILS, READ_LIBRARY_FILE, READ_SETTINGS_FILE, REQUEST_TO_ELECTRON, RESPONSE_FROM_ELECTRON } from '../../../../shared/constants';
+import { IncomingElectronResponseType } from '../../types/layout.types';
+import { clearLoading } from '../../state/slices/loaderSlice';
+import { useDispatch } from 'react-redux';
+import { setError } from '../../state/slices/layoutSlice';
 
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon, current: false },
@@ -37,87 +44,86 @@ function classNames(...classes: any[]) {
 export default function Layout() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const dispatch = useDispatch();
   // const loading = useSelector((state: RootState) => state.loader);
   // const { error, type, message } = useSelector((state: RootState) => state.layout);
 
   // const dispatch = useDispatch();
   const location = useLocation().pathname;
 
+  useEffect(() => {
+    // Requesting data from Electron -> Listeners
+    window.api.send(
+      REQUEST_TO_ELECTRON,
+      {
+        type: READ_LIBRARY_FILE,
+        payload: null
+      }
+    );
 
-  // useEffect(() => {
-  //   // Requesting data from Electron -> Listeners
-  //   window.api.send(
-  //     REQUEST_TO_ELECTRON,
-  //     {
-  //       type: READ_LIBRARY_FILE,
-  //       payload: null
-  //     }
-  //   );
+    window.api.send(
+      RESPONSE_FROM_ELECTRON,
+      {
+        type: READ_SETTINGS_FILE,
+        payload: null
+      }
+    );
 
-  //   window.api.send(
-  //     RESPONSE_FROM_ELECTRON,
-  //     {
-  //       type: READ_SETTINGS_FILE,
-  //       payload: null
-  //     }
-  //   );
-
-  //   // Recieve information from Electron -> Listeners
-  //   window.api.receive(RESPONSE_FROM_ELECTRON, async (res: IncomingElectronResponseType) => {
-  //     const { type, data } = res;
+    // Recieve information from Electron -> Listeners
+    window.api.receive(RESPONSE_FROM_ELECTRON, async (res: IncomingElectronResponseType) => {
+      const { type, data } = res;
 
 
-  //     switch (type) {
-  //       case APPEND_BOOKS: {
-  //         console.log('👉 -> file: handler.ts:27 -> data:', data);
-  //         // dispatch(setBooks(data));
-  //         // dispatch(clearLoading());
-  //         break;
-  //       }
-  //       case READ_SETTINGS_FILE: {
-  //         console.log('👉 -> file: Layout.tsx:61 -> data:', data);
-  //         break;
-  //       }
-  //       case GET_BOOK_DETAILS: {
-  //         console.log('👉 -> file: handler.ts:35 -> data:', data);
-  //         // dispatch(setCurrentBook(data));
-  //         break;
-  //       }
-  //       case ELECTRON_ERROR: {
-  //         console.log('👉 -> file: Layout.tsx:74 -> data:', data);
-  //         dispatch(clearLoading());
-  //         dispatch(setError({ error: true, type: 'error', message: data }));
-  //         // setTimeout(() => {
-  //         //   dispatch(clearError());
-  //         // }, 5000);
-  //         break;
-  //       }
-  //       case ELECTRON_WARNING: {
-  //         console.log('👉 -> file: Layout.tsx:80 -> data:', data);
-  //         dispatch(clearLoading());
-  //         dispatch(setError({ error: true, type: 'warning', message: data }));
-  //         // setTimeout(() => {
-  //         //   dispatch(clearError());
-  //         // }, 5000);
-  //         break;
-  //       }
-  //       case ELECTRON_INFO: {
-  //         console.log('👉 -> file: Layout.tsx:80 -> data:', data);
-  //         dispatch(clearLoading());
-  //         dispatch(setError({ error: true, type: 'info', message: data }));
-  //         // setTimeout(() => {
-  //         //   dispatch(clearError());
-  //         // }, 5000);
-  //         break;
-  //       }
-  //       default: {
-  //         console.log(`You've hit default case in Layout.js ${type}`);
-  //         break;
-  //       }
-  //     }
-  //   });
-
-  // }, []);
+      switch (type) {
+        case APPEND_BOOKS: {
+          console.log('👉 -> file: handler.ts:27 -> data:', data);
+          // dispatch(setBooks(data));
+          // dispatch(clearLoading());
+          break;
+        }
+        case READ_SETTINGS_FILE: {
+          console.log('👉 -> file: Layout.tsx:61 -> data:', data);
+          break;
+        }
+        case GET_BOOK_DETAILS: {
+          console.log('👉 -> file: handler.ts:35 -> data:', data);
+          // dispatch(setCurrentBook(data));
+          break;
+        }
+        case ELECTRON_ERROR: {
+          console.log('👉 -> file: Layout.tsx:74 -> data:', data);
+          dispatch(clearLoading());
+          dispatch(setError({ error: true, type: 'error', message: data }));
+          // setTimeout(() => {
+          //   dispatch(clearError());
+          // }, 5000);
+          break;
+        }
+        case ELECTRON_WARNING: {
+          console.log('👉 -> file: Layout.tsx:80 -> data:', data);
+          dispatch(clearLoading());
+          dispatch(setError({ error: true, type: 'warning', message: data }));
+          // setTimeout(() => {
+          //   dispatch(clearError());
+          // }, 5000);
+          break;
+        }
+        case ELECTRON_INFO: {
+          console.log('👉 -> file: Layout.tsx:80 -> data:', data);
+          dispatch(clearLoading());
+          dispatch(setError({ error: true, type: 'info', message: data }));
+          // setTimeout(() => {
+          //   dispatch(clearError());
+          // }, 5000);
+          break;
+        }
+        default: {
+          console.log(`You've hit default case in Layout.js ${type}`);
+          break;
+        }
+      }
+    });
+  }, []);
 
   return (
     <>
@@ -127,10 +133,11 @@ export default function Layout() {
           {/* Icon */}
           <div className="flex items-center h-16 shrink-0">
             <img
-              className="w-auto h-8"
-              src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
-              alt="Your Company"
+              className="w-12 h-auto cursor-default "
+              src={appLogo}
+              alt="Atomic Audiobook Player Logo"
             />
+            <p className='cursor-default'>Atomic Audiobook Player</p>
           </div>
           <nav className="flex flex-col flex-1">
             <ul role="list" className="flex flex-col flex-1 gap-y-7">
@@ -210,24 +217,14 @@ export default function Layout() {
           <h1 className="sr-only">Account Settings</h1>
           <header className="border-b border-white/5">
             {/* Secondary navigation */}
-            <nav className="flex py-4 overflow-x-auto">
-              <ul
-                role="list"
-                className="flex flex-none min-w-full px-4 text-sm font-semibold leading-6 text-gray-400 gap-x-6 sm:px-6 lg:px-8"
-              >
-                {secondaryNavigation.map((item) => (
-                  <li key={item.name}>
-                    <Link to={item.href} className={item.current ? 'text-indigo-400' : ''}>
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            {/* TODO -> Implement with folders or something */}
+            {/* <Breadcrumbs /> */}
           </header>
+          {/* CONTENT */}
           <div className="divide-y divide-white/5">
-            {/* CONTENT */}
-            <Outlet />
+            <div className='m-2'>
+              <Outlet />
+            </div>
           </div>
         </main>
       </div>
