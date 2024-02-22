@@ -1,5 +1,3 @@
-// REVIEW -> WIll Figure out how to do
-
 // API Request channels
 export const REQUEST_TO_ELECTRON = 'requestToElectron';
 export const RESPONSE_FROM_ELECTRON = 'responseFromElectron';
@@ -17,3 +15,5 @@ export const ELECTRON_INFO = 'electronInfo';
 export const APPEND_BOOKS = 'appendBooks';
 export const GET_BOOK_DETAILS = 'getBookDetails';
 export const REACT_ERROR = 'reactError';
+
+

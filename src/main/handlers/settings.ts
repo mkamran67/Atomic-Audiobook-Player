@@ -4,14 +4,9 @@ import { checkIfFileExists, readAndParseTextFile } from '../utils/diskReader';
 import { writeToDisk } from '../utils/diskWriter';
 import { BookData } from '../../renderer/src/types/library.types';
 import logger from '../utils/logger';
+import { SettingsStructureType } from '../../../src/shared/constants';
 
-export interface SettingsStructureType {
-	rootDirectories: string[];
-	theme?: string;
-	themeMode: 'dark' | 'light' | 'system';
-	fontSize?: number;
-	previoousBookDirectory: string;
-}
+
 
 async function saveSettings(data: SettingsStructureType) {
 	try {

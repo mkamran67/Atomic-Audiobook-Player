@@ -31,6 +31,14 @@ function classNames(...classes: string[]) {
 }
 
 export default function Settings() {
+
+  // Handle saves
+  // Read updates from Redux
+
+
+
+
+
   return (
     <>
       <div className="pt-16 mx-auto max-w-7xl lg:flex lg:gap-x-16 lg:px-8">
@@ -54,7 +62,7 @@ export default function Settings() {
               </ul>
               <div className="flex pt-6 border-t border-gray-700">
                 <button type="button" className="text-sm font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
-                  <span aria-hidden="true">+</span> Add another directory
+                  + Add another directory
                 </button>
               </div>
             </section>

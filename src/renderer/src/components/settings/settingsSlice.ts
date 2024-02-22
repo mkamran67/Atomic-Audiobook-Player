@@ -1,7 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { SettingsStructureType } from '../../../../shared/types'
 
-const initialState = {
-  volume: 100
+const initialState: SettingsStructureType = {
+  volume: 100,
+  themeMode: 'system',
+  previoousBookDirectory: '',
+  rootDirectories: []
 }
 
 const settingsSlice = createSlice({
