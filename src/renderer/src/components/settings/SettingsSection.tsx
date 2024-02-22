@@ -1,4 +1,6 @@
 import React from 'react'
+import { RootState } from '../../state/store';
+import { useSelector } from 'react-redux';
 
 type SectionProperties = {
   mainText: string,
@@ -25,6 +27,7 @@ type Props = {
 function SettingsSection({ settingSections }: Props) {
 
   const { sectionTitle, sectionDescription, sectionAction, sectionProperties, sectionBtnText } = settingSections;
+
 
   return (
     <section>

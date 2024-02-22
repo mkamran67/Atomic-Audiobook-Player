@@ -4,7 +4,7 @@ import { checkIfFileExists, readAndParseTextFile } from '../utils/diskReader';
 import { writeToDisk } from '../utils/diskWriter';
 import { BookData } from '../../renderer/src/types/library.types';
 import logger from '../utils/logger';
-import { SettingsStructureType } from '../../../src/shared/constants';
+import { SettingsStructureType } from '../../../src/shared/types';
 
 
 
@@ -40,7 +40,8 @@ export function createSettingsFile(): boolean {
 		const emptySettingsFile: SettingsStructureType = {
 			rootDirectories: [],
 			themeMode: 'system',
-			previoousBookDirectory: ''
+			previoousBookDirectory: '',
+			volume: 100
 		};
 
 		if (checkIfFileExists(SETTINGS_LOCATION)) {

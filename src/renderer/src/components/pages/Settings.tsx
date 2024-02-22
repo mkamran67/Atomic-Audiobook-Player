@@ -10,6 +10,8 @@ import {
   UsersIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../state/store'
 
 const navigation = [
   { name: 'Home', href: '#' },
@@ -34,7 +36,13 @@ export default function Settings() {
 
   // Handle saves
   // Read updates from Redux
-
+  const {
+    previoousBookDirectory,
+    rootDirectories,
+    themeMode,
+    volume,
+    fontSize
+  } = useSelector((state: RootState) => state.settings)
 
 
 
