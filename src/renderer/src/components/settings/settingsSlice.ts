@@ -4,9 +4,10 @@ import { SettingsStructureType } from '../../../../shared/types'
 const initialState: SettingsStructureType = {
   volume: 100,
   themeMode: 'system',
-  previoousBookDirectory: '',
+  previousBookDirectory: '',
   rootDirectories: []
 }
+
 
 const settingsSlice = createSlice({
   name: 'settings',
@@ -17,9 +18,12 @@ const settingsSlice = createSlice({
         ...state,
         ...payload
       }
+    },
+    resetSettings: () => {
+      return initialState
     }
   }
 })
 
-export const { setSettings } = settingsSlice.actions
+export const { setSettings, resetSettings } = settingsSlice.actions
 export default settingsSlice.reducer

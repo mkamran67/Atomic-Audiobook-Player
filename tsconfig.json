@@ -12,6 +12,7 @@
     "outDir": "dist",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "lib": ["ES6", "DOM", "DOM.Iterable"],
     "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*"]
@@ -20,12 +21,3 @@
   "include": ["./src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
-
-// "@renderer/assets": ["./src/renderer/src/assets/*"],
-// "@renderer/components": ["./src/renderer/src/components/*"],
-// "@renderer/types": ["./src/renderer/src/types/*"],
-// "@renderer/utils": ["./src/renderer/src/utils/*"],
-// "@main": ["./src/main/*"],
-// "@main/handlers": ["./src/main/handlers/*"],
-// "@main/types": ["./src/main/types/*"],
-// "@main/utils": ["./src/main/utils/*"],

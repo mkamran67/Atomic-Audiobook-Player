@@ -40,7 +40,7 @@ export function createSettingsFile(): boolean {
 		const emptySettingsFile: SettingsStructureType = {
 			rootDirectories: [],
 			themeMode: 'system',
-			previoousBookDirectory: '',
+			previousBookDirectory: '',
 			volume: 100
 		};
 
