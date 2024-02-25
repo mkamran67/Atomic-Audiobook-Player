@@ -13,7 +13,7 @@ import {
 	WRITE_SETTINGS_FILE
 } from '../../shared/constants';
 import { INFO_FOLDER_LOCATION, LIBRARY_FILE_LOCATION, STATS_FILE_LOCATION } from '../electron_constants';
-import { checkIfFileExists } from '../utils/diskReader';
+import { checkIfFileExists, readAndParseTextFile } from '../utils/diskReader';
 import { writeToDisk, writeToDiskAsync } from '../utils/diskWriter';
 import logger from '../utils/logger';
 import { searchDirectoryForBooks } from './bookData';
@@ -53,6 +53,12 @@ async function handleRendererRequest(event: any, request: RequestFromReactType) 
 		switch (type) {
 			case READ_LIBRARY_FILE: {
 				logger.info('Reading library file.');
+				const data = readAndParseTextFile(LIBRARY_FILE_LOCATION);
+
+				event.reply(RESPONSE_FROM_ELECTRON, {
+					type: APPEND_BOOKS,
+					data: data
+				});
 				break;
 			}
 			case READ_SETTINGS_FILE: {

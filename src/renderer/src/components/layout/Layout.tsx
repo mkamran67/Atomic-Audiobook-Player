@@ -11,10 +11,13 @@ import appLogo from '../../assets/app-icon.png'
 import Breadcrumbs from './Breadcrumbs';
 import { APPEND_BOOKS, ELECTRON_ERROR, ELECTRON_INFO, ELECTRON_WARNING, GET_BOOK_DETAILS, READ_LIBRARY_FILE, READ_SETTINGS_FILE, REQUEST_TO_ELECTRON, RESPONSE_FROM_ELECTRON } from '../../../../shared/constants';
 import { IncomingElectronResponseType } from '../../types/layout.types';
-import { clearLoading } from '../../state/slices/loaderSlice';
-import { useDispatch } from 'react-redux';
+import { clearLoading, setLoading } from '../../state/slices/loaderSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import { clearError, setError } from '../../state/slices/layoutSlice';
 import { setSettings } from '../settings/settingsSlice';
+import { setBooks } from '../../state/slices/booksSlice';
+import { RootState } from '../../state/store';
+import Loader from '../loader/Loader';
 
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon, current: false },
@@ -44,9 +47,8 @@ function classNames(...classes: any[]) {
 
 export default function Layout() {
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const dispatch = useDispatch();
-  // const loading = useSelector((state: RootState) => state.loader);
+  const loading = useSelector((state: RootState) => state.loader);
   // const { error, type, message } = useSelector((state: RootState) => state.layout);
 
   // const dispatch = useDispatch();
@@ -54,6 +56,7 @@ export default function Layout() {
 
   useEffect(() => {
     // Requesting data from Electron -> Listeners
+    dispatch(setLoading());
     window.api.send(
       REQUEST_TO_ELECTRON,
       {
@@ -76,9 +79,8 @@ export default function Layout() {
 
       switch (type) {
         case APPEND_BOOKS: {
-          console.log(data);
-          // dispatch(setBooks(data));
-          // dispatch(clearLoading());
+          dispatch(setBooks(data));
+          dispatch(clearLoading());
           break;
         }
         case READ_SETTINGS_FILE: {
@@ -219,7 +221,9 @@ export default function Layout() {
           {/* CONTENT */}
           <div className="divide-y divide-white/5">
             <div className='m-2'>
-              <Outlet />
+              {
+                loading ? (<Loader />) : (<Outlet />)
+              }
             </div>
           </div>
         </main>
