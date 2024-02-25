@@ -59,7 +59,7 @@ async function updateSettings(data: SettingsStructureType) {
 	let settings = await readSettings();
 
 	if (settings) {
-		let tempRootDirectories = [...settings.rootDirectories, ...data.rootDirectories];
+		let tempRootDirectories = [...new Set([...settings.rootDirectories, ...data.rootDirectories])];
 
 		settings = {
 			...settings,
@@ -69,8 +69,8 @@ async function updateSettings(data: SettingsStructureType) {
 		settings.rootDirectories = tempRootDirectories;
 
 		await saveSettings(settings);
+		return settings;
 	}
-	return settings;
 }
 
 async function deleteADirectory(data: string) {
@@ -85,8 +85,8 @@ async function deleteADirectory(data: string) {
 	return settings;
 }
 
-export async function handleSettings(operation: string, data: any): Promise<any> {
-	switch (operation) {
+export async function handleSettings(action: string, data: any): Promise<any> {
+	switch (action) {
 		case 'save': {
 			await saveSettings(data);
 			break;

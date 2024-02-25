@@ -14,13 +14,13 @@ export function writeToDisk(filePath: string, data: any, shouldAppend: boolean =
 	let convergedData;
 
 	if (shouldAppend) {
-		try {
-			let previousData = readAndParseTextFile(filePath);
+		let previousData = readAndParseTextFile(filePath);
 
-			if (previousData) {
-				convergedData = [...previousData, ...data];
-			}
-		} catch (error: unknown) {}
+		if (previousData.length > 0) {
+			convergedData = [...previousData, ...data];
+		} else {
+			convergedData = data;
+		}
 	} else {
 		convergedData = data;
 	}
@@ -30,13 +30,13 @@ export function writeToDisk(filePath: string, data: any, shouldAppend: boolean =
 	try {
 		fs.writeFileSync(filePath, jsonString);
 	} catch (error: unknown) {
-		logger.error('Error writing file');
+		logger.error('Error writing file in writeToDisk ${shouldAppend}');
 
 		if (error instanceof Error && error.stack) {
 			logger.error(error.stack);
-			return { message: 'Error writing file', data: error };
+			return { message: 'Error writing file in writeToDisk', data: error };
 		} else {
-			return { message: 'Error writing file', data: 'Unknown error' };
+			return { message: 'Error writing file in writeToDisk', data: 'Unknown error' };
 		}
 	}
 }
@@ -55,13 +55,13 @@ export async function writeToDiskAsync(
 	let convergedData: unknown;
 
 	if (shouldAppend) {
-		try {
-			let previousData = readAndParseTextFile(filePath);
+		let previousData = readAndParseTextFile(filePath);
 
-			if (previousData) {
-				convergedData = [...previousData, ...data];
-			}
-		} catch (error: unknown) {}
+		if (previousData.length > 0) {
+			convergedData = [...previousData, ...data];
+		} else {
+			convergedData = data;
+		}
 	} else {
 		convergedData = data;
 	}
@@ -70,13 +70,13 @@ export async function writeToDiskAsync(
 	try {
 		await writeFile(filePath, jsonString);
 	} catch (error: unknown) {
-		logger.error('Error writing file');
+		logger.error(`Error writing file in writeToDiskAsync ${shouldAppend}`);
 
 		if (error instanceof Error && error.stack) {
 			logger.error(error.stack);
-			return { message: 'Error writing file', data: error };
+			return { message: 'Error writing file in writeToDiskAsync', data: error };
 		} else {
-			return { message: 'Error writing file', data: 'Unknown error' };
+			return { message: 'Error writing file in writeToDiskAsync', data: 'Unknown error' };
 		}
 	}
 }

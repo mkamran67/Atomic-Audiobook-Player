@@ -28,7 +28,7 @@ export function createLibraryFile(): boolean {
 	if (checkIfFileExists(LIBRARY_FILE_LOCATION)) {
 		return true;
 	} else {
-		let emptyLibraryFile: unknown;
+		let emptyLibraryFile: [] = [];
 
 		writeToDisk(LIBRARY_FILE_LOCATION, emptyLibraryFile);
 		return true;
@@ -61,6 +61,12 @@ async function handleRendererRequest(event: any, request: RequestFromReactType) 
 			}
 			case WRITE_SETTINGS_FILE: {
 				logger.info('Writing settings file.');
+				// Data should ecnompass Action and Payload
+				const results = await handleSettings(data.action, data.payload);
+				event.reply(RESPONSE_FROM_ELECTRON, {
+					type: READ_SETTINGS_FILE,
+					data: results
+				});
 				break;
 			}
 			case ADD_BOOK_DIRECTORY: {

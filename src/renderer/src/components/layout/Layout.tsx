@@ -13,7 +13,8 @@ import { APPEND_BOOKS, ELECTRON_ERROR, ELECTRON_INFO, ELECTRON_WARNING, GET_BOOK
 import { IncomingElectronResponseType } from '../../types/layout.types';
 import { clearLoading } from '../../state/slices/loaderSlice';
 import { useDispatch } from 'react-redux';
-import { setError } from '../../state/slices/layoutSlice';
+import { clearError, setError } from '../../state/slices/layoutSlice';
+import { setSettings } from '../settings/settingsSlice';
 
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon, current: false },
@@ -73,48 +74,43 @@ export default function Layout() {
     window.api.receive(RESPONSE_FROM_ELECTRON, async (res: IncomingElectronResponseType) => {
       const { type, data } = res;
 
-
       switch (type) {
         case APPEND_BOOKS: {
-          console.log('👉 -> file: handler.ts:27 -> data:', data);
+          console.log(data);
           // dispatch(setBooks(data));
           // dispatch(clearLoading());
           break;
         }
         case READ_SETTINGS_FILE: {
-          console.log('👉 -> file: Layout.tsx:61 -> data:', data);
+          dispatch(setSettings(data));
           break;
         }
         case GET_BOOK_DETAILS: {
-          console.log('👉 -> file: handler.ts:35 -> data:', data);
           // dispatch(setCurrentBook(data));
           break;
         }
         case ELECTRON_ERROR: {
-          console.log('👉 -> file: Layout.tsx:74 -> data:', data);
           dispatch(clearLoading());
           dispatch(setError({ error: true, type: 'error', message: data }));
-          // setTimeout(() => {
-          //   dispatch(clearError());
-          // }, 5000);
+          setTimeout(() => {
+            dispatch(clearError());
+          }, 5000);
           break;
         }
         case ELECTRON_WARNING: {
-          console.log('👉 -> file: Layout.tsx:80 -> data:', data);
           dispatch(clearLoading());
           dispatch(setError({ error: true, type: 'warning', message: data }));
-          // setTimeout(() => {
-          //   dispatch(clearError());
-          // }, 5000);
+          setTimeout(() => {
+            dispatch(clearError());
+          }, 5000);
           break;
         }
         case ELECTRON_INFO: {
-          console.log('👉 -> file: Layout.tsx:80 -> data:', data);
           dispatch(clearLoading());
           dispatch(setError({ error: true, type: 'info', message: data }));
-          // setTimeout(() => {
-          //   dispatch(clearError());
-          // }, 5000);
+          setTimeout(() => {
+            dispatch(clearError());
+          }, 5000);
           break;
         }
         default: {
