@@ -1,6 +1,7 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 import { contextBridge, ipcRenderer } from 'electron'
+import logger from './main/utils/logger'
 
 // Custom APIs for renderer
 const api = {
@@ -34,6 +35,7 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('api', api)
   } catch (error) {
+    console.log('CODE 66 -> Error exposing Electron APIs to renderer')
     console.error(error)
   }
 } else {

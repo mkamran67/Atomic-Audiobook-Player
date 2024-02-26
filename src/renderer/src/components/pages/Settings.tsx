@@ -50,6 +50,21 @@ export default function Settings() {
     }
   };
 
+  const deleteDirectory = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+
+    const target = event.target as HTMLInputElement;
+    const directory = target.getAttribute('data-tag');
+
+    window.api.send(REQUEST_TO_ELECTRON, {
+      type: WRITE_SETTINGS_FILE,
+      data:
+      {
+        action: 'deleteADirectory',
+        payload: directory,
+      }
+
+    })
+  }
 
   useEffect(() => {
     window.api.send(REQUEST_TO_ELECTRON, {
@@ -98,7 +113,7 @@ export default function Settings() {
                           <button type="button" id='Update Directory' className="font-semibold text-indigo-600 hover:text-indigo-500">
                             Update
                           </button>
-                          <button type="button" id='Delete Directory' className="mx-6 font-semibold text-red-600 hover:text-red-800">
+                          <button onClick={deleteDirectory} type="button" data-tag={directory} id='Delete Directory' className="mx-6 font-semibold text-red-600 hover:text-red-800">
                             Delete
                           </button>
                         </div>

@@ -85,19 +85,18 @@ async function deleteADirectory(data: string) {
 	return settings;
 }
 
-export async function handleSettings(action: string, data: any): Promise<any> {
+export async function handleSettings(action: string, payload: any): Promise<any> {
 	switch (action) {
 		case 'save': {
-			await saveSettings(data);
+			await saveSettings(payload);
 			break;
 		}
 		case 'update': {
-			const settings = await updateSettings(data);
+			const settings = await updateSettings(payload);
 			return settings;
 		}
 		case 'deleteADirectory': {
-			await deleteADirectory(data);
-			break;
+			return await deleteADirectory(payload);
 		}
 		case 'read': {
 			const settings = await readSettings();
