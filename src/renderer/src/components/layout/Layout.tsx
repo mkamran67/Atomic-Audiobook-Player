@@ -1,21 +1,19 @@
 
-import { Dialog, Transition } from '@headlessui/react';
-import { Bars3Icon, MagnifyingGlassIcon } from '@heroicons/react/20/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import {
   BuildingLibraryIcon,
-  CalendarIcon, Cog6ToothIcon, HomeIcon, XMarkIcon
+  CalendarIcon, Cog6ToothIcon, HomeIcon
 } from '@heroicons/react/24/outline';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import appLogo from '../../assets/app-icon.png'
-import Breadcrumbs from './Breadcrumbs';
+import appLogo from '../../assets/app-icon.png';
 import { APPEND_BOOKS, ELECTRON_ERROR, ELECTRON_INFO, ELECTRON_WARNING, GET_BOOK_DETAILS, READ_LIBRARY_FILE, READ_SETTINGS_FILE, REQUEST_TO_ELECTRON, RESPONSE_FROM_ELECTRON } from '../../../../shared/constants';
 import { IncomingElectronResponseType } from '../../types/layout.types';
 import { clearLoading, setLoading } from '../../state/slices/loaderSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearError, setError } from '../../state/slices/layoutSlice';
 import { setSettings } from '../settings/settingsSlice';
-import { setBooks } from '../../state/slices/booksSlice';
+import { setBooks, setLibrary } from '../../state/slices/booksSlice';
 import { RootState } from '../../state/store';
 import Loader from '../loader/Loader';
 
@@ -53,7 +51,7 @@ export default function Layout() {
 
   // const dispatch = useDispatch();
   const location = useLocation().pathname;
-
+  // TODO -> Move UP or Loader DOWN
   useEffect(() => {
     // Requesting data from Electron -> Listeners
     dispatch(setLoading());
@@ -80,6 +78,11 @@ export default function Layout() {
       switch (type) {
         case APPEND_BOOKS: {
           dispatch(setBooks(data));
+          dispatch(clearLoading());
+          break;
+        }
+        case READ_LIBRARY_FILE: {
+          dispatch(setLibrary(data));
           dispatch(clearLoading());
           break;
         }
@@ -186,7 +189,6 @@ export default function Layout() {
           </nav>
         </div>
       </div>
-
       <div className="pl-72">
         {/* Sticky search header */}
         <div className="sticky top-0 z-40 flex items-center h-16 px-4 bg-gray-900 border-b shadow-sm shrink-0 gap-x-6 border-white/5 sm:px-6 lg:px-8">

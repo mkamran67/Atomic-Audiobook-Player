@@ -46,6 +46,60 @@ export function createStatsFile(): boolean {
 	}
 }
 
+export function cleanUpRootLibraryFile(doorDir: string) {
+
+	const libraryFile = readAndParseTextFile(LIBRARY_FILE_LOCATION);
+
+
+}
+
+async function addbookDirectory(event: any) {
+	// 0. Show pop up for directory selection
+	const { canceled, filePaths } = await dialog.showOpenDialog({
+		title: 'Select a directory',
+		properties: ['openDirectory']
+	});
+
+	if (canceled) {
+		event.reply(RESPONSE_FROM_ELECTRON, { type: ELECTRON_WARNING, data: 'Cancelled directory selection.' });
+		return;
+	}
+
+	const rootDirPath = '' + path.normalize(filePaths[0]);
+
+	// 1. Add the new rootDirectory to the settings file
+	if (checkForDuplicateRootDirectories(rootDirPath)) {
+		logger.error(`Directory already exists : ${rootDirPath}`);
+		event.reply(RESPONSE_FROM_ELECTRON, { type: ELECTRON_WARNING, data: 'Directory already exists.' });
+		return;
+	}
+
+	// 2. Read the new rootDirectory
+	const listOfbooks = await searchDirectoryForBooks(rootDirPath);
+	const libraryReadyData = [
+		{
+			rootDirectory: rootDirPath,
+			books: listOfbooks
+		}
+	]
+	console.log("👉 -> file: library.ts:85 -> libraryReadyData:", libraryReadyData);
+
+	// 3. Check if there are any books in the directory
+	// Update settings file with new rootDirectory
+	// Save new books to Library file
+	if (listOfbooks.length > 0) {
+		await handleSettings('update', { rootDirectories: filePaths });
+		await writeToDiskAsync(LIBRARY_FILE_LOCATION, libraryReadyData, true);
+		// 4. Return the new book files
+		event.reply(RESPONSE_FROM_ELECTRON, { type: APPEND_BOOKS, data: listOfbooks });
+	} else {
+		event.reply(RESPONSE_FROM_ELECTRON, {
+			type: ELECTRON_WARNING, data: 'No books found in directory.'
+		});
+	}
+
+}
+
 async function handleRendererRequest(event: any, request: RequestFromReactType) {
 	const { type, data } = request;
 
@@ -77,44 +131,7 @@ async function handleRendererRequest(event: any, request: RequestFromReactType) 
 			}
 			case ADD_BOOK_DIRECTORY: {
 				logger.info('Adding new directory.');
-
-				// 0. Show pop up for directory selection
-				const { canceled, filePaths } = await dialog.showOpenDialog({
-					title: 'Select a directory',
-					properties: ['openDirectory']
-				});
-
-				if (canceled) {
-					event.reply(RESPONSE_FROM_ELECTRON, { type: ELECTRON_WARNING, data: 'Cancelled directory selection.' });
-					return;
-				}
-
-				const rootDirPath = '' + path.normalize(filePaths[0]);
-
-				// 1. Add the new rootDirectory to the settings file
-				if (checkForDuplicateRootDirectories(rootDirPath)) {
-					logger.error(`Directory already exists : ${rootDirPath}`);
-					event.reply(RESPONSE_FROM_ELECTRON, { type: ELECTRON_WARNING, data: 'Directory already exists.' });
-					break;
-				}
-
-				// 2. Read the new rootDirectory
-				const listOfbooks = await searchDirectoryForBooks(rootDirPath);
-
-				// 3. Check if there are any books in the directory
-				// Update settings file with new rootDirectory
-				// Save new books to Library file
-				if (listOfbooks.length > 0) {
-					await handleSettings('update', { rootDirectories: filePaths });
-					await writeToDiskAsync(LIBRARY_FILE_LOCATION, listOfbooks, true);
-					// 4. Return the new book files
-					event.reply(RESPONSE_FROM_ELECTRON, { type: APPEND_BOOKS, data: listOfbooks });
-				} else {
-					event.reply(RESPONSE_FROM_ELECTRON, {
-						type: ELECTRON_WARNING, data: 'No books found in directory.'
-					});
-				}
-
+				await addbookDirectory(event);
 				break;
 			}
 			case SAVE_BOOK_PROGRESS: {

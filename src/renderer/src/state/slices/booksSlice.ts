@@ -16,9 +16,22 @@ const booksSlice = createSlice({
     clearBooks: (_state) => {
       return { books: [] };
     },
+    setLibrary: (_state, { payload }) => {
+
+      let books: any = [];
+
+      if (payload.length > 0) {
+        payload.forEach((rootDir: any) => {
+          books.push(...rootDir.books);
+        });
+      }
+
+      return { books };
+
+    }
   },
 });
 
-export const { setBooks, clearBooks } = booksSlice.actions;
+export const { setBooks, clearBooks, setLibrary } = booksSlice.actions;
 
 export default booksSlice.reducer;

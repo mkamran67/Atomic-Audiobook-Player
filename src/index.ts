@@ -3,6 +3,10 @@
 // plugin that tells the Electron app where to look for the Webpack-bundled app code (depending on
 import { is } from "@electron-toolkit/utils";
 import { BrowserWindow, app, ipcMain, net, protocol } from "electron";
+import installExtension, {
+  REACT_DEVELOPER_TOOLS,
+  REDUX_DEVTOOLS
+} from 'electron-devtools-installer';
 import fs from 'fs';
 import { INFO_FOLDER_LOCATION } from "./main/electron_constants";
 import { getFileFromDisk } from "./main/handlers/file_reader";
@@ -18,10 +22,9 @@ import {
   checkIfDirectoryExists
 } from "./main/utils/diskReader";
 import logger from "./main/utils/logger";
-import installExtension, {
-  REDUX_DEVTOOLS,
-  REACT_DEVELOPER_TOOLS
-} from 'electron-devtools-installer';
+import { setupConfigFiles } from "./main/utils/configs";
+
+
 // whether you're running in development or production).
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -31,33 +34,7 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
-
-function setupConfigFiles() {
-  logger.info('Setting up config files');
-
-  // 1. Check if INFO folder exists
-  if (!checkIfDirectoryExists(INFO_FOLDER_LOCATION)) {
-    // Create INFO folder
-    fs.mkdirSync(INFO_FOLDER_LOCATION);
-  }
-
-  // Create settings file
-  const settingsResults = createSettingsFile();
-  if (settingsResults) {
-    logger.info('Settings file created');
-  }
-  // Create library file
-  const libraryResults = createLibraryFile();
-  if (libraryResults) {
-    logger.info('Library file created');
-  }
-  // Create stats file
-  const statsResults = createStatsFile();
-  if (statsResults) {
-    logger.info('Stats file created');
-  }
-}
-
+setupConfigFiles();
 
 protocol.registerSchemesAsPrivileged([{
   scheme: 'get-file',
@@ -103,11 +80,6 @@ const createWindow = (): void => {
   }
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-// app.on('ready', createWindow)
-
 app.whenReady().then(() => {
 
   setupConfigFiles();
@@ -141,8 +113,5 @@ app.on('activate', () => {
   }
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
-
-// IPC test
+// Handle requests from the renderer process
 ipcMain.on('requestToElectron', handleRendererRequest);
