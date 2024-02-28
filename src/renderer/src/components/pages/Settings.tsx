@@ -5,6 +5,7 @@ import { InputEnumType, RangeInputProps } from '../../types/general.types'
 import { ReactEventHandler, useEffect, useState } from 'react'
 import { useDebounceValue } from '../../utils/customHooks'
 import { ADD_BOOK_DIRECTORY, REQUEST_TO_ELECTRON, WRITE_SETTINGS_FILE } from '../../../../../src/shared/constants'
+import SettingListItem from '../settings/SettingListItem'
 
 export default function Settings() {
   // Handle saves

@@ -100,6 +100,13 @@ async function addbookDirectory(event: any) {
 
 }
 
+export async function removeDirectoryFromLibrary(directory: string) {
+	logger.info(`Removing directory :${directory} from library.`);
+
+
+
+}
+
 async function handleRendererRequest(event: any, request: RequestFromReactType) {
 	const { type, data } = request;
 

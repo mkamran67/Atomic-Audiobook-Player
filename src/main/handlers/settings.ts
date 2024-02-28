@@ -5,6 +5,8 @@ import { writeToDisk } from '../utils/diskWriter';
 import { BookData } from '../../renderer/src/types/library.types';
 import logger from '../utils/logger';
 import { SettingsStructureType } from '../../../src/shared/types';
+import { remove } from 'winston';
+import { removeDirectoryFromLibrary } from './library';
 
 
 
@@ -80,6 +82,7 @@ async function deleteADirectory(data: string) {
 		const newRootDirectories = settings.rootDirectories.filter((dir) => dir !== data);
 		settings.rootDirectories = newRootDirectories;
 		await saveSettings(settings);
+		await removeDirectoryFromLibrary(data);
 	}
 
 	return settings;
