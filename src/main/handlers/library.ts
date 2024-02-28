@@ -18,6 +18,7 @@ import { writeToDisk, writeToDiskAsync } from '../utils/diskWriter';
 import logger from '../utils/logger';
 import { searchDirectoryForBooks } from './bookData';
 import { checkForDuplicateRootDirectories, handleSettings } from './settings';
+import { LibraryStructure } from '../../../src/shared/types';
 
 export interface RequestFromReactType {
 	type: string;
@@ -46,10 +47,15 @@ export function createStatsFile(): boolean {
 	}
 }
 
-export function cleanUpRootLibraryFile(doorDir: string) {
+export async function cleanUpRootLibraryFile(toRemoveDirectory: string) {
 
-	const libraryFile = readAndParseTextFile(LIBRARY_FILE_LOCATION);
+	const libraryFile: LibraryStructure = readAndParseTextFile(LIBRARY_FILE_LOCATION);
 
+	const newLibraryFile = libraryFile.filter((rootDir) => rootDir.rootDirectory !== toRemoveDirectory);
+
+	await writeToDiskAsync(LIBRARY_FILE_LOCATION, newLibraryFile, false);
+
+	return newLibraryFile;
 
 }
 
@@ -82,7 +88,6 @@ async function addbookDirectory(event: any) {
 			books: listOfbooks
 		}
 	]
-	console.log("👉 -> file: library.ts:85 -> libraryReadyData:", libraryReadyData);
 
 	// 3. Check if there are any books in the directory
 	// Update settings file with new rootDirectory

@@ -10,14 +10,7 @@ export interface BookDataType {
 	dirPath: string;
 }
 
-export interface BookData {
-	title: string;
-	author?: string;
-	cover?: string;
-	dirPath: string;
-	length?: number;
-	isDuplicate?: boolean;
-}
+
 
 export interface ResponseFromElectronType {
 	type: string;
