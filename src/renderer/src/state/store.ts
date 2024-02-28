@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
-import loadingSlice from './slices/loaderSlice'
-import playerSlice from './slices/playerSlice'
 import settingsSlice from '../components/settings/settingsSlice'
 import booksSlice from './slices/booksSlice'
 import layoutSlice from './slices/layoutSlice'
+import loadingSlice from './slices/loaderSlice'
+import playerSlice from './slices/playerSlice'
 
 const store = configureStore({
   reducer: {
