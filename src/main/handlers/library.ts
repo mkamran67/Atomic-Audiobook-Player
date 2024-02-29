@@ -1,29 +1,15 @@
 import { dialog } from 'electron';
 import path from 'node:path';
+import { LibraryStructure } from '../../../src/shared/types';
 import {
-	ADD_BOOK_DIRECTORY,
-	APPEND_BOOKS,
-	ELECTRON_ERROR,
-	ELECTRON_WARNING,
-	GET_BOOK_COVERS,
-	READ_LIBRARY_FILE,
-	READ_SETTINGS_FILE,
-	RESPONSE_FROM_ELECTRON,
-	SAVE_BOOK_PROGRESS,
-	WRITE_SETTINGS_FILE
+	APPEND_BOOKS, ELECTRON_WARNING, RESPONSE_FROM_ELECTRON
 } from '../../shared/constants';
-import { INFO_FOLDER_LOCATION, LIBRARY_FILE_LOCATION, STATS_FILE_LOCATION } from '../electron_constants';
+import { LIBRARY_FILE_LOCATION, STATS_FILE_LOCATION } from '../electron_constants';
 import { checkIfFileExists, readAndParseTextFile } from '../utils/diskReader';
 import { writeToDisk, writeToDiskAsync } from '../utils/diskWriter';
 import logger from '../utils/logger';
 import { searchDirectoryForBooks } from './bookData';
 import { checkForDuplicateRootDirectories, handleSettings } from './settings';
-import { LibraryStructure } from '../../../src/shared/types';
-
-export interface RequestFromReactType {
-	type: string;
-	data: any;
-}
 
 export function createLibraryFile(): boolean {
 	if (checkIfFileExists(LIBRARY_FILE_LOCATION)) {
@@ -59,7 +45,7 @@ export async function cleanUpRootLibraryFile(toRemoveDirectory: string) {
 
 }
 
-async function addbookDirectory(event: any) {
+export async function addbookDirectory(event: any) {
 	// 0. Show pop up for directory selection
 	const { canceled, filePaths } = await dialog.showOpenDialog({
 		title: 'Select a directory',
@@ -67,16 +53,22 @@ async function addbookDirectory(event: any) {
 	});
 
 	if (canceled) {
-		event.reply(RESPONSE_FROM_ELECTRON, { type: ELECTRON_WARNING, data: 'Cancelled directory selection.' });
+		event.reply(RESPONSE_FROM_ELECTRON, {
+			type: ELECTRON_WARNING,
+			data: 'Cancelled directory selection.'
+		});
 		return;
 	}
 
 	const rootDirPath = '' + path.normalize(filePaths[0]);
 
-	// 1. Add the new rootDirectory to the settings file
+	// 1. Check if Directory is already in the settings file
 	if (checkForDuplicateRootDirectories(rootDirPath)) {
 		logger.error(`Directory already exists : ${rootDirPath}`);
-		event.reply(RESPONSE_FROM_ELECTRON, { type: ELECTRON_WARNING, data: 'Directory already exists.' });
+		event.reply(RESPONSE_FROM_ELECTRON, {
+			type: ELECTRON_WARNING,
+			data: 'Directory already exists.'
+		});
 		return;
 	}
 
@@ -96,78 +88,17 @@ async function addbookDirectory(event: any) {
 		await handleSettings('update', { rootDirectories: filePaths });
 		await writeToDiskAsync(LIBRARY_FILE_LOCATION, libraryReadyData, true);
 		// 4. Return the new book files
-		event.reply(RESPONSE_FROM_ELECTRON, { type: APPEND_BOOKS, data: listOfbooks });
+		event.reply(RESPONSE_FROM_ELECTRON, {
+			type: APPEND_BOOKS,
+			data: libraryReadyData
+		});
 	} else {
 		event.reply(RESPONSE_FROM_ELECTRON, {
-			type: ELECTRON_WARNING, data: 'No books found in directory.'
+			type: ELECTRON_WARNING,
+			data: 'No books found in directory.'
 		});
 	}
 
 }
 
-export async function removeDirectoryFromLibrary(directory: string) {
-	logger.info(`Removing directory :${directory} from library.`);
 
-
-
-}
-
-async function handleRendererRequest(event: any, request: RequestFromReactType) {
-	const { type, data } = request;
-
-	try {
-		switch (type) {
-			case READ_LIBRARY_FILE: {
-				logger.info('Reading library file.');
-				const data = readAndParseTextFile(LIBRARY_FILE_LOCATION);
-
-				event.reply(RESPONSE_FROM_ELECTRON, {
-					type: APPEND_BOOKS,
-					data: data
-				});
-				break;
-			}
-			case READ_SETTINGS_FILE: {
-				logger.info('Reading settings file.');
-				break;
-			}
-			case WRITE_SETTINGS_FILE: {
-				logger.info('Writing settings file.');
-				// Data should ecnompass Action and Payload
-				const results = await handleSettings(data.action, data.payload);
-				event.reply(RESPONSE_FROM_ELECTRON, {
-					type: READ_SETTINGS_FILE,
-					data: results
-				});
-				break;
-			}
-			case ADD_BOOK_DIRECTORY: {
-				logger.info('Adding new directory.');
-				await addbookDirectory(event);
-				break;
-			}
-			case SAVE_BOOK_PROGRESS: {
-				logger.info('Saving book progress for book:');
-				break;
-			}
-			case GET_BOOK_COVERS: {
-				logger.info('Getting book covers.');
-				break;
-			}
-			default: {
-				console.log(`You've hit default case in handleRendererRequest with type: ${type} and data: ${data}`);
-				event.reply(RESPONSE_FROM_ELECTRON, {
-					type: ELECTRON_ERROR,
-					data: `Whoa! Something went wrong! Check logs ${INFO_FOLDER_LOCATION}`
-				});
-				break;
-			}
-		}
-	} catch (error: any) {
-		logger.error('Error in handleRendererRequest');
-		logger.error(error.stack);
-		event.reply(RESPONSE_FROM_ELECTRON, { type: 'error', data: error });
-	}
-}
-
-export { handleRendererRequest };

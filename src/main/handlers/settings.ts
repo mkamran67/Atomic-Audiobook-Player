@@ -2,11 +2,10 @@ import fs from 'fs';
 import { SETTINGS_LOCATION } from '../electron_constants';
 import { checkIfFileExists, readAndParseTextFile } from '../utils/diskReader';
 import { writeToDisk } from '../utils/diskWriter';
-import { BookData } from '../../renderer/src/types/library.types';
 import logger from '../utils/logger';
 import { SettingsStructureType } from '../../../src/shared/types';
-import { remove } from 'winston';
 import { removeDirectoryFromLibrary } from './library';
+import { RESPONSE_FROM_ELECTRON, READ_SETTINGS_FILE } from '../../../src/shared/constants';
 
 
 
@@ -19,11 +18,12 @@ async function saveSettings(data: SettingsStructureType) {
 	}
 }
 
-async function readSettings(): Promise<void | SettingsStructureType> {
+function readSettings(): SettingsStructureType {
 	try {
 		const settings = readAndParseTextFile(SETTINGS_LOCATION);
 		return settings;
 	} catch (err: any) {
+		logger.error('Error reading settings file');
 		throw new Error(err);
 	}
 }

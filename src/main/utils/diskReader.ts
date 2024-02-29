@@ -7,6 +7,7 @@ import { IMG_EXTENSIONS, MEDIA_EXTENSIONS } from '../electron_constants';
 
 import { access, constants } from 'fs/promises';
 import { BookDetails, MinimumChapterDetails } from '../../renderer/src/types/book.types';
+import logger from './logger';
 
 export function readAndParseTextFile(filePath: string) {
 	return JSON.parse(readFileSync(filePath, 'utf-8'));
@@ -57,6 +58,7 @@ export function directorySearch(dirPath: string): string[] {
 			withFileTypes: true
 		});
 	} catch (err: any) {
+		logger.error(`Error reading directory: ${dirPath}`);
 		throw new Error(err);
 	}
 
