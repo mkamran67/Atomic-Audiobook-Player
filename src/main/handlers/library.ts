@@ -2,7 +2,7 @@ import { dialog } from 'electron';
 import path from 'node:path';
 import { LibraryStructure } from '../../../src/shared/types';
 import {
-	APPEND_BOOKS, ELECTRON_WARNING, RESPONSE_FROM_ELECTRON
+	APPEND_BOOKS, ELECTRON_WARNING, READ_SETTINGS_FILE, RESPONSE_FROM_ELECTRON
 } from '../../shared/constants';
 import { LIBRARY_FILE_LOCATION, STATS_FILE_LOCATION } from '../electron_constants';
 import { checkIfFileExists, readAndParseTextFile } from '../utils/diskReader';
@@ -85,12 +85,17 @@ export async function addbookDirectory(event: any) {
 	// Update settings file with new rootDirectory
 	// Save new books to Library file
 	if (listOfbooks.length > 0) {
-		await handleSettings('update', { rootDirectories: filePaths });
+		const newSettings = await handleSettings('update', { rootDirectories: filePaths });
 		await writeToDiskAsync(LIBRARY_FILE_LOCATION, libraryReadyData, true);
 		// 4. Return the new book files
 		event.reply(RESPONSE_FROM_ELECTRON, {
 			type: APPEND_BOOKS,
 			data: libraryReadyData
+		});
+
+		event.reply(RESPONSE_FROM_ELECTRON, {
+			type: READ_SETTINGS_FILE,
+			data: newSettings
 		});
 	} else {
 		event.reply(RESPONSE_FROM_ELECTRON, {

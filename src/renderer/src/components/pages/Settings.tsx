@@ -1,11 +1,10 @@
+import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { RootState } from '../../state/store'
-import InputSelector from '../InputSelector'
-import { InputEnumType, RangeInputProps } from '../../types/general.types'
-import { ReactEventHandler, useEffect, useState } from 'react'
-import { useDebounceValue } from '../../utils/customHooks'
 import { ADD_BOOK_DIRECTORY, REQUEST_TO_ELECTRON, WRITE_SETTINGS_FILE } from '../../../../../src/shared/constants'
-import SettingListItem from '../settings/SettingListItem'
+import { RootState } from '../../state/store'
+import { InputEnumType, RangeInputProps } from '../../types/general.types'
+import { useDebounceValue } from '../../utils/customHooks'
+import InputSelector from '../InputSelector'
 
 export default function Settings() {
   // Handle saves
@@ -17,6 +16,10 @@ export default function Settings() {
     volume,
     fontSize
   } = useSelector((state: RootState) => state.settings);
+
+  const counter = useRef(0)
+  console.log(`Re render ${counter.current}`)
+  counter.current += 1
 
   // FIXME: This is a temporary solution to get the volume to update
   const [rangeValue, setRangeValue] = useState(volume)

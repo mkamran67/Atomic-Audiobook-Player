@@ -1,11 +1,11 @@
-import fs from 'fs';
+import { ipcMain, webContents } from 'electron';
+import { SettingsStructureType } from '../../../src/shared/types';
 import { SETTINGS_LOCATION } from '../electron_constants';
 import { checkIfFileExists, readAndParseTextFile } from '../utils/diskReader';
 import { writeToDisk } from '../utils/diskWriter';
 import logger from '../utils/logger';
-import { SettingsStructureType } from '../../../src/shared/types';
-import { removeDirectoryFromLibrary } from './library';
-import { RESPONSE_FROM_ELECTRON, READ_SETTINGS_FILE } from '../../../src/shared/constants';
+import { cleanUpRootLibraryFile } from './library';
+import { READ_LIBRARY_FILE, RESPONSE_FROM_ELECTRON } from '../../../src/shared/constants';
 
 
 
@@ -58,7 +58,7 @@ export function createSettingsFile(): boolean {
 }
 
 async function updateSettings(data: SettingsStructureType) {
-	let settings = await readSettings();
+	let settings = readSettings();
 
 	if (settings) {
 		let tempRootDirectories = [...new Set([...settings.rootDirectories, ...data.rootDirectories])];
@@ -76,13 +76,20 @@ async function updateSettings(data: SettingsStructureType) {
 }
 
 async function deleteADirectory(data: string) {
-	let settings = await readSettings();
+	let settings = readSettings();
 
 	if (settings) {
 		const newRootDirectories = settings.rootDirectories.filter((dir) => dir !== data);
 		settings.rootDirectories = newRootDirectories;
 		await saveSettings(settings);
-		await removeDirectoryFromLibrary(data);
+		const newLibrary = await cleanUpRootLibraryFile(data);
+		webContents.getAllWebContents().forEach((webContent) => {
+			webContent.send(RESPONSE_FROM_ELECTRON, {
+				type: READ_LIBRARY_FILE,
+				data: newLibrary
+			});
+		});
+
 	}
 
 	return settings;
@@ -91,19 +98,16 @@ async function deleteADirectory(data: string) {
 export async function handleSettings(action: string, payload: any): Promise<any> {
 	switch (action) {
 		case 'save': {
-			await saveSettings(payload);
-			break;
+			return await saveSettings(payload);
 		}
 		case 'update': {
-			const settings = await updateSettings(payload);
-			return settings;
+			return await updateSettings(payload);
 		}
 		case 'deleteADirectory': {
 			return await deleteADirectory(payload);
 		}
 		case 'read': {
-			const settings = await readSettings();
-			return settings;
+			return readSettings();
 		}
 		default: {
 			console.log(`You've hit default`);

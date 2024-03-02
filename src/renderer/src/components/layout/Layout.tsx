@@ -4,12 +4,22 @@ import {
   BuildingLibraryIcon,
   CalendarIcon, Cog6ToothIcon, HomeIcon
 } from '@heroicons/react/24/outline';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { APPEND_BOOKS, ELECTRON_ERROR, ELECTRON_INFO, ELECTRON_WARNING, GET_BOOK_DETAILS, READ_LIBRARY_FILE, READ_SETTINGS_FILE, REQUEST_TO_ELECTRON, RESPONSE_FROM_ELECTRON } from '../../../../shared/constants';
+import { Link, Outlet } from 'react-router-dom';
+import {
+  APPEND_BOOKS,
+  ELECTRON_ERROR,
+  ELECTRON_INFO,
+  ELECTRON_WARNING,
+  GET_BOOK_DETAILS,
+  READ_LIBRARY_FILE,
+  READ_SETTINGS_FILE,
+  REQUEST_TO_ELECTRON,
+  RESPONSE_FROM_ELECTRON
+} from '../../../../shared/constants';
 import appLogo from '../../assets/app-icon.png';
-import { setBooks, setLibrary } from '../../state/slices/booksSlice';
+import { appendLibrary, setBooks } from '../../state/slices/booksSlice';
 import { clearError, setError } from '../../state/slices/layoutSlice';
 import { clearLoading, setLoading } from '../../state/slices/loaderSlice';
 import { RootState } from '../../state/store';
@@ -43,13 +53,12 @@ function classNames(...classes: any[]) {
 }
 
 export default function Layout() {
-
   const dispatch = useDispatch();
   const loading = useSelector((state: RootState) => state.loader);
   // const { error, type, message } = useSelector((state: RootState) => state.layout);
 
   // const dispatch = useDispatch();
-  const location = useLocation().pathname;
+  // const location = useLocation().pathname;
   // TODO -> Move UP or Loader DOWN
   useEffect(() => {
     // Requesting data from Electron -> Listeners
@@ -76,12 +85,13 @@ export default function Layout() {
 
       switch (type) {
         case APPEND_BOOKS: {
-          dispatch(setBooks(data));
+          console.log("👉 -> file: Layout.tsx:75 -> type:", data);
+          dispatch(appendLibrary(data));
           dispatch(clearLoading());
           break;
         }
         case READ_LIBRARY_FILE: {
-          dispatch(setLibrary(data));
+          dispatch(setBooks(data));
           dispatch(clearLoading());
           break;
         }

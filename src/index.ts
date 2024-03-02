@@ -2,7 +2,7 @@ import { is } from "@electron-toolkit/utils";
 import { BrowserWindow, app, ipcMain, protocol } from "electron";
 import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } from 'electron-devtools-installer';
 import { getFileFromDisk } from "./main/handlers/file_reader";
-import { handleRendererRequest } from "./main/handlers/library";
+import handleRendererRequest from "./main/request_handler";
 import { setupConfigFiles } from "./main/utils/configs";
 import logger from "./main/utils/logger";
 

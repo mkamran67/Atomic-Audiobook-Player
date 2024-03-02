@@ -1,8 +1,8 @@
-import { BookDataType } from "../../types/library.types";
+import { BookDataType, LibraryBookSetType } from "../../types/library.types";
 import BookCard from "./BookCard";
 
 type Props = {
-  books: BookDataType[];
+  books: LibraryBookSetType[];
 };
 
 function GalleryView({ books }: Props) {
@@ -34,21 +34,9 @@ function GalleryView({ books }: Props) {
     <>
       <ul role="list" className="grid grid-flow-row grid-cols-6 gap-6">
         {books &&
-          books.map((book) => {
-            counter++;
-
-            return (
-              <li key={`book-${counter}`}>
-                <BookCard
-                  author={book.author}
-                  title={book.title}
-                  bookPath={book.dirPath}
-                  image={book.cover}
-                  setPlaying={setPlaying}
-                />
-              </li>
-            );
-          })}
+          
+          
+          }
       </ul>
     </>
   );

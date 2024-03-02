@@ -10,7 +10,10 @@ export interface BookDataType {
 	dirPath: string;
 }
 
-
+export interface LibraryBookSetType {
+	books: BookDataType[];
+	rootDirectory: string;
+}
 
 export interface ResponseFromElectronType {
 	type: string;
