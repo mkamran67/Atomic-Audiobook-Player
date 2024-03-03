@@ -8,7 +8,6 @@ import Home from './components/pages/Home';
 import Library from './components/pages/Library';
 import Settings from './components/pages/Settings';
 import Stats from './components/pages/Stats';
-import Player from './components/player/Player';
 import store from './state/store';
 import Loader from './components/loader/Loader';
 

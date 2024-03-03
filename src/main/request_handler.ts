@@ -27,7 +27,7 @@ function readLibraryFile(event: any) {
   const data = readAndParseTextFile(LIBRARY_FILE_LOCATION);
 
   event.reply(RESPONSE_FROM_ELECTRON, {
-    type: APPEND_BOOKS,
+    type: READ_LIBRARY_FILE,
     data: data
   });
 }
@@ -41,10 +41,10 @@ async function handleWriteSettingsFile(event: any, data: any) {
   logger.info('Writing settings file.');
   // Data should ecnompass Action and Payload
   const results = await handleSettings(data.action, data.payload);
-  event.reply(RESPONSE_FROM_ELECTRON, {
-    type: READ_SETTINGS_FILE,
-    data: results
-  });
+  // event.reply(RESPONSE_FROM_ELECTRON, {
+  //   type: READ_SETTINGS_FILE,
+  //   data: results
+  // });
 }
 
 function defaultSwitch(event: any, { type, data }: RequestFromReactType) {
@@ -58,6 +58,7 @@ function defaultSwitch(event: any, { type, data }: RequestFromReactType) {
 
 export default async function handleRendererRequest(event: any, request: RequestFromReactType) {
   const { type, data } = request;
+  console.log("👉 -> file: request_handler.ts:61 -> type:", type);
 
   try {
     switch (type) {

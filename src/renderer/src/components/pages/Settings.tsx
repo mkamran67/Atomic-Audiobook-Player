@@ -20,6 +20,7 @@ export default function Settings() {
   const counter = useRef(0)
   console.log(`Re render ${counter.current}`)
   counter.current += 1
+  const init = useRef(true)
 
   // FIXME: This is a temporary solution to get the volume to update
   const [rangeValue, setRangeValue] = useState(volume)

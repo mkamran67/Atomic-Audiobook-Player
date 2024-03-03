@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { BookDataType, LibraryBookSetType } from "../../types/library.types";
 import BookCard from "./BookCard";
 
@@ -30,13 +31,28 @@ function GalleryView({ books }: Props) {
     }
   };
 
+  // const booksCombined = useMemo(() => {
+
+  //   const combinedBooks: BookDataType[] = [];
+
+  //   books.forEach((bookSet) => {
+  //     bookSet.books.forEach((book) => {
+  //       combinedBooks.push(book);
+  //     });
+  //   });
+
+  //   return combinedBooks;
+
+  // }, [books]);
+  console.log("👉 -> file: GalleryView.tsx:37 -> booksCombined:", books);
+
   return (
     <>
       <ul role="list" className="grid grid-flow-row grid-cols-6 gap-6">
-        {books &&
-          
-          
-          }
+        {/* {books 
+
+
+          } */}
       </ul>
     </>
   );

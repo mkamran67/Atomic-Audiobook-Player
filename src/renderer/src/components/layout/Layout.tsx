@@ -25,6 +25,7 @@ import { clearLoading, setLoading } from '../../state/slices/loaderSlice';
 import { RootState } from '../../state/store';
 import { IncomingElectronResponseType } from '../../types/layout.types';
 import { setSettings } from '../settings/settingsSlice';
+import Player from '../player/Player';
 
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon, current: false },
@@ -39,14 +40,6 @@ const playlists = [
   { id: 3, name: 'Tailwind Labs', href: '#', initial: 'T', current: false },
 ]
 
-const secondaryNavigation = [
-  { name: 'Account', href: '#', current: true },
-  { name: 'Notifications', href: '#', current: false },
-  { name: 'Billing', href: '#', current: false },
-  { name: 'Teams', href: '#', current: false },
-  { name: 'Integrations', href: '#', current: false },
-]
-
 
 function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(' ')
@@ -54,45 +47,44 @@ function classNames(...classes: any[]) {
 
 export default function Layout() {
   const dispatch = useDispatch();
-  const loading = useSelector((state: RootState) => state.loader);
-  // const { error, type, message } = useSelector((state: RootState) => state.layout);
+  const oneTime = useRef(true);
 
-  // const dispatch = useDispatch();
-  // const location = useLocation().pathname;
-  // TODO -> Move UP or Loader DOWN
+
   useEffect(() => {
-    // Requesting data from Electron -> Listeners
-    dispatch(setLoading());
-    window.api.send(
-      REQUEST_TO_ELECTRON,
-      {
-        type: READ_LIBRARY_FILE,
-        payload: null
-      }
-    );
 
-    window.api.send(
-      RESPONSE_FROM_ELECTRON,
-      {
-        type: READ_SETTINGS_FILE,
-        payload: null
-      }
-    );
+    if (oneTime.current) {
+      window.api.send(
+        REQUEST_TO_ELECTRON,
+        {
+          type: READ_LIBRARY_FILE,
+          payload: null
+        }
+      );
+
+      window.api.send(
+        REQUEST_TO_ELECTRON,
+        {
+          type: READ_SETTINGS_FILE,
+          payload: null
+        }
+      );
+      oneTime.current = false;
+    }
 
     // Recieve information from Electron -> Listeners
     window.api.receive(RESPONSE_FROM_ELECTRON, async (res: IncomingElectronResponseType) => {
       const { type, data } = res;
+      console.log("👉 -> file: Layout.tsx:85 -> type:", type);
 
       switch (type) {
         case APPEND_BOOKS: {
-          console.log("👉 -> file: Layout.tsx:75 -> type:", data);
           dispatch(appendLibrary(data));
-          dispatch(clearLoading());
+
           break;
         }
         case READ_LIBRARY_FILE: {
           dispatch(setBooks(data));
-          dispatch(clearLoading());
+
           break;
         }
         case READ_SETTINGS_FILE: {
@@ -104,7 +96,7 @@ export default function Layout() {
           break;
         }
         case ELECTRON_ERROR: {
-          dispatch(clearLoading());
+
           dispatch(setError({ error: true, type: 'error', message: data }));
           setTimeout(() => {
             dispatch(clearError());
@@ -112,7 +104,7 @@ export default function Layout() {
           break;
         }
         case ELECTRON_WARNING: {
-          dispatch(clearLoading());
+
           dispatch(setError({ error: true, type: 'warning', message: data }));
           setTimeout(() => {
             dispatch(clearError());
@@ -120,7 +112,7 @@ export default function Layout() {
           break;
         }
         case ELECTRON_INFO: {
-          dispatch(clearLoading());
+
           dispatch(setError({ error: true, type: 'info', message: data }));
           setTimeout(() => {
             dispatch(clearError());
@@ -236,6 +228,7 @@ export default function Layout() {
             </div>
           </div>
         </main>
+        <Player />
       </div>
     </>
   );

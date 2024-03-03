@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { BookState } from "../../types/book.types";
-import { BookDataType, LibraryBookSetType } from "../../types/library.types";
+import { LibraryBookSetType } from "../../types/library.types";
 
 const initialState: LibraryBookSetType[] = [
   {
@@ -21,8 +20,7 @@ const booksSlice = createSlice({
       return initialState;
     },
     appendLibrary: (state, { payload }) => {
-      return { ...state, ...payload };
-
+      return [...state, ...payload];
     }
   },
 });
