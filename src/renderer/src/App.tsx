@@ -1,15 +1,15 @@
 
 import { Provider } from 'react-redux';
-import { createHashRouter, createMemoryRouter, HashRouter, Route, RouterProvider, Routes } from 'react-router-dom';
+import { createHashRouter, RouterProvider } from 'react-router-dom';
 
 import Layout from './components/layout/Layout';
+import Loader from './components/loader/Loader';
 import ErrorPage from './components/pages/ErrorPage';
 import Home from './components/pages/Home';
 import Library from './components/pages/Library';
 import Settings from './components/pages/Settings';
 import Stats from './components/pages/Stats';
 import store from './state/store';
-import Loader from './components/loader/Loader';
 
 
 const router = createHashRouter([

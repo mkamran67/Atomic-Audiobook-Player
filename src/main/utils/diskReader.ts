@@ -1,10 +1,11 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
-import getAudioDurationInSeconds from 'get-audio-duration';
 import * as jsmediatags from 'jsmediatags';
 import path from 'node:path';
 
 import { IMG_EXTENSIONS, MEDIA_EXTENSIONS } from '../electron_constants';
 
+import ffprobeStatic from 'ffprobe-static';
+import ffprobe from 'ffprobe';
 import { access, constants } from 'fs/promises';
 import { BookDetails, MinimumChapterDetails } from '../../renderer/src/types/book.types';
 import logger from './logger';
@@ -74,6 +75,19 @@ export function directorySearch(dirPath: string): string[] {
 	return bookList;
 }
 
+
+async function ffProbeMedia(mediaPath: string) {
+	return new Promise<any>((resolve, reject) => {
+		ffprobe(mediaPath, { path: ffprobeStatic.path })
+			.then(function (info) {
+				resolve(Number(info.streams[0].duration));
+			})
+			.catch(function (err) {
+				reject(err);
+			})
+	});
+}
+
 async function getAllDetailsOfAMediaFile(
 	mediaPath: string,
 	totalSize: number = 0,
@@ -81,17 +95,16 @@ async function getAllDetailsOfAMediaFile(
 ): Promise<[BookDetails, number, number]> {
 	try {
 		const bookDetails: BookDetails = await new Promise((resolve, reject) => {
+
 			jsmediatags.read(mediaPath, {
 				onSuccess: async (read_info: any) => {
 					let currentChapterLength = 0;
-					const totalTracks = read_info.tags.track ? read_info.tags.track.split('/')[1] : 1;
+					// const totalTracks = read_info.tags.track ? read_info.tags.track.split('/')[1] : 1;
+					const totalTracks = read_info.tags.track ? read_info.tags.track : 1;
 
 					totalSize += statSync(mediaPath).size;
 					// REVIEW - Fix the duration of the audio file
-					await getAudioDurationInSeconds(mediaPath).then((duration: number) => {
-						currentChapterLength = duration;
-						console.log('👉 -> file: utils.ts:248 -> currentChapterLength:', currentChapterLength);
-					});
+					currentChapterLength = await ffProbeMedia(mediaPath);
 
 					// currentChapterLength = await getAudioDuration(mediaPath);
 
@@ -138,9 +151,8 @@ async function getChapterDetails(
 		let currentChapterLength = 0;
 
 		totalSize += statSync(mediaPath).size;
-		await getAudioDurationInSeconds(mediaPath).then((duration: number) => {
-			currentChapterLength = duration;
-		});
+
+		currentChapterLength = await ffProbeMedia(mediaPath);
 
 		totalLength += currentChapterLength; // Seconds
 
@@ -171,7 +183,6 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 		let totalLength: number = 0;
 		let cover = '';
 
-		// REVIEW -> Skeleton needed?
 		let bookDetails: BookDetails = {
 			chapterList: [],
 			currentChapter: '',
@@ -232,103 +243,10 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 		bookDetails.totalLength = totalLength;
 		bookDetails.totalSize = totalSize;
 
-		// if (bookDetails) {
 		return bookDetails;
-		// }
+
 	} catch (err: any) {
+		console.error("\n\n👉 -> file: diskReader.ts:238 -> err:", err);
 		throw new Error(err);
 	}
 }
-
-// async function getBookInformation(listOfBooks, bookDirectories: string[]) {
-//   // iterate through directories
-//   for (let index = 0; index < bookDirectories.length; index++) {
-//     const bookPath = bookDirectories[index]; // Path to book directory
-
-//     let bookData: BookData = {
-//       title: "",
-//       artist: "",
-//       cover: "",
-//       dirPath: bookPath,
-//     };
-
-//     // 1. Get information & build bookData
-//     let bookDirectoryContents = readdirSync(bookPath);
-//     let checked = false;
-
-//     // Get cover
-//     // Get other metadata -> genre/tags
-//     for (let i = 0; i < bookDirectoryContents.length; i++) {
-//       let theFile = bookDirectoryContents[i];
-//       let fileExtension = bookDirectoryContents[i].split(".")[1];
-//       let fullFilePath = path.join(bookPath, theFile);
-
-//       // check file type
-//       // if -> media get metadata
-//       // if -> image set cover
-//       if (!checked && mediaExtensions.includes(fileExtension)) {
-//         let results = await getTags(fullFilePath);
-
-//         if (results.title == "skip" || results.artist == "skip") {
-//           let splitPath = bookPath.split(path.sep);
-
-//           // Since no tag was found we use the directory as the name
-//           bookData.title = splitPath[splitPath.length - 1];
-//           bookData.artist = "DNF";
-//         } else {
-//           bookData.title = results.title;
-//           bookData.artist = results.artist;
-//         }
-//         checked = true;
-//       } else if (imgExtensions.includes(fileExtension)) {
-//         bookData.cover = fullFilePath;
-//       }
-
-//       listOfBooks.push(bookData);
-//     }
-//   }
-// }
-
-// NOTE - Might use this later
-
-// async function getAudioDuration(mediaPath: string): Promise<number> {
-//   console.log("👉 -> file: utils.ts:227 -> mediaPath:", mediaPath)
-
-//   const tempAudio = new Audic(mediaPath);
-//   tempAudio.volume = 0;
-//   await tempAudio.play();
-
-//   if (tempAudio.duration == Infinity || isNaN(tempAudio.duration)) {
-//     tempAudio.currentTime = 1000000000.0;
-//     tempAudio.currentTime = 0;
-//     console.log(tempAudio.duration);
-
-//     tempAudio.pause();
-//     tempAudio.destroy();
-//     return 0;
-//   } else {
-//     tempAudio.pause();
-//     tempAudio.destroy();
-//     return tempAudio.duration;
-//   }
-// }
-
-// "scripts": {
-//   "start": "electron ./dist/electron.js",
-//   "build": "tsc",
-//   "seq": "npm run build && npm start",
-//   "dev": "nodemon --watch src --exec npm run seq",
-//   "clean": "rm -rf dist && rm -rf node_modules && rm -rf package-lock.json"
-// },
-
-// async function buildSimpleBookData(listOfBooks: BookData[], bookDirectories: string[]) {
-//   // This function will build a list containing only
-//   // Title - Cover Path - Directory Path
-
-//   for (let index = 0; index < bookDirectories.length; index++) {
-//     const book = bookDirectories[index];
-
-//     // 1. Get book title
-//     let results = await getTags(book);
-//   }
-// }

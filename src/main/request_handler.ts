@@ -2,6 +2,7 @@ import {
   ADD_BOOK_DIRECTORY,
   APPEND_BOOKS,
   ELECTRON_ERROR, GET_BOOK_COVERS,
+  GET_BOOK_DETAILS,
   READ_LIBRARY_FILE,
   READ_SETTINGS_FILE,
   RESPONSE_FROM_ELECTRON,
@@ -12,7 +13,7 @@ import { INFO_FOLDER_LOCATION, LIBRARY_FILE_LOCATION } from './electron_constant
 import { addbookDirectory } from './handlers/library';
 import { handleSettings } from "./handlers/settings";
 import { RequestFromReactType } from './types/library';
-import { readAndParseTextFile } from './utils/diskReader';
+import { getBookDetails, readAndParseTextFile } from './utils/diskReader';
 import logger from './utils/logger';
 
 
@@ -41,10 +42,10 @@ async function handleWriteSettingsFile(event: any, data: any) {
   logger.info('Writing settings file.');
   // Data should ecnompass Action and Payload
   const results = await handleSettings(data.action, data.payload);
-  // event.reply(RESPONSE_FROM_ELECTRON, {
-  //   type: READ_SETTINGS_FILE,
-  //   data: results
-  // });
+  event.reply(RESPONSE_FROM_ELECTRON, {
+    type: READ_SETTINGS_FILE,
+    data: results
+  });
 }
 
 function defaultSwitch(event: any, { type, data }: RequestFromReactType) {
@@ -58,7 +59,6 @@ function defaultSwitch(event: any, { type, data }: RequestFromReactType) {
 
 export default async function handleRendererRequest(event: any, request: RequestFromReactType) {
   const { type, data } = request;
-  console.log("👉 -> file: request_handler.ts:61 -> type:", type);
 
   try {
     switch (type) {
@@ -86,8 +86,14 @@ export default async function handleRendererRequest(event: any, request: Request
         logger.info('Saving book progress for book:');
         break;
       }
-      case GET_BOOK_COVERS: {
-        logger.info('Getting book covers.');
+      case GET_BOOK_DETAILS: {
+        logger.info(`Getting book details. ${data.path}`);
+
+        const bookDeets = await getBookDetails(data.path);
+        event.reply(RESPONSE_FROM_ELECTRON, {
+          type: GET_BOOK_DETAILS,
+          data: bookDeets
+        });
         break;
       }
       default: {

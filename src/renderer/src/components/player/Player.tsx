@@ -89,6 +89,7 @@ export default function Player() {
       setIsPlaying(false);
       audio.src = `get-file://${currentChapter}`;
       audio.load();
+      console.log("👉 -> file: Player.tsx:92 -> src:", audio.src);
 
       // Check if duration is Infinity or NaN -> bugged Electron
       if (audio.duration == Infinity || isNaN(audio.duration)) {
@@ -152,10 +153,10 @@ export default function Player() {
   };
 
   return (
-    <div className="fixed bottom-0 z-40 w-screen border-t h-36 bg-gray-50">
+    <div className="fixed bottom-0 z-40 w-screen bg-gray-800 h-36">
       <div className="w-full">
         <div className="px-12">
-          <div className="object-contain w-48 h-full bg-slate-400"></div>
+          <div className="object-contain w-48 h-full "></div>
           <div className="flex items-center justify-between pt-2">
             <div>
               <p className="w-48 text-center truncate">{title}</p>
