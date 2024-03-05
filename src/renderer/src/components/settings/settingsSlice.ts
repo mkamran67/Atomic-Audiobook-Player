@@ -1,11 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { SettingsStructureType } from '../../../../shared/types'
+import { LibraryView, SettingsStructureType } from '../../../../shared/types'
 
 const initialState: SettingsStructureType = {
   volume: 100,
   themeMode: 'system',
   previousBookDirectory: '',
-  rootDirectories: []
+  rootDirectories: [],
+  libraryView: LibraryView.LIST,
 }
 
 

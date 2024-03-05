@@ -1,10 +1,9 @@
-import { useMemo } from "react";
-import { BookDataType, LibraryBookSetType } from "../../types/library.types";
-import BookCard from "./BookCard";
 import { GET_BOOK_DETAILS, REQUEST_TO_ELECTRON } from "../../../../../src/shared/constants";
+import { BookDataType } from "../../types/library.types";
+import BookCard from "./BookCard";
 
 type Props = {
-  books: LibraryBookSetType[];
+  books: BookDataType[];
 };
 
 function GalleryView({ books }: Props) {
@@ -32,20 +31,10 @@ function GalleryView({ books }: Props) {
     }
   };
 
-  const booksCombined = useMemo(() => {
-    const combinedBooks: BookDataType[] = [];
-    books.forEach((bookSet) => {
-      bookSet.books.forEach((book) => {
-        combinedBooks.push(book);
-      });
-    });
-    return combinedBooks;
-  }, [books]);
-
   return (
     <>
-      <ul role="list" className="grid grid-flow-row grid-cols-6 gap-6">
-        {booksCombined && booksCombined.map((book, index) => {
+      <ul role="list" className="grid grid-flow-row gap-4 lg:grid-cols-4 md:grid-cols-3 xl:grid-cols-5 sm:grid-cols-2 2xl:grid-cols-8">
+        {books.map((book, index) => {
           counter++;
           return (
             <BookCard

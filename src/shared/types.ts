@@ -1,4 +1,9 @@
 // Shared Types
+export enum LibraryView {
+  GALLERY = 'gallery',
+  LIST = 'list',
+}
+
 export type SettingsStructureType = {
   rootDirectories: string[];
   themeMode: 'dark' | 'light' | 'system';
@@ -6,7 +11,10 @@ export type SettingsStructureType = {
   previousBookDirectory: string;
   fontSize?: number;
   volume: number;
+  libraryView: LibraryView;
 }
+
+
 export interface BookData {
   title: string;
   author?: string;
