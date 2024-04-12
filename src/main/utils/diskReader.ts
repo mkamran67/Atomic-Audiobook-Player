@@ -84,7 +84,7 @@ async function ffProbeMedia(mediaPath: string) {
 			})
 			.catch(function (err) {
 				reject(err);
-			})
+			});
 	});
 }
 

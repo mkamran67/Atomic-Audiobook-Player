@@ -4,20 +4,18 @@ import { ChevronRightIcon } from '@heroicons/react/20/solid';
 
 type Props = {
   book: BookDataType;
-  key: string;
 };
 
 
-function ListViewItem({ book, key }: Props) {
+function ListViewItem({ book }: Props) {
 
   const { title, author, cover, dirPath } = book;
-  console.log("👉 -> file: ListViewItem.tsx:13 -> title:", title);
+  // console.log("👉 -> file: ListViewItem.tsx:13 -> title:", title);
   const coverSrc = cover ? `get-file://${cover}` : default_img;
 
 
   return (
     <li
-      key={key}
       className="relative flex justify-between px-4 py-5 cursor-pointer gap-x-6 hover:bg-gray-800 sm:px-6 lg:px-8"
     >
       <div className="flex min-w-0 gap-x-4">
@@ -51,7 +49,7 @@ function ListViewItem({ book, key }: Props) {
         <ChevronRightIcon className="flex-none w-5 h-5 text-gray-400" aria-hidden="true" />
       </div>
     </li>
-  )
+  );
 }
 
-export default ListViewItem
+export default ListViewItem;

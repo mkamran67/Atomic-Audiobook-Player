@@ -8,10 +8,9 @@ type Props = {
   setPlaying: (arg0: any, arg1: string) => void;
 };
 
-export default function BookCard({ image, bookPath, setPlaying }: Props) {
+export default function BookCard({ title, image, bookPath, setPlaying }: Props) {
 
   const imageSrc = image ? `get-file://${image}` : default_img;
-
 
   return (
     <div
@@ -22,6 +21,7 @@ export default function BookCard({ image, bookPath, setPlaying }: Props) {
       <img
         className="object-center w-48 h-56"
         src={imageSrc} alt={"Book cover"} />
+      <p>{title}</p>
     </div>
   );
 }

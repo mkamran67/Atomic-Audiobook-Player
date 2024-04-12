@@ -9,8 +9,6 @@ export default function Library() {
   const library = useSelector((state: RootState) => state.library);
   const { libraryView } = useSelector((state: RootState) => state.settings);
 
-
-
   const booksCombined = useMemo(() => {
     const combinedBooks: BookDataType[] = [];
     library.forEach((bookSet) => {

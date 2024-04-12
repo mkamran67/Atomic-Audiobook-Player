@@ -24,7 +24,6 @@ async function handlerAddBookDirectory(event: any) {
 }
 
 function readLibraryFile(event: any) {
-  logger.info('Reading library file.');
   const data = readAndParseTextFile(LIBRARY_FILE_LOCATION);
 
   event.reply(RESPONSE_FROM_ELECTRON, {
@@ -33,9 +32,12 @@ function readLibraryFile(event: any) {
   });
 }
 
-function handleReadSettingsFile(event: any) {
-  logger.info('Reading settings file.');
-  return handleSettings('read', null);
+async function handleReadSettingsFile(event: any) {
+  const results = await handleSettings('read', null);
+  event.reply(RESPONSE_FROM_ELECTRON, {
+    type: READ_SETTINGS_FILE,
+    data: results
+  });
 }
 
 async function handleWriteSettingsFile(event: any, data: any) {
@@ -67,7 +69,7 @@ export default async function handleRendererRequest(event: any, request: Request
         break;
       }
       case READ_SETTINGS_FILE: {
-        handleReadSettingsFile(event);
+        await handleReadSettingsFile(event);
         break;
       }
       case WRITE_SETTINGS_FILE: {

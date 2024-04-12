@@ -38,11 +38,11 @@ const playlists = [
   { id: 1, name: 'Planetaria', href: '#', initial: 'P', current: false },
   { id: 2, name: 'Protocol', href: '#', initial: 'P', current: false },
   { id: 3, name: 'Tailwind Labs', href: '#', initial: 'T', current: false },
-]
+];
 
 
 function classNames(...classes: any[]) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(' ');
 }
 
 export default function Layout() {
@@ -85,6 +85,7 @@ export default function Layout() {
           break;
         }
         case READ_SETTINGS_FILE: {
+          console.log(`Got Settings`);
           dispatch(setSettings(data));
           break;
         }

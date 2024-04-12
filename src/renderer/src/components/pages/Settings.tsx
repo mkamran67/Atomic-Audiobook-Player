@@ -17,16 +17,19 @@ export default function Settings() {
     volume,
     fontSize
   } = useSelector((state: RootState) => state.settings);
+  console.log("🚀 -> file: Settings.tsx:20 -> rootDirectories:", rootDirectories);
   const [itemLoading, setItemLoading] = useState(false);
   const counter = useRef(0);
-  const previousDirectories = useRef<string[]>([]);
+  const prevDirState = useRef<string[]>([]);
 
-  // Compare to see if rootDirectories have been updated
   useEffect(() => {
-    if (previousDirectories.current.length === rootDirectories.length) {
+    if (prevDirState.current !== rootDirectories) {
       setItemLoading(false);
     }
+
+    prevDirState.current = rootDirectories;
   }, [rootDirectories]);
+
 
 
 
@@ -52,7 +55,7 @@ export default function Settings() {
     const eventType = target.id;
 
     if (eventType === 'Add Directory') {
-      previousDirectories.current = rootDirectories;
+      prevDirState.current = rootDirectories;
       setItemLoading(true);
       window.api.send(REQUEST_TO_ELECTRON, {
         type: ADD_BOOK_DIRECTORY,
@@ -125,7 +128,7 @@ export default function Settings() {
                     );
                   })
                 }
-                {itemLoading && <SettingsLoadingItem title="Adding new directory..." />}
+                {itemLoading ? <SettingsLoadingItem title="Adding new directory..." /> : <p>{itemLoading}</p>}
                 <div className="flex pt-6 border-gray-900">
                   <button type="button" id='Add Directory' className="text-sm font-semibold leading-6 text-indigo-600 hover:text-indigo-500" onClick={dirChangeHandler}>
                     <span aria-hidden="true">+</span> Add Directory
