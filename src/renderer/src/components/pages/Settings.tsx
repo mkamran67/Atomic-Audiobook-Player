@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { ADD_BOOK_DIRECTORY, REQUEST_TO_ELECTRON, WRITE_SETTINGS_FILE } from '../../../../../src/shared/constants'
-import { RootState } from '../../state/store'
-import { InputEnumType, RangeInputProps } from '../../types/general.types'
-import { useDebounceValue } from '../../utils/customHooks'
-import InputSelector from '../InputSelector'
+import { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { ADD_BOOK_DIRECTORY, REQUEST_TO_ELECTRON, WRITE_SETTINGS_FILE } from '../../../../../src/shared/constants';
+import { RootState } from '../../state/store';
+import { InputEnumType, RangeInputProps } from '../../types/general.types';
+import { useDebounceValue } from '../../utils/customHooks';
+import InputSelector from '../InputSelector';
+import SettingsLoadingItem from '../settings/SettingsLoadingItem';
 
 export default function Settings() {
   // Handle saves
@@ -16,22 +17,34 @@ export default function Settings() {
     volume,
     fontSize
   } = useSelector((state: RootState) => state.settings);
+  const [itemLoading, setItemLoading] = useState(false);
+  const counter = useRef(0);
+  const previousDirectories = useRef<string[]>([]);
 
-  const counter = useRef(0)
-  console.log(`Re render ${counter.current}`)
-  counter.current += 1
-  const init = useRef(true)
+  // Compare to see if rootDirectories have been updated
+  useEffect(() => {
+    if (previousDirectories.current.length === rootDirectories.length) {
+      setItemLoading(false);
+    }
+  }, [rootDirectories]);
+
+
+
 
   // FIXME: This is a temporary solution to get the volume to update
-  const [rangeValue, setRangeValue] = useState(volume)
-  const debouncedVolume = useDebounceValue(rangeValue, 500)
+  const [rangeValue, setRangeValue] = useState(volume);
+  // FIXME: Use this later
+  // const debouncedVolume = useDebounceValue(rangeValue, 500);
+
+  console.log(`Re render ${counter.current}`);
+  counter.current += 1;
 
   const rangeInputProps: RangeInputProps = {
     value: rangeValue,
     onChange: (e) => setRangeValue(Number(e.target.value)),
     min: '0',
     max: '100',
-  }
+  };
 
   const dirChangeHandler = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 
@@ -39,19 +52,21 @@ export default function Settings() {
     const eventType = target.id;
 
     if (eventType === 'Add Directory') {
+      previousDirectories.current = rootDirectories;
+      setItemLoading(true);
       window.api.send(REQUEST_TO_ELECTRON, {
         type: ADD_BOOK_DIRECTORY,
         data: {
           update: false
         }
-      })
+      });
     } else if (eventType === 'Update Directory') {
       window.api.send(REQUEST_TO_ELECTRON, {
         type: ADD_BOOK_DIRECTORY,
         data: {
           update: true
         }
-      })
+      });
     }
   };
 
@@ -68,25 +83,9 @@ export default function Settings() {
         payload: directory,
       }
 
-    })
-  }
+    });
+  };
 
-  useEffect(() => {
-    window.api.send(REQUEST_TO_ELECTRON, {
-      type: WRITE_SETTINGS_FILE,
-      data:
-      {
-        action: 'update',
-        payload: {
-          volume: debouncedVolume,
-          rootDirectories,
-          previousBookDirectory,
-          fontSize,
-          themeMode,
-        },
-      }
-    })
-  }, [debouncedVolume])
 
   return (
     <>
@@ -123,9 +122,10 @@ export default function Settings() {
                           </button>
                         </div>
                       </li>
-                    )
+                    );
                   })
                 }
+                {itemLoading && <SettingsLoadingItem title="Adding new directory..." />}
                 <div className="flex pt-6 border-gray-900">
                   <button type="button" id='Add Directory' className="text-sm font-semibold leading-6 text-indigo-600 hover:text-indigo-500" onClick={dirChangeHandler}>
                     <span aria-hidden="true">+</span> Add Directory
@@ -134,8 +134,8 @@ export default function Settings() {
               </ul>
             </section>
           </div>
-        </main>
-      </div>
+        </main >
+      </div >
     </>
-  )
+  );
 }

@@ -1,6 +1,5 @@
-import React from 'react'
-import InputSelector from '../InputSelector'
-import { InputEnumType, RangeInputProps } from '../../types/general.types'
+import InputSelector from '../InputSelector';
+import { InputEnumType, RangeInputProps } from '../../types/general.types';
 
 type Props = {
   liKey: string,
@@ -8,10 +7,10 @@ type Props = {
   description: string | null,
   inputEnum: InputEnumType,
   inputProps: RangeInputProps | null,
-}
+};
 
 function SettingListItem(props: Props) {
-  const { inputEnum, liKey, title, description, inputProps } = props
+  const { inputEnum, liKey, title, description, inputProps } = props;
 
   return (
     <>
@@ -24,7 +23,7 @@ function SettingListItem(props: Props) {
         {inputProps && <InputSelector inputEnumSelector={inputEnum} inputProps={inputProps} />}
       </li>
     </>
-  )
+  );
 }
 
-export default SettingListItem
+export default SettingListItem;

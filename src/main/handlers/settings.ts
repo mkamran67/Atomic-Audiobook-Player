@@ -1,5 +1,5 @@
-import { ipcMain, webContents } from 'electron';
-import { SettingsStructureType } from '../../../src/shared/types';
+import { webContents } from 'electron';
+import { LibraryView, SettingsStructureType } from '../../../src/shared/types';
 import { SETTINGS_LOCATION } from '../electron_constants';
 import { checkIfFileExists, readAndParseTextFile } from '../utils/diskReader';
 import { writeToDisk } from '../utils/diskWriter';
@@ -43,7 +43,8 @@ export function createSettingsFile(): boolean {
 			rootDirectories: [],
 			themeMode: 'system',
 			previousBookDirectory: '',
-			volume: 100
+			volume: 100,
+			libraryView: LibraryView.GALLERY
 		};
 
 		if (checkIfFileExists(SETTINGS_LOCATION)) {
