@@ -1,5 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit'
-import { LibraryView, SettingsStructureType } from '../../../../shared/types'
+import { createSlice } from '@reduxjs/toolkit';
+import { LibraryView, SettingsStructureType } from '../../../../shared/types';
 
 const initialState: SettingsStructureType = {
   volume: 100,
@@ -7,7 +7,7 @@ const initialState: SettingsStructureType = {
   previousBookDirectory: '',
   rootDirectories: [],
   libraryView: LibraryView.LIST,
-}
+};
 
 
 const settingsSlice = createSlice({
@@ -18,13 +18,19 @@ const settingsSlice = createSlice({
       return {
         ...state,
         ...payload
-      }
+      };
+    },
+    changeLibraryView: (state, { payload }) => {
+      return {
+        ...state,
+        ...payload
+      };
     },
     resetSettings: () => {
-      return initialState
+      return initialState;
     }
   }
-})
+});
 
-export const { setSettings, resetSettings } = settingsSlice.actions
-export default settingsSlice.reducer
+export const { setSettings, resetSettings, changeLibraryView } = settingsSlice.actions;
+export default settingsSlice.reducer;

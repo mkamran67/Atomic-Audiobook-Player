@@ -17,7 +17,6 @@ export default function Settings() {
     volume,
     fontSize
   } = useSelector((state: RootState) => state.settings);
-  console.log("🚀 -> file: Settings.tsx:20 -> rootDirectories:", rootDirectories);
   const [itemLoading, setItemLoading] = useState(false);
   const counter = useRef(0);
   const prevDirState = useRef<string[]>([]);
@@ -38,9 +37,6 @@ export default function Settings() {
   const [rangeValue, setRangeValue] = useState(volume);
   // FIXME: Use this later
   // const debouncedVolume = useDebounceValue(rangeValue, 500);
-
-  console.log(`Re render ${counter.current}`);
-  counter.current += 1;
 
   const rangeInputProps: RangeInputProps = {
     value: rangeValue,

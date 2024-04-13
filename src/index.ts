@@ -1,10 +1,13 @@
 import { is } from "@electron-toolkit/utils";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/20/solid";
 import { BrowserWindow, app, ipcMain, protocol } from "electron";
 import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } from 'electron-devtools-installer';
+import path from 'path';
 import { getFileFromDisk } from "./main/handlers/file_reader";
 import handleRendererRequest from "./main/request_handler";
 import { setupConfigFiles } from "./main/utils/configs";
 import logger from "./main/utils/logger";
+import { net } from "electron";
 
 
 // whether you're running in development or production).
@@ -69,7 +72,17 @@ app.whenReady().then(() => {
 
   protocol.handle('get-file', async (request) => {
     try {
-      return getFileFromDisk(request);
+      const trimmedPath = request.url.slice('get-file://'.length);
+      const decodedPath = path.normalize(decodeURI(trimmedPath));
+      const formattedFilePath = 'file://' + decodedPath[0] + ':' + decodedPath.slice(1);
+
+      const res = await net.fetch(formattedFilePath);
+
+      if (res.ok) {
+        return res;
+      } else {
+        throw new Error(res.statusText + request.url.slice('get-file://'.length));
+      }
     } catch (error) {
       logger.error('Error in handling get-file protocol' + error);
       return error;

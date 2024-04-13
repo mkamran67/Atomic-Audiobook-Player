@@ -7,8 +7,6 @@ type Props = {
 };
 
 function GalleryView({ books }: Props) {
-  let counter = 0;
-
   // TODO: Add a loading state/spinner for images
   // TODO: Change first click to view more info of the book rather than playing it.
 
@@ -35,7 +33,6 @@ function GalleryView({ books }: Props) {
     <>
       <ul role="list" className="grid grid-flow-row gap-4 lg:grid-cols-4 md:grid-cols-3 xl:grid-cols-5 sm:grid-cols-2 2xl:grid-cols-8">
         {books.map((book, index) => {
-          counter++;
           return (
             <BookCard
               key={index + "bookCard"}
@@ -48,7 +45,6 @@ function GalleryView({ books }: Props) {
           );
         })}
       </ul>
-      <p>Found {counter} books.</p>
     </>
   );
 }
