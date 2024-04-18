@@ -6,7 +6,7 @@ type Props = {
   isPlaying: boolean,
   isThereAudio: boolean,
   steppingAround: (amount: number, direction: string) => void,
-}
+};
 
 function ButtonGroup({ handlePlayPause, isPlaying, isThereAudio, steppingAround }: Props) {
 
@@ -18,7 +18,7 @@ function ButtonGroup({ handlePlayPause, isPlaying, isThereAudio, steppingAround 
           <EllipsisHorizontalCircleIcon className="w-10 h-10 text-gray-500 rotate-180 cursor-default" />
         </div>
       </div>
-    )
+    );
   }
 
 
@@ -47,7 +47,7 @@ function ButtonGroup({ handlePlayPause, isPlaying, isThereAudio, steppingAround 
       </div>
       <ForwardIcon className="w-10 h-10 text-gray-500 cursor-pointer hover:text-gray-800" />
     </div>
-  )
+  );
 }
 
-export default ButtonGroup
+export default ButtonGroup;

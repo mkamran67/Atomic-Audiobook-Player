@@ -1,6 +1,8 @@
 import React from 'react';
 
-type Props = {};
+type Props = {
+  title: string;
+};
 
 function ContinueItem({ }: Props) {
   return (

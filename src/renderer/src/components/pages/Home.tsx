@@ -1,14 +1,12 @@
+import ContinueReading from "../home/ContinueReading";
 import TimeLine from "../home/TimeLine";
 
-type Props = {};
 
-export default function Home({ }: Props) {
+export default function Home() {
   return (
-    <div className="flex w-full h-full">
-      <section className="w-3/4 h-full bg-gray-800">
-        <h3 className="p-2 text-xl text-ellipsis">
-          Continue Reading
-        </h3>
+    <div className="flex w-full h-full gap-2 text-gray-100">
+      <section className="w-3/4 h-auto bg-gray-800 rounded">
+        <ContinueReading />
       </section>
       <section className="m-2">
         <TimeLine />

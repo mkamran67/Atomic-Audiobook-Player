@@ -169,11 +169,6 @@ async function getChapterDetails(
 	}
 }
 
-/**
- *
- * @param dirPath -> Path to Book directory
- * @returns A book object with book details and chapters
- */
 export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 	try {
 		const listOfFiles = readdirSync(dirPath, { withFileTypes: true });
@@ -191,6 +186,7 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 			totalTracks: 0,
 			title: ''
 		};
+
 		let bookDataTrigger: boolean = true; // If true means we don't have information about the book yet.
 
 		// Get files from the book directory
@@ -211,12 +207,7 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 					} else if (!cover) {
 						cover = file.name;
 					}
-				} else {
-					// TODO -> Log here for testing
-					console.log('File type not supported');
 				}
-			} else {
-				console.log(`Not a file`);
 			}
 		}
 

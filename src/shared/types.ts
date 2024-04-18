@@ -12,6 +12,21 @@ export type SettingsStructureType = {
   fontSize?: number;
   volume: number;
   libraryView: LibraryView;
+};
+
+export interface ChapterStats {
+  chapters: number;
+  length: number;
+  comments: string[];
+}
+
+export interface statsBooksState {
+  title: string;
+  duration: number;
+  path: string;
+  imgPath: string;
+  durationPlayed: number;
+  chapters: ChapterStats[];
 }
 
 
@@ -27,6 +42,6 @@ export interface BookData {
 type RootDirectoryStructure = {
   rootDirectory: string;
   books: BookData[];
-}
+};
 
 export type LibraryStructure = RootDirectoryStructure[];

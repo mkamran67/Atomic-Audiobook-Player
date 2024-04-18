@@ -5,11 +5,13 @@ import {
   GET_BOOK_DETAILS,
   READ_LIBRARY_FILE,
   READ_SETTINGS_FILE,
+  READ_STATS_FILE,
   RESPONSE_FROM_ELECTRON,
   SAVE_BOOK_PROGRESS,
-  WRITE_SETTINGS_FILE
+  WRITE_SETTINGS_FILE,
+  WRITE_STATS_FILE
 } from '../shared/constants';
-import { INFO_FOLDER_LOCATION, LIBRARY_FILE_LOCATION } from './electron_constants';
+import { INFO_FOLDER_LOCATION, LIBRARY_FILE_LOCATION, STATS_FILE_LOCATION } from './electron_constants';
 import { addbookDirectory } from './handlers/library';
 import { handleSettings } from "./handlers/settings";
 import { RequestFromReactType } from './types/library';
@@ -59,11 +61,33 @@ function defaultSwitch(event: any, { type, data }: RequestFromReactType) {
 
 }
 
+function handleReadStatsFile(event: any) {
+  const data = readAndParseTextFile(STATS_FILE_LOCATION);
+
+  event.reply(RESPONSE_FROM_ELECTRON, {
+    type: READ_STATS_FILE,
+    data: data
+  });
+
+}
+
+function handleWriteStatsFile(event: any, data: ) {
+
+}
+
 export default async function handleRendererRequest(event: any, request: RequestFromReactType) {
   const { type, data } = request;
 
   try {
     switch (type) {
+      case READ_STATS_FILE: {
+        handleReadStatsFile(event);
+        break;
+      }
+      case WRITE_STATS_FILE: {
+        // handleWriteStatsFile(event, data);
+        break;
+      }
       case READ_LIBRARY_FILE: {
         readLibraryFile(event);
         break;

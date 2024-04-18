@@ -3,6 +3,9 @@ export const REQUEST_TO_ELECTRON = 'requestToElectron';
 export const RESPONSE_FROM_ELECTRON = 'responseFromElectron';
 
 // API Request types
+export const READ_STATS_FILE = 'readStatsFile';
+export const WRITE_STATS_FILE = 'writeStatsFile';
+export const UPDATE_STATS_FILE = 'updateStatsFile';
 export const READ_LIBRARY_FILE = 'readLibraryFile';
 export const READ_SETTINGS_FILE = 'readSettingsFile';
 export const WRITE_SETTINGS_FILE = 'writeSettingsFile';
@@ -15,5 +18,3 @@ export const ELECTRON_INFO = 'electronInfo';
 export const APPEND_BOOKS = 'appendBooks';
 export const GET_BOOK_DETAILS = 'getBookDetails';
 export const REACT_ERROR = 'reactError';
-
-

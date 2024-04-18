@@ -22,7 +22,7 @@ const playerSlice = createSlice({
     },
     setChapterList: (state, { payload }) => {
 
-      const chapters = payload.chapterList.map((chapter : string) => {
+      const chapters = payload.chapterList.map((chapter: string) => {
         const names = chapter.split("/");
 
         return {
