@@ -8,6 +8,7 @@ const initialState: BookDetails = {
   currentTime: 0,
   totalTracks: 0,
   chapterList: [],
+  bookPath: ""
 };
 
 const playerSlice = createSlice({

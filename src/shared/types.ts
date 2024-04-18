@@ -44,4 +44,6 @@ type RootDirectoryStructure = {
   books: BookData[];
 };
 
+
+
 export type LibraryStructure = RootDirectoryStructure[];

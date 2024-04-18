@@ -111,6 +111,7 @@ async function getAllDetailsOfAMediaFile(
 					totalLength += currentChapterLength; // Seconds
 
 					const bookData: BookDetails = {
+						bookPath: mediaPath,
 						totalTracks: totalTracks,
 						title: read_info.tags.title,
 						author: read_info.tags.artist,
@@ -184,7 +185,8 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 			currentTrack: 0,
 			currentTime: 0,
 			totalTracks: 0,
-			title: ''
+			title: '',
+			bookPath: dirPath
 		};
 
 		let bookDataTrigger: boolean = true; // If true means we don't have information about the book yet.
@@ -231,6 +233,7 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 			}
 		}
 
+		bookDetails.coverPath = cover;
 		bookDetails.totalLength = totalLength;
 		bookDetails.totalSize = totalSize;
 

@@ -63,8 +63,10 @@ export default function Player() {
     title,
     totalLength,
     totalSize,
-    year
+    year,
+    bookPath
   } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
+  console.log("file: Player.tsx:69 -> bookPath:", bookPath);
   console.log("file: Player.tsx:66 -> cover:", coverPath);
 
   // TODO: 1. Add logic for playing & pausing
@@ -74,7 +76,6 @@ export default function Player() {
   const [currentTimeLeftInSeconds, setCurrentTimeLeftInSeconds] = useState("00:00:00");
   const trackProgress = useRef(0);
   const [progressBar, setProgressBar] = useState(0);
-  console.log("file: Player.tsx:73 -> audio:", audio);
 
   const handlePlayPause = () => {
     if (audio && !isPlaying) {
@@ -163,7 +164,7 @@ export default function Player() {
   return (
     <div className="fixed bottom-0 left-0 z-40 w-screen bg-gray-900 h-52 overflow-none">
       <div className="flex flex-row max-w-full max-h-full p-2">
-        <img src={coverPath ? coverPath : default_img} className="rounded-lg max-w-32" />
+        <img src={coverPath ? `get-file://${coverPath}` : null} className="rounded-lg max-w-32" />
         <div className="flex flex-col items-center justify-center w-full gap-2">
           <p className="w-64 text-center truncate hover:w-full">{title}</p>
           <ButtonGroup isPlaying={isPlaying} steppingAround={steppingAround} isThereAudio={audio ? true : false} handlePlayPause={handlePlayPause} />

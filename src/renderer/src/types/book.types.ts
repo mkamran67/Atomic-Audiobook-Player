@@ -22,4 +22,5 @@ export interface BookDetails {
   coverPath?: string;
   totalSize?: number;
   totalLength?: number;
+  bookPath: string;
 }
