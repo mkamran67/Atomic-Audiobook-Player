@@ -1,6 +1,7 @@
 import { BookDataType } from '../../types/library.types';
 import default_img from '../../assets/default-book-cover.jpg';
 import { ChevronRightIcon } from '@heroicons/react/20/solid';
+import { convertURI } from '../../utils/funcs';
 
 type Props = {
   book: BookDataType;
@@ -11,7 +12,7 @@ function ListViewItem({ book }: Props) {
 
   const { title, author, cover, dirPath } = book;
   // console.log("👉 -> file: ListViewItem.tsx:13 -> title:", title);
-  const coverSrc = cover ? `potato://${cover}` : default_img;
+  const coverSrc = cover ? convertURI(cover) : default_img;
 
 
   return (

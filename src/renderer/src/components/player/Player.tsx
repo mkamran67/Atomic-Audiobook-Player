@@ -7,6 +7,7 @@ import ButtonGroup from "./ButtonGroup";
 import BookCard from "../library/BookCard";
 import default_img from '../../assets/default-book-cover.jpg';
 import { useAudio } from "../../utils/customHooks";
+import { convertURI } from "../../utils/funcs";
 
 
 
@@ -81,10 +82,10 @@ export default function Player() {
   return (
     <div className="fixed bottom-0 left-0 z-40 w-screen bg-gray-900 h-52 overflow-none">
       <div className="flex flex-row max-w-full max-h-full p-2">
-        <img src={coverPath ? `potato://${coverPath}` : null} className="rounded-lg max-w-32" />
+        <img src={coverPath ? convertURI(coverPath) : null} className="rounded-lg max-w-32" />
         <div className="flex flex-col items-center justify-center w-full gap-2">
           <p className="w-64 text-center truncate hover:w-full">{title}</p>
-          <audio ref={audioRef} src={`potato://${currentChapter}`}>{currentChapter}</audio>
+          <audio ref={audioRef} src={convertURI(currentChapter)}>{currentChapter}</audio>
           <button onClick={playOnClick}>Play</button>
           <button onClick={pauseOnClick}>Pause</button>
           {/* <ButtonGroup isPlaying={isPlaying} steppingAround={steppingAround} isThereAudio={audio ? true : false} handlePlayPause={handlePlayPause} />

@@ -5,7 +5,6 @@ import path from 'path';
 import handleRendererRequest from "./main/request_handler";
 import { setupConfigFiles } from "./main/utils/configs";
 import logger from "./main/utils/logger";
-import { pathToFileURL } from 'url';
 
 
 // whether you're running in development or production).
@@ -21,13 +20,13 @@ if (require('electron-squirrel-startup')) {
 setupConfigFiles();
 
 // REVIEW supportFetchAPI 
-// protocol.registerSchemesAsPrivileged([{
-//   scheme: 'potato',
-//   privileges: {
-//     standard: true,
-//     secure: true,
-//   }
-// }]);
+protocol.registerSchemesAsPrivileged([{
+  scheme: 'potato://',
+  privileges: {
+    standard: true,
+    secure: true,
+  }
+}]);
 
 const createWindow = (): void => {
 
@@ -73,11 +72,15 @@ app.whenReady().then(() => {
 
   protocol.handle('potato', async (request) => {
     try {
+      // console.log(request.url);
       const trimmedPath = request.url.slice('potato://'.length);
       const decodedPath = path.normalize(decodeURIComponent(trimmedPath));
       const formattedFilePath = 'file://' + decodedPath;
 
-      return await net.fetch(formattedFilePath);
+      const res = await net.fetch(formattedFilePath);
+
+      return res;
+
     } catch (error) {
       console.error(request.url);
       logger.error('Error in handling potato protocol' + error);
