@@ -5,6 +5,7 @@
   "description": "My Electron application description",
   "main": ".webpack/main",
   "scripts": {
+    "dev": "nodemon",
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
@@ -16,7 +17,6 @@
     "name": "Muhammad Kamran",
     "email": "mkamran1967@gmail.com"
   },
-  "devContentSecurityPolicy": "default-src 'self' 'unsafe-eval' 'unsafe-inline' http://localhost:* ws://localhost:*;",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.23.9",
@@ -45,6 +45,7 @@
     "eslint-plugin-import": "^2.25.0",
     "fork-ts-checker-webpack-plugin": "^7.2.13",
     "node-loader": "^2.0.0",
+    "nodemon": "^3.1.0",
     "postcss": "^8.4.35",
     "postcss-loader": "^8.1.0",
     "postcss-preset-env": "^9.3.0",

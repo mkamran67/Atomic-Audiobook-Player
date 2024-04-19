@@ -71,9 +71,8 @@ function handleReadStatsFile(event: any) {
 
 }
 
-function handleWriteStatsFile(event: any, data: ) {
-
-}
+// function handleWriteStatsFile(event: any, data: ) {
+// }
 
 export default async function handleRendererRequest(event: any, request: RequestFromReactType) {
   const { type, data } = request;
@@ -113,8 +112,6 @@ export default async function handleRendererRequest(event: any, request: Request
         break;
       }
       case GET_BOOK_DETAILS: {
-        logger.info(`Getting book details. ${data.path}`);
-
         const bookDeets = await getBookDetails(data.path);
         event.reply(RESPONSE_FROM_ELECTRON, {
           type: GET_BOOK_DETAILS,

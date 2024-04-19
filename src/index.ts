@@ -1,13 +1,11 @@
 import { is } from "@electron-toolkit/utils";
-import { ChatBubbleLeftRightIcon } from "@heroicons/react/20/solid";
-import { BrowserWindow, app, ipcMain, protocol } from "electron";
+import { BrowserWindow, app, ipcMain, net, protocol } from "electron";
 import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } from 'electron-devtools-installer';
 import path from 'path';
-import { getFileFromDisk } from "./main/handlers/file_reader";
 import handleRendererRequest from "./main/request_handler";
 import { setupConfigFiles } from "./main/utils/configs";
 import logger from "./main/utils/logger";
-import { net } from "electron";
+import { pathToFileURL } from 'url';
 
 
 // whether you're running in development or production).
@@ -19,16 +17,17 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
+
 setupConfigFiles();
 
-protocol.registerSchemesAsPrivileged([{
-  scheme: 'get-file',
-  privileges: {
-    standard: true,
-    secure: true
-  }
-}]);
-
+// REVIEW supportFetchAPI 
+// protocol.registerSchemesAsPrivileged([{
+//   scheme: 'potato',
+//   privileges: {
+//     standard: true,
+//     secure: true,
+//   }
+// }]);
 
 const createWindow = (): void => {
 
@@ -49,45 +48,43 @@ const createWindow = (): void => {
     callback({
       responseHeaders: {
         ...details.responseHeaders,
-        'Content-Security-Policy': ["default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: get-file:; media-src 'self' data: get-file:;"]
+        'Content-Security-Policy': ["default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: potato:; media-src 'self' data: potato:;"]
       }
     });
   });
 
 
   // if (is.dev) {
-  installExtension(REDUX_DEVTOOLS)
-    .then((name) => console.log(`Added Extension:  ${name}`))
-    .catch((err) => console.log('An error occurred: ', err));
-  installExtension(REACT_DEVELOPER_TOOLS)
-    .then((name) => console.log(`Added Extension:  ${name}`))
-    .catch((err) => console.log('An error occurred: ', err));
-  mainWindow.webContents.openDevTools();
+  // installExtension(REDUX_DEVTOOLS)
+  //   .then((name) => console.log(`Added Extension:  ${name}`))
+  //   .catch((err) => console.log('An error occurred: ', err));
+  // installExtension(REACT_DEVELOPER_TOOLS)
+  //   .then((name) => console.log(`Added Extension:  ${name}`))
+  //   .catch((err) => console.log('An error occurred: ', err));
+  try {
+    mainWindow.webContents.openDevTools();
+  } catch (error) {
+    console.error('Error in opening dev tools', error);
+  }
 };
-// };
+
 
 app.whenReady().then(() => {
 
-  setupConfigFiles();
-
-  protocol.handle('get-file', async (request) => {
+  protocol.handle('potato', async (request) => {
     try {
-      const trimmedPath = request.url.slice('get-file://'.length);
-      const decodedPath = path.normalize(decodeURI(trimmedPath));
-      const formattedFilePath = 'file://' + decodedPath[0] + ':' + decodedPath.slice(1);
+      const trimmedPath = request.url.slice('potato://'.length);
+      const decodedPath = path.normalize(decodeURIComponent(trimmedPath));
+      const formattedFilePath = 'file://' + decodedPath;
 
-      const res = await net.fetch(formattedFilePath);
-
-      if (res.ok) {
-        return res;
-      } else {
-        throw new Error(res.statusText + request.url.slice('get-file://'.length));
-      }
+      return await net.fetch(formattedFilePath);
     } catch (error) {
-      logger.error('Error in handling get-file protocol' + error);
+      console.error(request.url);
+      logger.error('Error in handling potato protocol' + error);
       return error;
     }
   });
+
 
   createWindow();
 });

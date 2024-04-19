@@ -135,9 +135,7 @@ async function getAllDetailsOfAMediaFile(
 			});
 		});
 
-		// if (bookDetails) {
 		return [bookDetails, totalSize, totalLength];
-		// }
 	} catch (err: any) {
 		throw new Error(err);
 	}
@@ -172,12 +170,14 @@ async function getChapterDetails(
 
 export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 	try {
+		// 1. Get list of files in the directory
 		const listOfFiles = readdirSync(dirPath, { withFileTypes: true });
 
 		let chapters: string[] = [];
 		let totalSize: number = 0;
 		let totalLength: number = 0;
 		let cover = '';
+		let bookDataTrigger: boolean = true; // If true means we don't have information about the book yet.
 
 		let bookDetails: BookDetails = {
 			chapterList: [],
@@ -189,7 +189,6 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 			bookPath: dirPath
 		};
 
-		let bookDataTrigger: boolean = true; // If true means we don't have information about the book yet.
 
 		// Get files from the book directory
 		for (let index = 0; index < listOfFiles.length; index++) {
@@ -233,7 +232,7 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 			}
 		}
 
-		bookDetails.coverPath = cover;
+		bookDetails.coverPath = cover ? (path.resolve(dirPath, cover)) : "none";
 		bookDetails.totalLength = totalLength;
 		bookDetails.totalSize = totalSize;
 
@@ -241,6 +240,7 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 
 	} catch (err: any) {
 		console.error("\n\n👉 -> file: diskReader.ts:238 -> err:", err);
+		logger.error(`Error reading directory: ${dirPath}`);
 		throw new Error(err);
 	}
 }

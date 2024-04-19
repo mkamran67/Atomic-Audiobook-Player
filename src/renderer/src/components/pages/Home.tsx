@@ -9,7 +9,7 @@ export default function Home() {
         <ContinueReading />
       </section>
       <section className="m-2">
-        <TimeLine />
+        {/* <TimeLine /> */}
       </section>
     </div>
   );

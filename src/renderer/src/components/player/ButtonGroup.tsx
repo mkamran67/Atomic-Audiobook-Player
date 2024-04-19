@@ -2,9 +2,9 @@ import { PlayCircleIcon, ForwardIcon, PauseCircleIcon } from "@heroicons/react/2
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, EllipsisHorizontalCircleIcon } from "@heroicons/react/20/solid";
 
 type Props = {
-  handlePlayPause: (stateChange: boolean) => void,
   isPlaying: boolean,
   isThereAudio: boolean,
+  handlePlayPause: (stateChange: boolean) => void,
   steppingAround: (amount: number, direction: string) => void,
 };
 

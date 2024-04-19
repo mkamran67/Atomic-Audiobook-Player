@@ -11,7 +11,7 @@ function ListViewItem({ book }: Props) {
 
   const { title, author, cover, dirPath } = book;
   // console.log("👉 -> file: ListViewItem.tsx:13 -> title:", title);
-  const coverSrc = cover ? `get-file://${cover}` : default_img;
+  const coverSrc = cover ? `potato://${cover}` : default_img;
 
 
   return (

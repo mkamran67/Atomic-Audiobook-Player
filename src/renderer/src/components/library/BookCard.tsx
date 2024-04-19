@@ -1,4 +1,5 @@
 import default_img from '../../assets/default-book-cover.jpg';
+import { convertURI } from '../../utils/funcs';
 
 type Props = {
   title: string;
@@ -10,9 +11,11 @@ type Props = {
 
 export default function BookCard({ image, bookPath, setPlaying }: Props) {
 
-  const filePath = `get-file://${image}`;
-  const imageSrc = image ? filePath : default_img;
+  // const image_path = convertURI(image);
 
+  const imageSrc = image && image !== "none" ? `potato://${encodeURIComponent(image)}` : default_img;
+
+  console.log("file: BookCard.tsx:18 -> imageSrc:", imageSrc);
   return (
     <div
       className="relative h-56 rounded-md shadow-xl cursor-pointer overflow-clip w-44 group "
