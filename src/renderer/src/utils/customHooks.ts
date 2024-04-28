@@ -27,7 +27,13 @@ const useAudio = (url: string) => {
   };
 
   useEffect(() => {
-    playing ? audio.play() : audio.pause();
+    console.log(audio.src, playing);
+    if (audio) {
+      playing ? audio.play() : audio.pause();
+    } else {
+      console.log('No audio');
+    }
+
   }, [playing]);
 
   useEffect(() => {
@@ -41,6 +47,7 @@ const useAudio = (url: string) => {
 };
 
 const useAudioPlayer = (url: string) => {
+  console.log("file: customHooks.ts:44 -> url:", url);
   const [audio] = useState(new Audio(url));
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -60,12 +67,12 @@ const useAudioPlayer = (url: string) => {
     setCurrentTime(audio.currentTime);
   };
 
-  const changeVolume = (newVolume) => {
+  const changeVolume = (newVolume: number) => {
     setVolume(newVolume);
     audio.volume = newVolume;
   };
 
-  const seek = (time) => {
+  const seek = (time: number) => {
     audio.currentTime = time;
     setCurrentTime(time);
   };

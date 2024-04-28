@@ -5,8 +5,8 @@ import path from 'path';
 import handleRendererRequest from "./main/request_handler";
 import { setupConfigFiles } from "./main/utils/configs";
 import logger from "./main/utils/logger";
-
-
+import fs from 'fs/promises';
+import * as fsSync from 'fs';
 // whether you're running in development or production).
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -19,14 +19,31 @@ if (require('electron-squirrel-startup')) {
 
 setupConfigFiles();
 
-// REVIEW supportFetchAPI 
-protocol.registerSchemesAsPrivileged([{
-  scheme: 'potato://',
-  privileges: {
-    standard: true,
-    secure: true,
-  }
-}]);
+// protocol.registerSchemesAsPrivileged([
+//   {
+//     scheme: 'potato://',
+//     privileges: {
+//       standard: true,
+//       secure: true,
+//     }
+//   },
+// ]);
+
+
+// protocol.registerSchemesAsPrivileged([
+//   {
+//     scheme: 'get-audio',
+//     privileges: {
+//       standard: true,
+//     }
+//   },
+//   {
+//     scheme: 'get-audio://',
+//     privileges: {
+//       standard: true,
+//     }
+//   }
+// ]);
 
 const createWindow = (): void => {
 
@@ -37,6 +54,7 @@ const createWindow = (): void => {
     autoHideMenuBar: true,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      nodeIntegration: true,
     }
   });
 
@@ -47,7 +65,7 @@ const createWindow = (): void => {
     callback({
       responseHeaders: {
         ...details.responseHeaders,
-        'Content-Security-Policy': ["default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: potato:; media-src 'self' data: potato:;"]
+        'Content-Security-Policy': ["default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' potato:; media-src 'self' data: potato: get-audio:; "]
       }
     });
   });
@@ -70,26 +88,61 @@ const createWindow = (): void => {
 
 app.whenReady().then(() => {
 
-  protocol.handle('potato', async (request) => {
+  protocol.handle('potato', (request) => {
     try {
-      // console.log(request.url);
+
       const trimmedPath = request.url.slice('potato://'.length);
       const decodedPath = path.normalize(decodeURIComponent(trimmedPath));
       const formattedFilePath = 'file://' + decodedPath;
 
-      const res = await net.fetch(formattedFilePath);
-
-      return res;
-
+      return net.fetch(formattedFilePath);
     } catch (error) {
       console.error(request.url);
       logger.error('Error in handling potato protocol' + error);
-      return error;
     }
   });
 
+  // REVIEW -> Trash update broke this completely
+  // protocol.handle('get-audio', (request) => {
+  //   try {
+  //     // console.log(`\nfirst request: ${request.url}\n\n`);
+  //     // const trimmedPath = request.url.slice('get-audio://'.length);
+  //     // const decodedPath = path.normalize(decodeURIComponent(trimmedPath));
+  //     // const formattedFilePath = 'file://' + decodedPath;
+
+  //     console.log(`\n get-audio what in the flying fuck is going on here \n`);
+  //     const hPath = 'file://' + path.normalize('E:/Books/Audio Books/Food, Diet/Fat for Fuel A Revolutionary Diet to Combat Cancer, Boost Brain Power, and Increase Your Energy/Fat for Fuel_ A Revo_B072L48PKB_LC_32_22050_Mono.mp3');
+  //     console.log("file: index.ts:114 -> hPath:", hPath);
+
+  //     return net.fetch(hPath);
+
+  //     // return net.fetch('file://' + path.normalize('E:/Books/Audio Books/Food, Diet/Fat for Fuel A Revolutionary Diet to Combat Cancer, Boost Brain Power, and Increase Your Energy/Fat for Fuel_ A Revo_B072L48PKB_LC_32_22050_Mono.mp3'));
+  //   } catch (err) {
+  //     console.log('\n ERROR ->');
+  //     console.error(request.url);
+  //     console.error(err);
+  //     return new Response(null, { status: 500 });
+  //   }
+  // });
+
+
+  protocol.registerFileProtocol('get-audio', async (request, callback) => {
+    try {
+      const trimmedPath = request.url.slice('get-audio://'.length);
+      const decodedPath = path.normalize(decodeURIComponent(trimmedPath));
+      const audioData = await fs.readFile(decodedPath);
+      const mimeType = 'audio/mpeg'; // replace with the appropriate MIME type for your audio files
+      callback({ path: decodedPath, data: audioData, mimeType });
+    } catch (error) {
+      console.error(request.url);
+      logger.error('Error in handling get-audio protocol' + error);
+      callback({ error: error.message });
+    }
+  });
 
   createWindow();
+
+  console.log('\n\n\n');
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

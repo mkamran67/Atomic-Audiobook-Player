@@ -1,5 +1,4 @@
 import { convertURI } from '../../utils/funcs';
-import DefaultCover from './DefaultCover';
 
 type Props = {
   imgSrc: string;
@@ -7,13 +6,15 @@ type Props = {
 
 function BookCover({ imgSrc }: Props) {
   return (
-    <>
-      {
-        imgSrc ?
-          <img src={convertURI(imgSrc)} className="rounded-lg max-w-32" /> :
-          <DefaultCover />
-      }
-    </>
+    <div className="mx-4 overflow-hidden rounded-lg">
+      <div className="flex items-center w-32 h-40 bg-gray-800 rounded-lg justify-evenly">
+        {
+          imgSrc ?
+            <img src={imgSrc} className='object-fill w-full h-full' /> :
+            <p className="text-lg text-center -rotate-45 -translate-x-2">No Cover</p>
+        }
+      </div>
+    </div>
   );
 }
 

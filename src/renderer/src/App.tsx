@@ -10,6 +10,7 @@ import Library from './components/pages/Library';
 import Settings from './components/pages/Settings';
 import Stats from './components/pages/Stats';
 import store from './state/store';
+import ErrorBoundary from './components/ErrorBoundary';
 
 
 const router = createHashRouter([
@@ -43,7 +44,9 @@ function App(): JSX.Element {
   return (
     <div className="App">
       <Provider store={store}>
-        <RouterProvider router={router} />
+        <ErrorBoundary>
+          <RouterProvider router={router} />
+        </ErrorBoundary>
       </Provider>
     </div>
   );

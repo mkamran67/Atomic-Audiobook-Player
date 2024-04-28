@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import ChapterSelector from "./ChapterSelector";
+import default_img from '../../assets/default-book-cover.jpg';
 import { RootState } from "../../state/store";
 import { MinimumChapterDetails } from "../../types/book.types";
-import ButtonGroup from "./ButtonGroup";
-import BookCard from "../library/BookCard";
-import default_img from '../../assets/default-book-cover.jpg';
 import { useAudio } from "../../utils/customHooks";
 import { convertURI } from "../../utils/funcs";
+import BookCard from "../library/BookCard";
 import AudioPlayer from "./AudioPlayer";
+import BookCover from "./BookCover";
+import ButtonGroup from "./ButtonGroup";
+import ChapterSelector from "./ChapterSelector";
 
 
 
@@ -70,19 +71,22 @@ export default function Player() {
     bookPath
   } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
 
+  const bookCoverPath = coverPath !== 'none' && coverPath ? convertURI(coverPath) : null;
+
 
 
   return (
     <div className="fixed bottom-0 left-0 z-40 w-screen bg-gray-900 h-52 overflow-none">
-      <div className="flex flex-row max-w-full max-h-full p-2">
+      <div className="flex flex-row items-center justify-center w-full h-full ">
+        <BookCover imgSrc={bookCoverPath} />
         {
           currentChapter ?
             (<>
-              <AudioPlayer url={currentChapter} />
+              <AudioPlayer url={currentChapter} title={title} />
             </>
             ) : (
               <div className="flex flex-col items-center justify-center w-full gap-2">
-                <p className="w-64 text-center truncate hover:w-full">No book playing</p>
+                <h3 className="text-xl">No book playing</h3>
               </div>
             )
         }
