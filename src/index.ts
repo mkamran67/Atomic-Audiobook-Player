@@ -37,12 +37,7 @@ setupConfigFiles();
 //       standard: true,
 //     }
 //   },
-//   {
-//     scheme: 'get-audio://',
-//     privileges: {
-//       standard: true,
-//     }
-//   }
+
 // ]);
 
 const createWindow = (): void => {
@@ -101,6 +96,23 @@ app.whenReady().then(() => {
       logger.error('Error in handling potato protocol' + error);
     }
   });
+
+
+  // protocol.handle('get-audio', (request) => {
+  //   try {
+  //     console.log(`\nYou've hit the get-audio protocol`);
+  //     const trimmedPath = request.url.slice('get-audio://'.length);
+  //     const decodedPath = path.normalize(decodeURI(trimmedPath));
+  //     const formattedFilePath = 'file://' + decodedPath[0] + ':' + decodedPath.slice(1);
+  //     console.log("\nfile: index.ts:109 -> formattedFilePath:", formattedFilePath);
+
+  //     return net.fetch(formattedFilePath);
+  //   } catch (error) {
+  //     console.error(request.url);
+  //     logger.error('Error in handling get-audio protocol' + error);
+  //   }
+  // });
+
 
   // REVIEW -> Trash update broke this completely
   // protocol.handle('get-audio', (request) => {
