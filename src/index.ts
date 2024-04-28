@@ -29,17 +29,15 @@ setupConfigFiles();
 //   },
 // ]);
 
-
-// protocol.registerSchemesAsPrivileged([
-//   {
-//     scheme: 'get-audio',
-//     privileges: {
-//       standard: true,
-//     }
-//   },
-
-// ]);
-
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'get-audio',
+    privileges: {
+      standard: true,
+      bypassCSP: true
+    }
+  }
+]);
 const createWindow = (): void => {
 
   // Create the browser window.
@@ -115,42 +113,33 @@ app.whenReady().then(() => {
 
 
   // REVIEW -> Trash update broke this completely
-  // protocol.handle('get-audio', (request) => {
+
+  protocol.handle('get-audio', (async req => {
+    const filePath = path.normalize(decodeURI(req.url.replace('get-audio://', '')));
+    const formattedFile = filePath[0] + ':' + filePath.slice(1);
+    console.log("file: index.ts:56 -> formattedFile:", formattedFile);
+    const file = await fs.readFile(formattedFile);
+    const headers = {
+      'Content-Type': 'audio/mpeg',
+      'Content-Length': file.length.toString() // Convert to string
+    };
+    return new Response(file, { headers });
+  }));
+
+
+  // protocol.registerFileProtocol('get-audio', async (request, callback) => {
   //   try {
-  //     // console.log(`\nfirst request: ${request.url}\n\n`);
-  //     // const trimmedPath = request.url.slice('get-audio://'.length);
-  //     // const decodedPath = path.normalize(decodeURIComponent(trimmedPath));
-  //     // const formattedFilePath = 'file://' + decodedPath;
-
-  //     console.log(`\n get-audio what in the flying fuck is going on here \n`);
-  //     const hPath = 'file://' + path.normalize('E:/Books/Audio Books/Food, Diet/Fat for Fuel A Revolutionary Diet to Combat Cancer, Boost Brain Power, and Increase Your Energy/Fat for Fuel_ A Revo_B072L48PKB_LC_32_22050_Mono.mp3');
-  //     console.log("file: index.ts:114 -> hPath:", hPath);
-
-  //     return net.fetch(hPath);
-
-  //     // return net.fetch('file://' + path.normalize('E:/Books/Audio Books/Food, Diet/Fat for Fuel A Revolutionary Diet to Combat Cancer, Boost Brain Power, and Increase Your Energy/Fat for Fuel_ A Revo_B072L48PKB_LC_32_22050_Mono.mp3'));
-  //   } catch (err) {
-  //     console.log('\n ERROR ->');
+  //     const trimmedPath = request.url.slice('get-audio://'.length);
+  //     const decodedPath = path.normalize(decodeURIComponent(trimmedPath));
+  //     const audioData = await fs.readFile(decodedPath);
+  //     const mimeType = 'audio/mpeg'; // replace with the appropriate MIME type for your audio files
+  //     callback({ path: decodedPath, data: audioData, mimeType });
+  //   } catch (error) {
   //     console.error(request.url);
-  //     console.error(err);
-  //     return new Response(null, { status: 500 });
+  //     logger.error('Error in handling get-audio protocol' + error);
+  //     callback({ error: error.message });
   //   }
   // });
-
-
-  protocol.registerFileProtocol('get-audio', async (request, callback) => {
-    try {
-      const trimmedPath = request.url.slice('get-audio://'.length);
-      const decodedPath = path.normalize(decodeURIComponent(trimmedPath));
-      const audioData = await fs.readFile(decodedPath);
-      const mimeType = 'audio/mpeg'; // replace with the appropriate MIME type for your audio files
-      callback({ path: decodedPath, data: audioData, mimeType });
-    } catch (error) {
-      console.error(request.url);
-      logger.error('Error in handling get-audio protocol' + error);
-      callback({ error: error.message });
-    }
-  });
 
   createWindow();
 
