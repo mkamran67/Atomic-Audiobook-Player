@@ -18,3 +18,4 @@ export const ELECTRON_INFO = 'electronInfo';
 export const APPEND_BOOKS = 'appendBooks';
 export const GET_BOOK_DETAILS = 'getBookDetails';
 export const REACT_ERROR = 'reactError';
+export const GET_PREVIOUS_BOOK = 'getPreviousBook';

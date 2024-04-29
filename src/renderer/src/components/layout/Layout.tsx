@@ -13,6 +13,7 @@ import {
   ELECTRON_INFO,
   ELECTRON_WARNING,
   GET_BOOK_DETAILS,
+  GET_PREVIOUS_BOOK,
   READ_LIBRARY_FILE,
   READ_SETTINGS_FILE,
   REQUEST_TO_ELECTRON,
@@ -64,6 +65,14 @@ export default function Layout() {
         REQUEST_TO_ELECTRON,
         {
           type: READ_SETTINGS_FILE,
+          payload: null
+        }
+      );
+
+      window.api.send(
+        REQUEST_TO_ELECTRON,
+        {
+          type: GET_PREVIOUS_BOOK,
           payload: null
         }
       );

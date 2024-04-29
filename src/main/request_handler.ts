@@ -1,8 +1,10 @@
+import { StatsFileStructure } from '../../src/shared/types';
 import {
   ADD_BOOK_DIRECTORY,
   APPEND_BOOKS,
   ELECTRON_ERROR, GET_BOOK_COVERS,
   GET_BOOK_DETAILS,
+  GET_PREVIOUS_BOOK,
   READ_LIBRARY_FILE,
   READ_SETTINGS_FILE,
   READ_STATS_FILE,
@@ -71,8 +73,11 @@ function handleReadStatsFile(event: any) {
 
 }
 
-// function handleWriteStatsFile(event: any, data: ) {
-// }
+
+
+function handleWriteStatsFile(data: StatsFileStructure) {
+
+}
 
 export default async function handleRendererRequest(event: any, request: RequestFromReactType) {
   const { type, data } = request;
@@ -84,6 +89,8 @@ export default async function handleRendererRequest(event: any, request: Request
         break;
       }
       case WRITE_STATS_FILE: {
+        console.log(request);
+
         // handleWriteStatsFile(event, data);
         break;
       }
@@ -109,6 +116,12 @@ export default async function handleRendererRequest(event: any, request: Request
       }
       case SAVE_BOOK_PROGRESS: {
         logger.info('Saving book progress for book:');
+        console.log(request);
+        break;
+      }
+      case GET_PREVIOUS_BOOK: {
+        logger.info('Getting previous book details:');
+        console.log(event);
         break;
       }
       case GET_BOOK_DETAILS: {

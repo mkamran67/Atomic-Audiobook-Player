@@ -47,7 +47,6 @@ const useAudio = (url: string) => {
 };
 
 const useAudioPlayer = (url: string) => {
-  console.log("file: customHooks.ts:44 -> url:", url);
   const [audio] = useState(new Audio(url));
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -65,6 +64,12 @@ const useAudioPlayer = (url: string) => {
 
   const onTimeUpdate = () => {
     setCurrentTime(audio.currentTime);
+
+    if (Math.round(audio.currentTime) % 5 === 0) {
+      console.log("file: customHooks.ts:69 -> currentTime:", Math.round(audio.currentTime));
+      console.log('5 seconds passed');
+    }
+
   };
 
   const changeVolume = (newVolume: number) => {
@@ -80,11 +85,13 @@ const useAudioPlayer = (url: string) => {
   useEffect(() => {
     audio.addEventListener('loadeddata', onPlaying);
     audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('ended', () => setIsPlaying(false));
     isPlaying ? audio.play() : audio.pause();
 
     return () => {
       audio.removeEventListener('loadeddata', onPlaying);
       audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.removeEventListener('ended', () => setIsPlaying(false));
       audio.pause();
     };
   }, [isPlaying, audio]);

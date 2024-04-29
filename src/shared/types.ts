@@ -44,6 +44,17 @@ type RootDirectoryStructure = {
   books: BookData[];
 };
 
+export interface StatsFileStructure {
+  bookTitle: string;
+  bookPath: string;
+  startedTime: number;
+  endedTime: number;
+  startDate: Date;
+  endedDate: Date;
+  currentChapterPath: string;
+  currentTime: number;
+}
+
 
 
 export type LibraryStructure = RootDirectoryStructure[];
