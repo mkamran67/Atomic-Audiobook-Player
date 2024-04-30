@@ -117,7 +117,6 @@ app.whenReady().then(() => {
   protocol.handle('get-audio', (async req => {
     const filePath = path.normalize(decodeURI(req.url.replace('get-audio://', '')));
     const formattedFile = filePath[0] + ':' + filePath.slice(1);
-    console.log("file: index.ts:56 -> formattedFile:", formattedFile);
     const file = await fs.readFile(formattedFile);
     const headers = {
       'Content-Type': 'audio/mpeg',

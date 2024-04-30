@@ -1,14 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useAudio, useAudioPlayer } from '../../utils/customHooks';
+import { useAudioPlayer } from '../../utils/customHooks';
 import { convertURI, convertURIForAudio } from '../../utils/funcs';
 import { PlayIcon } from '@heroicons/react/24/solid';
 
 type Props = {
   url: string;
   title: string;
+  bookURL: string;
+  currentTrack: number;
 };
 
-function AudioPlayer({ url, title }: Props) {
+function AudioPlayer({ url, title, bookURL, currentTrack }: Props) {
   const encodedURL = 'get-audio://' + url;
 
 
@@ -19,10 +21,8 @@ function AudioPlayer({ url, title }: Props) {
     isPlaying,
     seek,
     togglePlayPause,
-    volume
-  } = useAudioPlayer(encodedURL);
-
-
+    volume,
+  } = useAudioPlayer(encodedURL, bookURL, currentTrack);
 
 
 

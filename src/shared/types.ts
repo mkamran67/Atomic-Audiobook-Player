@@ -44,16 +44,32 @@ type RootDirectoryStructure = {
   books: BookData[];
 };
 
-export interface StatsFileStructure {
+export interface BookStatStructure {
   bookTitle: string;
+  bookAuthor: string;
   bookPath: string;
-  startedTime: number;
-  endedTime: number;
-  startDate: Date;
-  endedDate: Date;
+  chapterCount: number;
+  startDateAndTime: Date;
+  endedDateAndTime: Date | 'TBD';
   currentChapterPath: string;
   currentTime: number;
+  currentTrack: number;
+  totalLength: number;
+  coverPath: string;
 }
+
+export interface StatsFileStructure {
+  bookStats: BookStatStructure[];
+}
+
+export interface SaveBookProgressPayload {
+  currentTime: number;
+  currentChapterURL: string;
+  duration: number;
+  bookURL: string;
+  currentTrack: number;
+};
+
 
 
 

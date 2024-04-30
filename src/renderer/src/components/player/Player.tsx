@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import default_img from '../../assets/default-book-cover.jpg';
 import { RootState } from "../../state/store";
 import { MinimumChapterDetails } from "../../types/book.types";
-import { useAudio } from "../../utils/customHooks";
 import { convertURI } from "../../utils/funcs";
 import BookCard from "../library/BookCard";
 import AudioPlayer from "./AudioPlayer";
@@ -14,8 +13,6 @@ import ChapterSelector from "./ChapterSelector";
 
 
 function convertSecondsToString(timeInSeconds: number) {
-
-
   let wholeNumberOfSeconds = Math.round(timeInSeconds);
 
   // Get seconds
@@ -70,10 +67,9 @@ export default function Player() {
     year,
     bookPath
   } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
+  console.log("file: Player.tsx:73 -> bookPath:", bookPath);
 
   const bookCoverPath = coverPath !== 'none' && coverPath ? convertURI(coverPath) : null;
-
-
 
   return (
     <div className="fixed bottom-0 left-0 z-40 w-screen bg-gray-900 h-52 overflow-none">
@@ -82,7 +78,12 @@ export default function Player() {
         {
           currentChapter ?
             (<>
-              <AudioPlayer url={currentChapter} title={title} />
+              <AudioPlayer
+                key={currentChapter}
+                url={currentChapter}
+                bookURL={bookPath}
+                title={title}
+                currentTrack={currentTrack} />
             </>
             ) : (
               <div className="flex flex-col items-center justify-center w-full gap-2">

@@ -1,4 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { SAVE_BOOK_PROGRESS, REQUEST_TO_ELECTRON } from '../../../../src/shared/constants';
+import { SaveBookProgressPayload } from '../../../../src/shared/types';
+
 
 const useDebounceValue = <T>(value: T, delay = 250) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -16,42 +19,13 @@ const useDebounceValue = <T>(value: T, delay = 250) => {
   return debouncedValue;
 };
 
-
-const useAudio = (url: string) => {
-
-  const [audio] = useState(new Audio(url));
-  const [playing, setPlaying] = useState(false);
-
-  const toggle = () => {
-    setPlaying(!playing);
-  };
-
-  useEffect(() => {
-    console.log(audio.src, playing);
-    if (audio) {
-      playing ? audio.play() : audio.pause();
-    } else {
-      console.log('No audio');
-    }
-
-  }, [playing]);
-
-  useEffect(() => {
-    audio.addEventListener('ended', () => setPlaying(false));
-    return () => {
-      audio.removeEventListener('ended', () => setPlaying(false));
-    };
-  }, []);
-
-  return [playing, toggle] as const;
-};
-
-const useAudioPlayer = (url: string) => {
+const useAudioPlayer = (url: string, bookPath: string, currentTrack: number) => {
   const [audio] = useState(new Audio(url));
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(0.1);
+  const previousTime = useRef(0);
 
   const togglePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -63,11 +37,34 @@ const useAudioPlayer = (url: string) => {
   };
 
   const onTimeUpdate = () => {
-    setCurrentTime(audio.currentTime);
 
-    if (Math.round(audio.currentTime) % 5 === 0) {
-      console.log("file: customHooks.ts:69 -> currentTime:", Math.round(audio.currentTime));
-      console.log('5 seconds passed');
+    // 'C:\\Users\\highz\\bucket\\Atomic-Audiobook-Player\\get-audio:\\E:\\Books\\Audio Books\\Food, Diet\\Fat for Fuel A Revolutionary Diet to Combat Cancer, Boost Brain Power, and Increase Your Energy\\Fat for Fuel_ A Revo_B072L48PKB_LC_32_22050_Mono.mp3'
+
+    const currentTime = Math.ceil(audio.currentTime);
+    setCurrentTime(currentTime);
+    // Save every 30 seconds save progress
+    if (currentTime !== previousTime.current && currentTime % 5 === 0) {
+      console.log(`Sending save progress request`);
+
+      const payload: SaveBookProgressPayload = {
+        currentChapterURL: url,
+        currentTime: currentTime,
+        duration: duration,
+        bookURL: bookPath,
+        currentTrack: currentTrack
+      };
+
+      window.api.send(
+        REQUEST_TO_ELECTRON,
+        {
+          type: SAVE_BOOK_PROGRESS,
+          data: payload
+        }
+      );
+
+
+
+      previousTime.current = currentTime;
     }
 
   };
@@ -108,4 +105,4 @@ const useAudioPlayer = (url: string) => {
 };
 
 
-export { useDebounceValue, useAudio, useAudioPlayer };
+export { useDebounceValue, useAudioPlayer };
