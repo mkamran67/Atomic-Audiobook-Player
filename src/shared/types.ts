@@ -56,6 +56,8 @@ export interface BookStatStructure {
   currentTrack: number;
   totalLength: number;
   coverPath: string;
+  bookDirectory: string;
+  markedForPrevious: boolean;
 }
 
 export interface StatsFileStructure {
@@ -68,7 +70,30 @@ export interface SaveBookProgressPayload {
   duration: number;
   bookURL: string;
   currentTrack: number;
+  markedForCompletion: boolean;
 };
+
+export interface MinimumChapterDetails {
+  path: string;
+  name?: string;
+  length: number;
+}
+
+export interface BookDetails {
+  currentChapter: string;
+  currentTrack: number;
+  currentTime: number;
+  totalTracks: number;
+  chapterList: MinimumChapterDetails[];
+  title?: string;
+  author?: string;
+  year?: number;
+  coverPath?: string;
+  totalSize?: number;
+  totalLength?: number;
+  bookPath: string;
+}
+
 
 
 

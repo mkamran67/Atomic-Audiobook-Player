@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { BookDetails } from "../../types/book.types";
+import { BookDetails } from "../../../../../src/shared/types";
 
 
 const initialState: BookDetails = {

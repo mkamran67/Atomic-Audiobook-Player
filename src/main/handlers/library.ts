@@ -26,7 +26,9 @@ export function createStatsFile(): boolean {
 	if (checkIfFileExists(STATS_FILE_LOCATION)) {
 		return true;
 	} else {
-		const emptyStatsFile = {};
+		const emptyStatsFile: any = {
+			bookStats: []
+		};
 
 		writeToDisk(STATS_FILE_LOCATION, emptyStatsFile);
 		return true;
@@ -79,7 +81,7 @@ export async function addbookDirectory(event: any) {
 			rootDirectory: rootDirPath,
 			books: listOfbooks
 		}
-	]
+	];
 
 	// 3. Check if there are any books in the directory
 	// Update settings file with new rootDirectory

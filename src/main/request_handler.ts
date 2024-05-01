@@ -1,5 +1,5 @@
 import path from 'path';
-import { BookStatStructure, SaveBookProgressPayload, StatsFileStructure } from '../../src/shared/types';
+import { BookDetails, BookStatStructure, SaveBookProgressPayload, StatsFileStructure } from '../../src/shared/types';
 import {
   ADD_BOOK_DIRECTORY,
   APPEND_BOOKS,
@@ -21,6 +21,7 @@ import { handleSettings } from "./handlers/settings";
 import { RequestFromReactType } from './types/library';
 import { getBookDetails, readAndParseTextFile } from './utils/diskReader';
 import logger from './utils/logger';
+import { writeToDiskAsync } from './utils/diskWriter';
 
 
 async function handlerAddBookDirectory(event: any) {
@@ -74,6 +75,23 @@ function handleReadStatsFile(event: any) {
 
 }
 
+function resetBookProgress(url: string, currentTime: number) {
+  // 1. Read stats file
+  const statsFileData: StatsFileStructure = readAndParseTextFile(STATS_FILE_LOCATION);
+  const bookStats = statsFileData.bookStats;
+
+  // 2. Update stats file
+  for (let index = 0; index < bookStats.length; index++) {
+    const bookStat = bookStats[index];
+    if (bookStat.bookPath === url) {
+      bookStat.currentTime = currentTime;
+      bookStat.startDateAndTime = new Date();
+      bookStat.endedDateAndTime = 'TBD';
+      return;
+    }
+  }
+}
+
 async function markBookCompleted(url: string, currentTime: number) {
   // 1. Read stats file
   const statsFileData: StatsFileStructure = readAndParseTextFile(STATS_FILE_LOCATION);
@@ -90,70 +108,121 @@ async function markBookCompleted(url: string, currentTime: number) {
   }
 }
 
-async function newBookStarted(data: SaveBookProgressPayload) {
+async function checkIfBookStatIsDuplicate(bookStats: BookStatStructure[], bookURL: string) {
+  for (let index = 0; index < bookStats.length; index++) {
+    const bookStat = bookStats[index];
+    if (bookStat.bookPath === bookURL) {
+      logger.error('New book is a duplicate. Not adding to stats file.');
+      return true;
+    }
+  }
 
+  return false;
+}
+
+async function newBookStarted(data: SaveBookProgressPayload, bookDetails: BookDetails, bookDirectory: string) {
   const { bookURL, currentChapterURL, currentTime, currentTrack, duration } = data;
-  const bookDirectory = path.dirname(bookURL);
   const statsFileData: StatsFileStructure = readAndParseTextFile(STATS_FILE_LOCATION);
   const bookStats = statsFileData.bookStats;
-  const bookDetails = await getBookDetails(bookDirectory);
+
+  // 2. Make sure it's not a duplicate
+  const isDuplicate = await checkIfBookStatIsDuplicate(bookStats, bookURL);
+
+  if (isDuplicate) {
+    return;
+  }
+
 
   const newBookObject: BookStatStructure = {
-    bookPath: bookURL,
     bookTitle: bookDetails.title,
     bookAuthor: bookDetails.author,
+    bookPath: bookURL,
     currentTime: currentTime,
     startDateAndTime: new Date(),
     endedDateAndTime: 'TBD',
     currentChapterPath: currentChapterURL,
     currentTrack: 1,
-    totalLength: duration,
     chapterCount: bookDetails.chapterList.length + 1,
-    coverPath: bookDetails.coverPath
+    coverPath: bookDetails.coverPath,
+    bookDirectory: bookDirectory,
+    totalLength: bookDetails.totalLength ? bookDetails.totalLength : -1,
+    markedForPrevious: true
   };
 
+  // 3. Add to stats file
+  bookStats.push(newBookObject);
 
+  // 4. Write stats file
+  await writeToDiskAsync(STATS_FILE_LOCATION, statsFileData);
+}
+
+async function updateBookProgress(data: SaveBookProgressPayload) {
+  // 1. Read stats file
+  const statsFileData: StatsFileStructure = readAndParseTextFile(STATS_FILE_LOCATION);
+  const bookStats = statsFileData.bookStats;
   // 2. Update stats file
   for (let index = 0; index < bookStats.length; index++) {
     const bookStat = bookStats[index];
+    if (bookStat.bookPath === data.bookURL) {
+      bookStat.currentTime = data.currentTime;
+      bookStat.currentChapterPath = data.currentChapterURL;
+      bookStat.currentTrack = data.currentTrack;
+      bookStat.markedForPrevious = true;
 
+      // Check if it's the first book in the list
+      if (index !== 0) {
+        // Swap with the last book
+        const temp = bookStats[index];
+        bookStats[index] = bookStats[0];
+        bookStats[0] = temp;
+      }
+    } else {
+      bookStat.markedForPrevious = false;
+    }
   }
 
+  // 3. Write stats file
+  await writeToDiskAsync(STATS_FILE_LOCATION, statsFileData);
 }
 
 async function saveBookProgress(data: SaveBookProgressPayload) {
 
-  // Have to figure out chapters
-  const { currentTime, duration, bookURL } = data;
-  const percentageCompleted = (currentTime / duration) * 100;
+
+  const { currentTime, bookURL, duration, markedForCompletion } = data;
+  const bookDirectory = path.dirname(bookURL);
+  const bookDetails = await getBookDetails(bookDirectory);
+  const percentageCompleted = bookDetails.totalLength ? (currentTime / bookDetails.totalLength) * 100 : (currentTime / duration) * 100;
 
   // check if book is new aka first 30 seconds
   if (currentTime <= 31) {
-    await newBookStarted(data);
+    await newBookStarted(data, bookDetails, bookDirectory);
   }
   // Check if book ended
-  else if (percentageCompleted >= 0.98) {
+  else if (markedForCompletion || percentageCompleted >= 0.98) {
     await markBookCompleted(bookURL, currentTime);
   } else {
-
-    console.log(`hit the else statement`);
-    // 1. Read stats file
-    // const statsFileData: StatsFileStructure = readAndParseTextFile(STATS_FILE_LOCATION);
-    // const bookStats = statsFileData.bookStats;
-    // // 2. Update stats file
-    // for (let index = 0; index < bookStats.length; index++) {
-    //   const bookStat = bookStats[index];
-    //   if (bookStat.bookPath === data.url) {
-    //     bookStat.currentTime = data.currentTime;
-    //     break;
-    //   }
-    // }
+    await updateBookProgress(data);
   }
+}
 
-  // 3. Write stats file
-  // file: request_handler.ts:129 -> bookURL: D:\Books\Audio Books\Computer, Net\Darknet A Beginner's Guide to Staying Anonymous Online\01 - Darknet A Beginner's Guide to Staying Anonymous Online.mp3
-  // file: request_handler.ts:130 -> percentageCompleted: 89.23367989612487
-  // file: request_handler.ts:133 -> bookDirectory: D:\Books\Audio Books\Computer, Net\Darknet A Beginner's Guide to Staying Anonymous Online
+async function getPreviousBook(event: any) {
+  const statsFileData: StatsFileStructure = readAndParseTextFile(STATS_FILE_LOCATION);
+  const bookStats = statsFileData.bookStats;
+  const bookDetails = await getBookDetails(bookStats[0].bookDirectory);
+  // REVIEW -> Test to make it sure it works.
+
+
+  for (let index = 0; index < bookStats.length; index++) {
+    const element = bookStats[index];
+
+    if (element.markedForPrevious) {
+      event.reply(RESPONSE_FROM_ELECTRON, {
+        type: GET_BOOK_DETAILS,
+        data: element
+      });
+      return;
+    }
+  }
 
 }
 
@@ -196,7 +265,7 @@ export default async function handleRendererRequest(event: any, request: Request
         break;
       }
       case GET_PREVIOUS_BOOK: {
-        logger.info('Getting previous book details:');
+        await getPreviousBook(event);
         break;
       }
       case GET_BOOK_DETAILS: {

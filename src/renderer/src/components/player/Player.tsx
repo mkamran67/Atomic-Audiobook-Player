@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import default_img from '../../assets/default-book-cover.jpg';
 import { RootState } from "../../state/store";
-import { MinimumChapterDetails } from "../../types/book.types";
 import { convertURI } from "../../utils/funcs";
 import BookCard from "../library/BookCard";
 import AudioPlayer from "./AudioPlayer";
 import BookCover from "./BookCover";
 import ButtonGroup from "./ButtonGroup";
 import ChapterSelector from "./ChapterSelector";
+import { MinimumChapterDetails } from "../../../../../src/shared/types";
 
 
 

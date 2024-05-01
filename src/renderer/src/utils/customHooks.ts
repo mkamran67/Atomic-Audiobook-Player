@@ -43,15 +43,15 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number) => 
     const currentTime = Math.ceil(audio.currentTime);
     setCurrentTime(currentTime);
     // Save every 30 seconds save progress
-    if (currentTime !== previousTime.current && currentTime % 5 === 0) {
-      console.log(`Sending save progress request`);
+    if (currentTime !== previousTime.current && currentTime % 30 === 0) {
 
       const payload: SaveBookProgressPayload = {
         currentChapterURL: url,
         currentTime: currentTime,
         duration: duration,
         bookURL: bookPath,
-        currentTrack: currentTrack
+        currentTrack: currentTrack,
+        markedForCompletion: false
       };
 
       window.api.send(

@@ -7,8 +7,8 @@ import { IMG_EXTENSIONS, MEDIA_EXTENSIONS } from '../electron_constants';
 import ffprobeStatic from 'ffprobe-static';
 import ffprobe from 'ffprobe';
 import { access, constants } from 'fs/promises';
-import { BookDetails, MinimumChapterDetails } from '../../renderer/src/types/book.types';
 import logger from './logger';
+import { MinimumChapterDetails, BookDetails } from '../../../src/shared/types';
 
 export function readAndParseTextFile(filePath: string) {
 	return JSON.parse(readFileSync(filePath, 'utf-8'));
