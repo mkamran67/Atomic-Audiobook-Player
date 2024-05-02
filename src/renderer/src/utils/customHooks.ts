@@ -22,7 +22,7 @@ const useDebounceValue = <T>(value: T, delay = 250) => {
 const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, incomingTime: number) => {
   const [audio] = useState(new Audio(url));
   const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
+  // const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(incomingTime);
   const [volume, setVolume] = useState(100);
   const previousTime = useRef(0);
@@ -31,10 +31,10 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, inc
     setIsPlaying(!isPlaying);
   };
 
-  const onPlaying = () => {
-    setDuration(audio.duration);
-    setCurrentTime(audio.currentTime);
-  };
+  // const onPlaying = () => {
+  //   setDuration(audio.duration);
+  //   setCurrentTime(audio.currentTime);
+  // };
 
   const onTimeUpdate = () => {
     const currentTime = Math.ceil(audio.currentTime);
@@ -45,7 +45,7 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, inc
       const payload: SaveBookProgressPayload = {
         currentChapterURL: url.replace('get-audio://', ''),
         currentTime: currentTime,
-        duration: duration,
+        duration: audio.duration,
         bookURL: bookPath,
         currentTrack: currentTrack,
         markedForCompletion: false
@@ -76,22 +76,16 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, inc
   };
 
   useEffect(() => {
-    audio.addEventListener('loadeddata', onPlaying);
-    audio.addEventListener('timeupdate', onTimeUpdate);
-    audio.addEventListener('ended', () => setIsPlaying(false));
-    audio.addEventListener('seeked', () => {
-      onTimeUpdate();
-    });
     isPlaying ? audio.play() : audio.pause();
 
+    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('ended', () => setIsPlaying(false));
+    audio.addEventListener('seeked', () => onTimeUpdate());
+
     return () => {
-      audio.removeEventListener('loadeddata', onPlaying);
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('ended', () => setIsPlaying(false));
-      audio.addEventListener('seeked', () => {
-        onTimeUpdate();
-      });
-
+      audio.removeEventListener('seeked', () => onTimeUpdate());
       audio.pause();
     };
   }, [isPlaying, audio]);
@@ -103,12 +97,13 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, inc
 
   return {
     isPlaying,
-    duration,
+    // duration,
     currentTime,
     volume,
     togglePlayPause,
     changeVolume,
     seek,
+    audio
   };
 };
 

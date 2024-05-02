@@ -1,5 +1,6 @@
 import {
   ADD_BOOK_DIRECTORY, ELECTRON_ERROR, GET_BOOK_DETAILS,
+  GET_CHAPTER,
   GET_PREVIOUS_BOOK,
   READ_LIBRARY_FILE,
   READ_SETTINGS_FILE,
@@ -68,6 +69,10 @@ export default async function handleRendererRequest(event: any, request: Request
       }
       case GET_PREVIOUS_BOOK: {
         await getPreviousBook(event);
+        break;
+      }
+      case GET_CHAPTER: {
+        // await getChapter(event, data);
         break;
       }
       case GET_BOOK_DETAILS: {

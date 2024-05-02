@@ -19,6 +19,7 @@ const playerSlice = createSlice({
       return { ...state, currentTime: payload.currentTime };
     },
     setCurrentPlayingChapter: (state, { payload }) => {
+      console.log(payload);
       return { ...state, currentlyPlaying: payload.currentlyPlaying };
     },
     setChapterList: (state, { payload }) => {
