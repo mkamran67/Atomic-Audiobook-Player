@@ -1,9 +1,11 @@
-import { BrowserWindow, app, ipcMain, net, protocol } from "electron";
-import path from 'path';
+import { BrowserWindow, app, ipcMain, protocol } from "electron";
 import handleRendererRequest from "./main/request_handler";
 import { setupConfigFiles } from "./main/utils/configs";
-import logger from "./main/utils/logger";
-import fs from 'fs/promises';
+import audioProtocolHandler from "./main/protocols/audio_protocol";
+import imageHandler from "./main/protocols/images_protocol";
+
+
+
 // whether you're running in development or production).
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -25,6 +27,7 @@ protocol.registerSchemesAsPrivileged([
     }
   }
 ]);
+
 const createWindow = (): void => {
 
   // Create the browser window.
@@ -68,68 +71,10 @@ const createWindow = (): void => {
 
 app.whenReady().then(() => {
 
-  protocol.handle('potato', (request) => {
-    try {
-
-      const trimmedPath = request.url.slice('potato://'.length);
-      const decodedPath = path.normalize(decodeURIComponent(trimmedPath));
-      const formattedFilePath = 'file://' + decodedPath;
-
-      return net.fetch(formattedFilePath);
-    } catch (error) {
-      console.error(request.url);
-      logger.error('Error in handling potato protocol' + error);
-    }
-  });
-
-
-  // protocol.handle('get-audio', (request) => {
-  //   try {
-  //     console.log(`\nYou've hit the get-audio protocol`);
-  //     const trimmedPath = request.url.slice('get-audio://'.length);
-  //     const decodedPath = path.normalize(decodeURI(trimmedPath));
-  //     const formattedFilePath = 'file://' + decodedPath[0] + ':' + decodedPath.slice(1);
-  //     console.log("\nfile: index.ts:109 -> formattedFilePath:", formattedFilePath);
-
-  //     return net.fetch(formattedFilePath);
-  //   } catch (error) {
-  //     console.error(request.url);
-  //     logger.error('Error in handling get-audio protocol' + error);
-  //   }
-  // });
-
-
-  // REVIEW -> Trash update broke this completely
-
-  protocol.handle('get-audio', (async req => {
-    const filePath = path.normalize(decodeURI(req.url.replace('get-audio://', '')));
-    const formattedFile = filePath[0] + ':' + filePath.slice(1);
-    const file = await fs.readFile(formattedFile);
-    const headers = {
-      'Content-Type': 'audio/mpeg',
-      'Content-Length': file.length.toString() // Convert to string
-    };
-    return new Response(file, { headers });
-  }));
-
-
-  // protocol.registerFileProtocol('get-audio', async (request, callback) => {
-  //   try {
-  //     const trimmedPath = request.url.slice('get-audio://'.length);
-  //     const decodedPath = path.normalize(decodeURIComponent(trimmedPath));
-  //     const audioData = await fs.readFile(decodedPath);
-  //     const mimeType = 'audio/mpeg'; // replace with the appropriate MIME type for your audio files
-  //     callback({ path: decodedPath, data: audioData, mimeType });
-  //   } catch (error) {
-  //     console.error(request.url);
-  //     logger.error('Error in handling get-audio protocol' + error);
-  //     callback({ error: error.message });
-  //   }
-  // });
+  protocol.handle('potato', imageHandler);
+  protocol.handle('get-audio', audioProtocolHandler);
 
   createWindow();
-
-  console.log('\n\n\n');
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

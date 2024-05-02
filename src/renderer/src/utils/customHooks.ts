@@ -19,11 +19,11 @@ const useDebounceValue = <T>(value: T, delay = 250) => {
   return debouncedValue;
 };
 
-const useAudioPlayer = (url: string, bookPath: string, currentTrack: number) => {
+const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, incomingTime: number) => {
   const [audio] = useState(new Audio(url));
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState(incomingTime);
   const [volume, setVolume] = useState(100);
   const previousTime = useRef(0);
 
@@ -40,7 +40,7 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number) => 
     const currentTime = Math.ceil(audio.currentTime);
     setCurrentTime(currentTime);
     // Save every 30 seconds save progress
-    if (currentTime !== previousTime.current && currentTime % 30 === 0) {
+    if (currentTime !== previousTime.current && currentTime % 15 === 0) {
 
       const payload: SaveBookProgressPayload = {
         currentChapterURL: url.replace('get-audio://', ''),
@@ -71,6 +71,7 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number) => 
 
   const seek = (time: number) => {
     audio.currentTime = time;
+    audio.play();
     setCurrentTime(time);
   };
 
@@ -78,18 +79,27 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number) => 
     audio.addEventListener('loadeddata', onPlaying);
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('ended', () => setIsPlaying(false));
-    audio.addEventListener('seeked', () => audio.play());
+    audio.addEventListener('seeked', () => {
+      onTimeUpdate();
+    });
     isPlaying ? audio.play() : audio.pause();
 
     return () => {
       audio.removeEventListener('loadeddata', onPlaying);
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('ended', () => setIsPlaying(false));
-      audio.addEventListener('seeked', () => audio.play());
+      audio.addEventListener('seeked', () => {
+        onTimeUpdate();
+      });
 
       audio.pause();
     };
   }, [isPlaying, audio]);
+
+  useEffect(() => {
+    audio.currentTime = incomingTime;
+  }, []);
+
 
   return {
     isPlaying,

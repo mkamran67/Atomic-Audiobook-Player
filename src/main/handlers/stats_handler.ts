@@ -137,7 +137,7 @@ export async function progressHandler(data: SaveBookProgressPayload) {
   const percentageCompleted = bookDetails.totalLength ? (currentTime / bookDetails.totalLength) * 100 : (currentTime / duration) * 100;
 
   // check if book is new aka first 30 seconds
-  if (currentTime <= 31) {
+  if (currentTime <= 15) {
     await newBookStarted(data, bookDetails, bookDirectory);
   }
   // Check if book ended

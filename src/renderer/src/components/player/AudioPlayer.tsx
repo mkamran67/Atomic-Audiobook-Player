@@ -2,14 +2,17 @@ import { useAudioPlayer } from '../../utils/customHooks';
 // import { PlayIcon } from '@heroicons/react/24/solid';
 import { PlayCircleIcon, PauseCircleIcon, SpeakerXMarkIcon, SpeakerWaveIcon, BackwardIcon, ForwardIcon, ChevronDoubleDownIcon } from '@heroicons/react/24/outline';
 import { formatTime, secondsToPercentage } from '../../utils/timeConversions';
+import { MinimumChapterDetails } from '../../../../../src/shared/types';
 type Props = {
   url: string;
   title: string;
   bookURL: string;
   currentTrack: number;
+  incomingTime: number;
+  chapterList: MinimumChapterDetails[];
 };
 
-function AudioPlayer({ url, title, bookURL, currentTrack }: Props) {
+function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterList }: Props) {
   const encodedURL = 'get-audio://' + url;
 
 
@@ -21,7 +24,7 @@ function AudioPlayer({ url, title, bookURL, currentTrack }: Props) {
     seek,
     togglePlayPause,
     volume,
-  } = useAudioPlayer(encodedURL, bookURL, currentTrack);
+  } = useAudioPlayer(encodedURL, bookURL, currentTrack, incomingTime);
 
   const handleVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -61,7 +64,7 @@ function AudioPlayer({ url, title, bookURL, currentTrack }: Props) {
                 <button className=''><ChevronDoubleDownIcon className='w-8 h-8 rotate-90' /></button>
               </div>
               <div className="tooltip" data-tip="Play or Pause">
-                <button onClick={togglePlayPause} >
+                <button onClick={togglePlayPause}>
                   {
                     isPlaying ?
                       <PauseCircleIcon className='w-14 h-14 hover:text-gray-300' /> :

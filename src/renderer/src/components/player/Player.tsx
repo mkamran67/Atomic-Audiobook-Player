@@ -61,7 +61,7 @@ export default function Player() {
     totalSize,
     year,
     bookPath
-  } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
+  } = useSelector((state: RootState) => state.player);
 
   const bookCoverPath = coverPath !== 'none' && coverPath ? convertURI(coverPath) : null;
 
@@ -77,7 +77,10 @@ export default function Player() {
                 url={currentChapter}
                 bookURL={bookPath}
                 title={title}
-                currentTrack={currentTrack} />
+                currentTrack={currentTrack}
+                incomingTime={currentTime}
+                chapterList={chapterList}
+              />
             </>
             ) : (
               <div className="flex flex-col items-center justify-center w-full gap-2">
