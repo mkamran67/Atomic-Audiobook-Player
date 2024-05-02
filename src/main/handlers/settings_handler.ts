@@ -1,11 +1,11 @@
 import { webContents } from 'electron';
-import { LibraryView, SettingsStructureType } from '../../../src/shared/types';
+import { LibraryView, SettingsStructureType } from '../../shared/types';
 import { SETTINGS_LOCATION } from '../electron_constants';
 import { checkIfFileExists, readAndParseTextFile } from '../utils/diskReader';
 import { writeToDisk } from '../utils/diskWriter';
 import logger from '../utils/logger';
-import { cleanUpRootLibraryFile } from './library';
-import { READ_LIBRARY_FILE, RESPONSE_FROM_ELECTRON } from '../../../src/shared/constants';
+import { cleanUpRootLibraryFile } from './library_handler';
+import { READ_LIBRARY_FILE, READ_SETTINGS_FILE, RESPONSE_FROM_ELECTRON } from '../../shared/constants';
 
 
 
@@ -115,4 +115,24 @@ export async function handleSettings(action: string, payload: any): Promise<any>
 			break;
 		}
 	}
+}
+
+
+
+export async function handleReadSettingsFile(event: any) {
+	const results = await handleSettings('read', null);
+	event.reply(RESPONSE_FROM_ELECTRON, {
+		type: READ_SETTINGS_FILE,
+		data: results
+	});
+}
+
+export async function handleWriteSettingsFile(event: any, data: any) {
+	logger.info('Writing settings file.');
+	// Data should ecnompass Action and Payload
+	const results = await handleSettings(data.action, data.payload);
+	event.reply(RESPONSE_FROM_ELECTRON, {
+		type: READ_SETTINGS_FILE,
+		data: results
+	});
 }

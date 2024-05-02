@@ -1,13 +1,8 @@
-import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import default_img from '../../assets/default-book-cover.jpg';
 import { RootState } from "../../state/store";
 import { convertURI } from "../../utils/funcs";
-import BookCard from "../library/BookCard";
 import AudioPlayer from "./AudioPlayer";
 import BookCover from "./BookCover";
-import ButtonGroup from "./ButtonGroup";
-import ChapterSelector from "./ChapterSelector";
 import { MinimumChapterDetails } from "../../../../../src/shared/types";
 
 
@@ -67,7 +62,6 @@ export default function Player() {
     year,
     bookPath
   } = useSelector((state: RootState) => state.player); // Get the currently playing url from the store
-  console.log("file: Player.tsx:73 -> bookPath:", bookPath);
 
   const bookCoverPath = coverPath !== 'none' && coverPath ? convertURI(coverPath) : null;
 

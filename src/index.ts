@@ -1,12 +1,9 @@
-import { is } from "@electron-toolkit/utils";
 import { BrowserWindow, app, ipcMain, net, protocol } from "electron";
-import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } from 'electron-devtools-installer';
 import path from 'path';
 import handleRendererRequest from "./main/request_handler";
 import { setupConfigFiles } from "./main/utils/configs";
 import logger from "./main/utils/logger";
 import fs from 'fs/promises';
-import * as fsSync from 'fs';
 // whether you're running in development or production).
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -18,16 +15,6 @@ if (require('electron-squirrel-startup')) {
 
 
 setupConfigFiles();
-
-// protocol.registerSchemesAsPrivileged([
-//   {
-//     scheme: 'potato://',
-//     privileges: {
-//       standard: true,
-//       secure: true,
-//     }
-//   },
-// ]);
 
 protocol.registerSchemesAsPrivileged([
   {

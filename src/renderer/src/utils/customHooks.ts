@@ -24,7 +24,7 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number) => 
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [volume, setVolume] = useState(0.1);
+  const [volume, setVolume] = useState(100);
   const previousTime = useRef(0);
 
   const togglePlayPause = () => {
@@ -37,16 +37,13 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number) => 
   };
 
   const onTimeUpdate = () => {
-
-    // 'C:\\Users\\highz\\bucket\\Atomic-Audiobook-Player\\get-audio:\\E:\\Books\\Audio Books\\Food, Diet\\Fat for Fuel A Revolutionary Diet to Combat Cancer, Boost Brain Power, and Increase Your Energy\\Fat for Fuel_ A Revo_B072L48PKB_LC_32_22050_Mono.mp3'
-
     const currentTime = Math.ceil(audio.currentTime);
     setCurrentTime(currentTime);
     // Save every 30 seconds save progress
     if (currentTime !== previousTime.current && currentTime % 30 === 0) {
 
       const payload: SaveBookProgressPayload = {
-        currentChapterURL: url,
+        currentChapterURL: url.replace('get-audio://', ''),
         currentTime: currentTime,
         duration: duration,
         bookURL: bookPath,
@@ -62,8 +59,6 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number) => 
         }
       );
 
-
-
       previousTime.current = currentTime;
     }
 
@@ -71,7 +66,7 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number) => 
 
   const changeVolume = (newVolume: number) => {
     setVolume(newVolume);
-    audio.volume = newVolume;
+    audio.volume = (newVolume / 100);
   };
 
   const seek = (time: number) => {
@@ -83,12 +78,15 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number) => 
     audio.addEventListener('loadeddata', onPlaying);
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('ended', () => setIsPlaying(false));
+    audio.addEventListener('seeked', () => audio.play());
     isPlaying ? audio.play() : audio.pause();
 
     return () => {
       audio.removeEventListener('loadeddata', onPlaying);
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('ended', () => setIsPlaying(false));
+      audio.addEventListener('seeked', () => audio.play());
+
       audio.pause();
     };
   }, [isPlaying, audio]);

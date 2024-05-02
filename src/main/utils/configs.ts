@@ -1,6 +1,6 @@
 import { INFO_FOLDER_LOCATION } from "../electron_constants";
-import { createLibraryFile, createStatsFile } from "../handlers/library";
-import { createSettingsFile } from "../handlers/settings";
+import { createLibraryFile, createStatsFile } from "../handlers/library_handler";
+import { createSettingsFile } from "../handlers/settings_handler";
 import { checkIfDirectoryExists } from "./diskReader";
 import logger from "./logger";
 import fs from 'fs';

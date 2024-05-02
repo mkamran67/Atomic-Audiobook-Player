@@ -1,15 +1,15 @@
 import { dialog } from 'electron';
 import path from 'node:path';
-import { LibraryStructure } from '../../../src/shared/types';
+import { LibraryStructure } from '../../shared/types';
 import {
-	APPEND_BOOKS, ELECTRON_WARNING, READ_SETTINGS_FILE, RESPONSE_FROM_ELECTRON
+	APPEND_BOOKS, ELECTRON_WARNING, READ_LIBRARY_FILE, READ_SETTINGS_FILE, RESPONSE_FROM_ELECTRON
 } from '../../shared/constants';
 import { LIBRARY_FILE_LOCATION, STATS_FILE_LOCATION } from '../electron_constants';
 import { checkIfFileExists, readAndParseTextFile } from '../utils/diskReader';
 import { writeToDisk, writeToDiskAsync } from '../utils/diskWriter';
 import logger from '../utils/logger';
 import { searchDirectoryForBooks } from './bookData';
-import { checkForDuplicateRootDirectories, handleSettings } from './settings';
+import { checkForDuplicateRootDirectories, handleSettings } from './settings_handler';
 
 export function createLibraryFile(): boolean {
 	if (checkIfFileExists(LIBRARY_FILE_LOCATION)) {
@@ -109,3 +109,17 @@ export async function addbookDirectory(event: any) {
 }
 
 
+
+export async function handlerAddBookDirectory(event: any) {
+	logger.info('Adding new directory.');
+	await addbookDirectory(event);
+}
+
+export function readLibraryFile(event: any) {
+	const data = readAndParseTextFile(LIBRARY_FILE_LOCATION);
+
+	event.reply(RESPONSE_FROM_ELECTRON, {
+		type: READ_LIBRARY_FILE,
+		data: data
+	});
+}
