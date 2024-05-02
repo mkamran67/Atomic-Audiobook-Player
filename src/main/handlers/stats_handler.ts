@@ -155,8 +155,6 @@ export async function getPreviousBook(event: any) {
   if (bookStats.length === 0) {
     return;
   }
-  // REVIEW -> Test to make it sure it works.
-
 
   for (let index = 0; index < bookStats.length; index++) {
     const bookDeets = bookStats[index];
