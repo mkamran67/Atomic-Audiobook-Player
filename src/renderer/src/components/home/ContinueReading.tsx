@@ -1,29 +1,18 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../../state/store";
-import { statsBooksState } from "../../../../../src/shared/types";
+import { READ_STATS_FILE, REQUEST_TO_ELECTRON } from "../../../../../src/shared/constants";
+import { useEffect } from "react";
+import ContinueItem from "./ContinueItem";
 
-const tempData: statsBooksState[] = [
-  {
-    chapters: [
-      {
-        chapters: 2,
-        comments: [
-          "",
-          ""
-        ],
-        length: 130
-      }
-    ],
-    duration: 120,
-    durationPlayed: 37,
-    imgPath: "",
-    path: "",
-    title: "temp book"
-  }
-];
 
 function ContinueReading() {
   const { stats } = useSelector((state: RootState) => state.stats);
+
+
+  useEffect(() => {
+    window.api.send(REQUEST_TO_ELECTRON, { type: READ_STATS_FILE, payload: null });
+  }, []);
+
 
 
 
@@ -33,11 +22,15 @@ function ContinueReading() {
         stats.length > 0 ?
           (
             <>
-              <h3 className="p-2 text-xl text-ellipsis">
-                Continue Reading
+              <h3 className="w-full p-4 text-2xl">
+                Continue Listening
               </h3>
-              <ul className='w-full h-full'>
-
+              <ul className='w-full h-full shadow-sm'>
+                {
+                  stats.map((book, index) => (
+                    <ContinueItem key={book.bookTitle} book={book} />
+                  ))
+                }
               </ul>
             </>
           ) : (
@@ -46,7 +39,6 @@ function ContinueReading() {
             </h3>
           )
       }
-
     </div>
   );
 }

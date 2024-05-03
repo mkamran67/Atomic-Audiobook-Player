@@ -20,16 +20,6 @@ export interface ChapterStats {
   comments: string[];
 }
 
-export interface statsBooksState {
-  title: string;
-  duration: number;
-  path: string;
-  imgPath: string;
-  durationPlayed: number;
-  chapters: ChapterStats[];
-}
-
-
 export interface BookData {
   title: string;
   author?: string;

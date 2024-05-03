@@ -1,5 +1,4 @@
 
-import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import {
   BuildingLibraryIcon,
   CalendarIcon, Cog6ToothIcon, HomeIcon
@@ -16,6 +15,7 @@ import {
   GET_PREVIOUS_BOOK,
   READ_LIBRARY_FILE,
   READ_SETTINGS_FILE,
+  READ_STATS_FILE,
   REQUEST_TO_ELECTRON,
   RESPONSE_FROM_ELECTRON
 } from '../../../../shared/constants';
@@ -28,6 +28,7 @@ import { setSettings } from '../settings/settingsSlice';
 import Search from '../Search';
 import UIHandler from '../alerts/UIHandler';
 import { clearError, clearInfo, clearWarning, setError, setInfo, setWarning } from '../../state/slices/errorsSlice';
+import { setStats } from '../../state/slices/statsSlice';
 
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon, current: false },
@@ -124,6 +125,14 @@ export default function Layout() {
           }, 5000);
           break;
         }
+        case READ_STATS_FILE: {
+          dispatch(setStats(data));
+          setTimeout(() => {
+            dispatch(clearInfo());
+          }, 5000);
+          break;
+        }
+
         default: {
           console.log(`You've hit default case in Layout.js ${type}`);
           break;

@@ -35,6 +35,7 @@ export default async function handleRendererRequest(event: any, request: Request
   try {
     switch (type) {
       case READ_STATS_FILE: {
+        console.log(`read stats file`);
         handleReadStatsFile(event);
         break;
       }
