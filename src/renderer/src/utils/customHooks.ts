@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { SAVE_BOOK_PROGRESS, REQUEST_TO_ELECTRON } from '../../../../src/shared/constants';
+import { REQUEST_TO_ELECTRON, SAVE_BOOK_PROGRESS } from '../../../../src/shared/constants';
 import { SaveBookProgressPayload } from '../../../../src/shared/types';
 
 
@@ -22,7 +22,7 @@ const useDebounceValue = <T>(value: T, delay = 250) => {
 const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, incomingTime: number) => {
   const [audio] = useState(new Audio(url));
   const [isPlaying, setIsPlaying] = useState(false);
-  // const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(incomingTime);
   const [volume, setVolume] = useState(100);
   const previousTime = useRef(0);
@@ -31,10 +31,10 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, inc
     setIsPlaying(!isPlaying);
   };
 
-  // const onPlaying = () => {
-  //   setDuration(audio.duration);
-  //   setCurrentTime(audio.currentTime);
-  // };
+  const onPlaying = () => {
+    setDuration(audio.duration);
+    setCurrentTime(audio.currentTime);
+  };
 
   const onTimeUpdate = () => {
     const currentTime = Math.ceil(audio.currentTime);
@@ -77,15 +77,17 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, inc
 
   useEffect(() => {
     isPlaying ? audio.play() : audio.pause();
-
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('ended', () => setIsPlaying(false));
     audio.addEventListener('seeked', () => onTimeUpdate());
+    audio.addEventListener('loadedmetadata', () => setDuration(audio.duration));
 
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('ended', () => setIsPlaying(false));
       audio.removeEventListener('seeked', () => onTimeUpdate());
+      audio.removeEventListener('loadedmetadata', () => setDuration(audio.duration));
+
       audio.pause();
     };
   }, [isPlaying, audio]);
@@ -95,17 +97,19 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, inc
   }, []);
 
 
+
   return {
     isPlaying,
-    // duration,
+    duration,
     currentTime,
     volume,
+    audio,
     togglePlayPause,
     changeVolume,
     seek,
-    audio
+    onPlaying,
   };
 };
 
 
-export { useDebounceValue, useAudioPlayer };
+export { useAudioPlayer, useDebounceValue };

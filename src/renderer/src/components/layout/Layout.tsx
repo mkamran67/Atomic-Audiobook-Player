@@ -21,12 +21,13 @@ import {
 } from '../../../../shared/constants';
 import appLogo from '../../assets/app-icon.png';
 import { appendLibrary, setBooks } from '../../state/slices/booksSlice';
-import { clearError, setError } from '../../state/slices/layoutSlice';
 import { setCurrentBook } from '../../state/slices/playerSlice';
 import { IncomingElectronResponseType } from '../../types/layout.types';
 import Player from '../player/Player';
 import { setSettings } from '../settings/settingsSlice';
 import Search from '../Search';
+import UIHandler from '../alerts/UIHandler';
+import { clearError, clearInfo, clearWarning, setError, setInfo, setWarning } from '../../state/slices/errorsSlice';
 
 const navigation = [
   { name: "Home", href: "/", icon: HomeIcon, current: false },
@@ -103,23 +104,23 @@ export default function Layout() {
           break;
         }
         case ELECTRON_ERROR: {
-          dispatch(setError({ error: true, type: 'error', message: data }));
+          dispatch(setError(data));
           setTimeout(() => {
             dispatch(clearError());
           }, 5000);
           break;
         }
         case ELECTRON_WARNING: {
-          dispatch(setError({ error: true, type: 'warning', message: data }));
+          dispatch(setWarning(data));
           setTimeout(() => {
-            dispatch(clearError());
+            dispatch(clearWarning());
           }, 5000);
           break;
         }
         case ELECTRON_INFO: {
-          dispatch(setError({ error: true, type: 'info', message: data }));
+          dispatch(setInfo(data));
           setTimeout(() => {
-            dispatch(clearError());
+            dispatch(clearInfo());
           }, 5000);
           break;
         }
@@ -208,6 +209,7 @@ export default function Layout() {
           {/* CONTENT */}
           <div className="divide-y divide-white/5">
             <div className='m-2'>
+              <UIHandler />
               <Outlet />
             </div>
           </div>

@@ -16,19 +16,27 @@ function classNames(...classes: string[]) {
 }
 
 export default function Library() {
+  const dispatch = useDispatch();
   const library = useSelector((state: RootState) => state.library);
   const { libraryView } = useSelector((state: RootState) => state.settings);
-  const dispatch = useDispatch();
+  const { searchTerm } = useSelector((state: RootState) => state.search);
 
   const booksCombined = useMemo(() => {
     const combinedBooks: BookDataType[] = [];
     library.forEach((bookSet) => {
       bookSet.books.forEach((book) => {
-        combinedBooks.push(book);
+        // combinedBooks.push(book);
+        if (searchTerm) {
+          if (book.title && book.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+            combinedBooks.push(book);
+          }
+        } else {
+          combinedBooks.push(book);
+        }
       });
     });
     return combinedBooks;
-  }, [library]);
+  }, [library, searchTerm]);
 
   const viewHandler = () => {
 

@@ -5,10 +5,11 @@ import { convertURI } from '../../utils/funcs';
 
 type Props = {
   book: BookDataType;
+  setPlaying: (e: any, bookPath: string) => void;
 };
 
 
-function ListViewItem({ book }: Props) {
+function ListViewItem({ book, setPlaying }: Props) {
 
   const { title, author, cover, dirPath } = book;
   // console.log("👉 -> file: ListViewItem.tsx:13 -> title:", title);
@@ -18,6 +19,7 @@ function ListViewItem({ book }: Props) {
   return (
     <li
       className="relative flex justify-between px-4 py-5 cursor-pointer gap-x-6 hover:bg-gray-800 sm:px-6 lg:px-8"
+      onClick={(e) => setPlaying(e, dirPath)}
     >
       <div className="flex min-w-0 gap-x-4">
         <img className="flex-none w-12 h-12 rounded-md bg-gray-50" src={coverSrc} alt={title + 'cover'} />

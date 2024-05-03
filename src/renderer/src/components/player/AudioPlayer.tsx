@@ -22,10 +22,11 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
     changeVolume,
     seek,
     togglePlayPause,
+    onPlaying,
     currentTime,
     isPlaying,
     volume,
-    audio
+    duration
   } = useAudioPlayer(encodedURL, bookURL, currentTrack, incomingTime);
 
   const handleVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,7 +45,7 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
     const percentage = (value / 100);
-    const newTime = percentage * audio.duration;
+    const newTime = percentage * duration;
     seek(newTime);
   };
 
@@ -80,7 +81,6 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
     const newChapter = chapterList[chapterIndex];
     dispatch(setCurrentPlayingChapter({ currentlyPlaying: newChapter.path }));
   };
-
 
   return (
     <>
@@ -126,10 +126,10 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
                 type="range"
                 min={0}
                 max={100}
-                value={secondsToPercentage(currentTime, audio.duration) ? secondsToPercentage(currentTime, audio.duration) : 0}
+                value={duration ? secondsToPercentage(currentTime, duration) : 0}
                 onChange={handleSeek}
                 className="range range-xs" />
-              <p>{formatTime(Math.ceil(audio.duration - currentTime))}</p>
+              <p>{formatTime(Math.ceil(duration - currentTime))}</p>
             </div>
           </div>
           {/* Volume o--> */}

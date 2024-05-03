@@ -1,9 +1,9 @@
 import { useSelector } from "react-redux";
+import { MinimumChapterDetails } from "../../../../../src/shared/types";
 import { RootState } from "../../state/store";
 import { convertURI } from "../../utils/funcs";
 import AudioPlayer from "./AudioPlayer";
 import BookCover from "./BookCover";
-import { MinimumChapterDetails } from "../../../../../src/shared/types";
 
 
 
