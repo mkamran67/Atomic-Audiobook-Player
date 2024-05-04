@@ -14,18 +14,16 @@ function ContinueReading() {
   }, []);
 
 
-
-
   return (
     <div className="w-full h-full">
       {
         stats.length > 0 ?
           (
             <>
-              <h3 className="w-full p-4 text-2xl">
+              <h3 className="w-full p-4 text-2xl text-gray-300">
                 Continue Listening
               </h3>
-              <ul className='w-full h-full shadow-sm'>
+              <ul className='w-full h-full'>
                 {
                   stats.map((book, index) => (
                     <ContinueItem key={book.bookTitle} book={book} />
