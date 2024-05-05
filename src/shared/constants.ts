@@ -20,3 +20,5 @@ export const GET_BOOK_DETAILS = 'getBookDetails';
 export const REACT_ERROR = 'reactError';
 export const GET_PREVIOUS_BOOK = 'getPreviousBook';
 export const GET_CHAPTER = 'getChapter';
+
+export const TEST_TEST_TEST = 'testTestTest';

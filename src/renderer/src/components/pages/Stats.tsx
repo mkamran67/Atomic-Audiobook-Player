@@ -1,11 +1,23 @@
-import React from 'react'
+import { REQUEST_TO_ELECTRON, TEST_TEST_TEST } from "../../../../../src/shared/constants";
 
-type Props = {}
+function Stats() {
 
-function Stats({ }: Props) {
+  const testDirectory = () => {
+    console.log('Test Directory');
+    window.api.send(REQUEST_TO_ELECTRON, {
+      type: TEST_TEST_TEST,
+      data: null,
+    });
+  };
+
+
   return (
-    <div>Stats</div>
-  )
+    <div className='grid w-full h-full mb-32 place-items-center'>
+      <button className="btn" onClick={testDirectory}>
+        Test Directory
+      </button>
+    </div>
+  );
 }
 
-export default Stats
+export default Stats;

@@ -1,14 +1,12 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
 import * as jsmediatags from 'jsmediatags';
 import path from 'node:path';
-
 import { IMG_EXTENSIONS, MEDIA_EXTENSIONS } from '../electron_constants';
-
-import ffprobeStatic from 'ffprobe-static';
 import ffprobe from 'ffprobe';
+import ffprobeStatic from 'ffprobe-static';
 import { access, constants } from 'fs/promises';
+import { BookDetails, MinimumChapterDetails } from '../../../src/shared/types';
 import logger from './logger';
-import { MinimumChapterDetails, BookDetails } from '../../../src/shared/types';
 
 export function readAndParseTextFile(filePath: string) {
 	return JSON.parse(readFileSync(filePath, 'utf-8'));
@@ -34,7 +32,7 @@ function recursiveBookSearch(bookList: string[], dirPath: string): void {
 	if (!directoryElements || directoryElements.length === 0) {
 		return;
 	}
-
+	// REVIEW <-||-> 
 	// if the first file is not a directory -> push the current directory as an audiobook location;
 	if (!directoryElements[0].isDirectory()) {
 		bookList.push(dirPath);

@@ -7,6 +7,7 @@ import {
   READ_STATS_FILE,
   RESPONSE_FROM_ELECTRON,
   SAVE_BOOK_PROGRESS,
+  TEST_TEST_TEST,
   WRITE_SETTINGS_FILE,
   WRITE_STATS_FILE
 } from '../shared/constants';
@@ -16,6 +17,7 @@ import { handleReadSettingsFile, handleWriteSettingsFile } from "./handlers/sett
 import { getPreviousBook, handleReadStatsFile, progressHandler } from './handlers/stats_handler';
 import { RequestFromReactType } from './types/library';
 import { getBookDetails } from './utils/diskReader';
+import mapFolders from './utils/folderMap';
 import logger from './utils/logger';
 
 
@@ -35,7 +37,6 @@ export default async function handleRendererRequest(event: any, request: Request
   try {
     switch (type) {
       case READ_STATS_FILE: {
-        console.log(`read stats file`);
         handleReadStatsFile(event);
         break;
       }
@@ -74,6 +75,11 @@ export default async function handleRendererRequest(event: any, request: Request
       }
       case GET_CHAPTER: {
         // await getChapter(event, data);
+        break;
+      }
+      case TEST_TEST_TEST: {
+        console.log(`Test Test Test`);
+        await mapFolders();
         break;
       }
       case GET_BOOK_DETAILS: {

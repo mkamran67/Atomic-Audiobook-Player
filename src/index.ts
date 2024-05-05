@@ -61,11 +61,11 @@ const createWindow = (): void => {
   // installExtension(REACT_DEVELOPER_TOOLS)
   //   .then((name) => console.log(`Added Extension:  ${name}`))
   //   .catch((err) => console.log('An error occurred: ', err));
-  try {
-    mainWindow.webContents.openDevTools();
-  } catch (error) {
-    console.error('Error in opening dev tools', error);
-  }
+  // try {
+  //   mainWindow.webContents.openDevTools();
+  // } catch (error) {
+  //   console.error('Error in opening dev tools', error);
+  // }
 };
 
 
