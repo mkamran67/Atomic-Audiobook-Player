@@ -15,6 +15,7 @@ codecs.set("webm", "audio/webm");
 codecs.set("amr", "audio/amr");
 codecs.set("3gpp", "audio/3gpp");
 codecs.set("mp4", "audio/mp4");
+codecs.set("m4b", "audio/mp4");
 
 
 export function getHeadersForAudio(extType: string): string {

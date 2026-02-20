@@ -13,4 +13,4 @@
 // export const ELECTRON_WARNING = 'electronWarning';
 // export const APPEND_BOOKS = 'appendBooks';
 // export const GET_BOOK_DETAILS = 'getBookDetails';
-export const POTATO = 'potato';
+export const APP_NAME = 'atomic-audiobook-player';

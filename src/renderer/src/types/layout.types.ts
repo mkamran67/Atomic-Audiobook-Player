@@ -1,4 +1,4 @@
-export type IncomingElectronResponseType {
+export type IncomingElectronResponseType = {
   type: string,
   data: any
 }

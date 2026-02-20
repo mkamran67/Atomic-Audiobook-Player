@@ -19,13 +19,15 @@ const useDebounceValue = <T>(value: T, delay = 250) => {
   return debouncedValue;
 };
 
-const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, incomingTime: number) => {
+const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, incomingTime: number, onEnded?: () => void) => {
   const [audio] = useState(new Audio(url));
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(incomingTime);
   const [volume, setVolume] = useState(100);
   const previousTime = useRef(0);
+  const onEndedRef = useRef(onEnded);
+  onEndedRef.current = onEnded;
 
   const togglePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -39,7 +41,7 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, inc
   const onTimeUpdate = () => {
     const currentTime = Math.ceil(audio.currentTime);
     setCurrentTime(currentTime);
-    // Save every 30 seconds save progress
+    // Save every 15 seconds
     if (currentTime !== previousTime.current && currentTime % 15 === 0) {
 
       const payload: SaveBookProgressPayload = {
@@ -77,16 +79,24 @@ const useAudioPlayer = (url: string, bookPath: string, currentTrack: number, inc
 
   useEffect(() => {
     isPlaying ? audio.play() : audio.pause();
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+      onEndedRef.current?.();
+    };
+    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handleSeeked = () => onTimeUpdate();
+
     audio.addEventListener('timeupdate', onTimeUpdate);
-    audio.addEventListener('ended', () => setIsPlaying(false));
-    audio.addEventListener('seeked', () => onTimeUpdate());
-    audio.addEventListener('loadedmetadata', () => setDuration(audio.duration));
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('seeked', handleSeeked);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
 
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
-      audio.removeEventListener('ended', () => setIsPlaying(false));
-      audio.removeEventListener('seeked', () => onTimeUpdate());
-      audio.removeEventListener('loadedmetadata', () => setDuration(audio.duration));
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('seeked', handleSeeked);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
 
       audio.pause();
     };

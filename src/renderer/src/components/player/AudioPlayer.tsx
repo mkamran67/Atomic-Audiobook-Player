@@ -18,6 +18,36 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
   const encodedURL = 'get-audio://' + url;
   const dispatch = useDispatch();
 
+  const skipChapter = (direction: 'forward' | 'backward') => {
+    let chapterIndex = 0;
+    let currentChapterIndex = 0;
+
+    for (let index = 0; index < chapterList.length; index++) {
+      const chapter = chapterList[index];
+      if (chapter.path === url) {
+        currentChapterIndex = index;
+        break;
+      }
+    }
+
+    if (direction === 'forward') {
+      if ((currentChapterIndex + 1) >= chapterList.length) {
+        return;
+      } else {
+        chapterIndex = currentChapterIndex + 1;
+      }
+    } else {
+      if ((currentChapterIndex - 1) < 0) {
+        return;
+      } else {
+        chapterIndex = currentChapterIndex - 1;
+      }
+    }
+
+    const newChapter = chapterList[chapterIndex];
+    dispatch(setCurrentPlayingChapter({ currentlyPlaying: newChapter.path }));
+  };
+
   const {
     changeVolume,
     seek,
@@ -27,7 +57,7 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
     isPlaying,
     volume,
     duration
-  } = useAudioPlayer(encodedURL, bookURL, currentTrack, incomingTime);
+  } = useAudioPlayer(encodedURL, bookURL, currentTrack, incomingTime, () => skipChapter('forward'));
 
   const handleVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -49,37 +79,9 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
     seek(newTime);
   };
 
-  const skipChapter = (direction: 'forward' | 'backward') => {
-    console.log(`Changing chapters`);
-    let chapterIndex = 0;
-    let currentChapterIndex = 0;
-
-    for (let index = 0; index < chapterList.length; index++) {
-      const chapter = chapterList[index];
-      if (chapter.path === url) {
-        currentChapterIndex = index;
-        break;
-      }
-    }
-
-    if (direction === 'forward') {
-      if ((currentChapterIndex + 1) > chapterList.length) {
-        // REVIEW -> handle error in UI
-        return;
-      } else {
-        chapterIndex = currentChapterIndex + 1;
-      }
-    } else {
-      if ((currentChapterIndex - 1) < 0) {
-        // REVIEW -> handle error in UI
-        return;
-      } else {
-        chapterIndex = currentChapterIndex - 1;
-      }
-    }
-
-    const newChapter = chapterList[chapterIndex];
-    dispatch(setCurrentPlayingChapter({ currentlyPlaying: newChapter.path }));
+  const skipTime = (seconds: number) => {
+    const newTime = Math.max(0, Math.min(duration, currentTime + seconds));
+    seek(newTime);
   };
 
   return (
@@ -95,7 +97,7 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
                 </button>
               </div>
               <div className="tooltip" data-tip="15 Seconds back">
-                <button className=''>
+                <button onClick={() => skipTime(-15)}>
                   <ChevronDoubleDownIcon className='w-8 h-8 rotate-90' />
                 </button>
               </div>
@@ -109,7 +111,7 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
                 </button>
               </div>
               <div className="tooltip" data-tip="15 Seconds Forward">
-                <button className=''>
+                <button onClick={() => skipTime(15)}>
                   <ChevronDoubleDownIcon className='w-8 h-8 -rotate-90' />
                 </button>
               </div>
@@ -151,4 +153,4 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
   );
 }
 
-export default AudioPlayer;;;
+export default AudioPlayer;
