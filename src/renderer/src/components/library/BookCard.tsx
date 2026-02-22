@@ -9,19 +9,32 @@ type Props = {
   setPlaying: (arg0: any, arg1: string) => void;
 };
 
-export default function BookCard({ image, bookPath, setPlaying }: Props) {
+export default function BookCard({ image, bookPath, title, author, setPlaying }: Props) {
 
   const imageSrc = image && image !== "none" ? convertURI(image) : default_img;
 
   return (
     <div
-      className="relative h-56 rounded-md shadow-xl cursor-pointer overflow-clip w-44 group "
+      className="relative rounded-md shadow-xl cursor-pointer overflow-clip group aspect-[3/4]"
       onClick={(e) => setPlaying(e, bookPath)}
     >
-      <div className="absolute z-10 invisible w-full h-full duration-150 ease-in-out bg-black rounded-md opacity-0 hover:shadow-2xl hover:opacity-50 hover:transition-opacity group-hover:visible"></div>
+      {/* Hover overlay */}
+      <div className="absolute inset-0 z-10 bg-black opacity-0 transition-opacity duration-150 group-hover:opacity-40" />
+      {/* Cover image */}
       <img
-        className="object-center w-48 h-56"
-        src={imageSrc} alt={"Book cover"} />
+        className="object-cover w-full h-full"
+        src={imageSrc}
+        alt={title || "Book cover"}
+      />
+      {/* Title/Author gradient at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/80 to-transparent p-2 pt-6">
+        <p className="text-sm font-semibold text-white truncate">
+          {title || bookPath.split(/[\\/]/).pop()}
+        </p>
+        {author && (
+          <p className="text-xs text-gray-300 truncate">{author}</p>
+        )}
+      </div>
     </div>
   );
 }

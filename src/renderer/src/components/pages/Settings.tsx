@@ -94,7 +94,7 @@ export default function Settings() {
             <section>
               <h2 className="text-base font-semibold leading-7 text-gray-300">Settings</h2>
               <ul role="list" className="mt-6 text-sm leading-6 border-t border-gray-600 divide-y divide-gray-100">
-                <li key={"volume" + 0} className="flex justify-between py-6 gap-x-6">
+                <li key={"volume" + 0} className="flex flex-col sm:flex-row justify-between py-6 gap-2 sm:gap-x-6">
                   {/* Title */}
                   <div className="font-medium text-gray-300">Default Volume</div>
                   {/* Description */}
@@ -108,7 +108,7 @@ export default function Settings() {
                 {rootDirectories.length > 0 &&
                   rootDirectories.map((directory, index) => {
                     return (
-                      <li key={"dirs" + index} className="flex justify-between py-6 gap-x-6">
+                      <li key={"dirs" + index} className="flex flex-col sm:flex-row justify-between py-6 gap-2 sm:gap-x-6">
                         {/* Title */}
                         <div className="font-medium text-gray-300">{directory}</div>
                         {/* Input */}

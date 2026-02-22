@@ -1,17 +1,15 @@
-import { convertURI } from '../../utils/funcs';
-
 type Props = {
   imgSrc: string;
 };
 
 function BookCover({ imgSrc }: Props) {
   return (
-    <div className="mx-4 overflow-hidden rounded-lg">
-      <div className="flex items-center w-32 h-40 bg-gray-800 rounded-lg justify-evenly">
+    <div className="mx-2 md:mx-4 overflow-hidden rounded-lg shrink-0">
+      <div className="flex items-center w-16 h-20 md:w-24 md:h-28 bg-gray-800 rounded-lg justify-evenly">
         {
           imgSrc ?
-            <img src={imgSrc} className='object-fill w-full h-full' /> :
-            <p className="text-lg text-center -rotate-45 -translate-x-2">No Cover</p>
+            <img src={imgSrc} className='object-cover w-full h-full rounded-lg' /> :
+            <p className="text-xs md:text-sm text-center text-gray-400">No Cover</p>
         }
       </div>
     </div>

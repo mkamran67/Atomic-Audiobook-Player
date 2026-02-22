@@ -11,7 +11,6 @@ import {
   GET_PREVIOUS_BOOK,
   READ_LIBRARY_FILE,
   READ_SETTINGS_FILE,
-  READ_STATS_FILE,
   REQUEST_TO_ELECTRON,
   RESPONSE_FROM_ELECTRON
 } from '../../../../shared/constants';
@@ -24,11 +23,23 @@ import UIHandler from '../alerts/UIHandler';
 import { clearError, clearInfo, clearWarning, setError, setInfo, setWarning } from '../../state/slices/errorsSlice';
 import { setStats } from '../../state/slices/statsSlice';
 import Sidebar from './Sidebar';
+import Player from '../player/Player';
+import { SidebarProvider, useSidebar } from '../../context/SidebarContext';
 
-export default function Layout() {
+function MobileOverlay() {
+  const { isOpen, close } = useSidebar();
+  if (!isOpen) return null;
+  return (
+    <div
+      className="fixed inset-0 z-40 bg-black/50 md:hidden"
+      onClick={close}
+    />
+  );
+}
+
+function LayoutContent() {
   const dispatch = useDispatch();
   const oneTime = useRef(true);
-
 
   useEffect(() => {
     if (oneTime.current) {
@@ -120,7 +131,8 @@ export default function Layout() {
   return (
     <>
       <Sidebar />
-      <div className="pb-40 pl-72">
+      <MobileOverlay />
+      <div className="pb-32 md:pl-72 md:pb-36">
         <Search />
         <main>
           <div className="divide-y divide-white/5">
@@ -131,6 +143,15 @@ export default function Layout() {
           </div>
         </main>
       </div>
+      <Player />
     </>
+  );
+}
+
+export default function Layout() {
+  return (
+    <SidebarProvider>
+      <LayoutContent />
+    </SidebarProvider>
   );
 }

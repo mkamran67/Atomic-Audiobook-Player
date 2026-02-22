@@ -1,21 +1,29 @@
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { setSearchTerm } from '../state/slices/searchSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../state/store';
-import { ChangeEvent, ReactHTMLElement } from 'react';
+import { ChangeEvent } from 'react';
+import { useSidebar } from '../context/SidebarContext';
 
 
 const Search = () => {
   const dispatch = useDispatch();
   const { searchTerm } = useSelector((state: RootState) => state.search);
+  const { toggle } = useSidebar();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    // e.preventdefault();
     dispatch(setSearchTerm(e.target.value));
   };
 
   return (
-    <div className="sticky top-0 z-40 flex items-center h-16 px-4 bg-gray-900 border-b shadow-sm shrink-0 gap-x-6 border-white/5 sm:px-6 lg:px-8">
+    <div className="sticky top-0 z-40 flex items-center h-16 px-4 bg-gray-900 border-b shadow-sm shrink-0 gap-x-4 border-white/5 sm:px-6 lg:px-8">
+      <button
+        onClick={toggle}
+        className="p-2 text-gray-400 hover:text-white md:hidden"
+        aria-label="Toggle sidebar"
+      >
+        <Bars3Icon className="w-6 h-6" />
+      </button>
       <div className="flex self-stretch flex-1 gap-x-4 lg:gap-x-6">
         <form className="flex flex-1">
           <label htmlFor="search-field" className="sr-only">

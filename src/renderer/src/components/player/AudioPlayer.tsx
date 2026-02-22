@@ -85,71 +85,69 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
   };
 
   return (
-    <>
-      <div className="flex flex-col items-center justify-center w-full h-full gap-2">
-        <div className='flex items-center justify-center w-full h-full text-white'>
-          <div className='flex flex-col items-center justify-center gap-2 grow'>
-            {/* << < |||> > >> */}
-            <div className='flex items-center justify-center'>
-              <div className="tooltip" data-tip="Chapter Rewind">
-                <button onClick={() => skipChapter('backward')}>
-                  <BackwardIcon className='w-8 h-8' />
-                </button>
-              </div>
-              <div className="tooltip" data-tip="15 Seconds back">
-                <button onClick={() => skipTime(-15)}>
-                  <ChevronDoubleDownIcon className='w-8 h-8 rotate-90' />
-                </button>
-              </div>
-              <div className="tooltip" data-tip="Play or Pause">
-                <button onClick={togglePlayPause}>
-                  {
-                    isPlaying ?
-                      <PauseCircleIcon className='w-14 h-14 hover:text-gray-300' /> :
-                      <PlayCircleIcon className='w-14 h-14 hover:text-gray-300' />
-                  }
-                </button>
-              </div>
-              <div className="tooltip" data-tip="15 Seconds Forward">
-                <button onClick={() => skipTime(15)}>
-                  <ChevronDoubleDownIcon className='w-8 h-8 -rotate-90' />
-                </button>
-              </div>
-              <div className="tooltip" data-tip="Chapter Forward">
-                <button onClick={() => skipChapter('forward')}>
-                  <ForwardIcon className='w-8 h-8' />
-                </button>
-              </div>
+    <div className="flex flex-col items-center justify-center w-full h-full gap-1 md:gap-2 px-2">
+      <div className='flex items-center justify-center w-full h-full text-white'>
+        <div className='flex flex-col items-center justify-center gap-1 md:gap-2 grow'>
+          {/* Playback controls */}
+          <div className='flex items-center justify-center gap-1'>
+            <div className="tooltip" data-tip="Chapter Rewind">
+              <button onClick={() => skipChapter('backward')}>
+                <BackwardIcon className='w-6 h-6 md:w-8 md:h-8 hover:text-gray-300' />
+              </button>
             </div>
-            {/* <----- Chapter Range/Seeker ----> */}
-            <div className='flex items-center justify-center w-full gap-2'>
-              <p>{formatTime(Math.ceil(currentTime))}</p>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={duration ? secondsToPercentage(currentTime, duration) : 0}
-                onChange={handleSeek}
-                className="range range-xs" />
-              <p>{formatTime(Math.ceil(duration - currentTime))}</p>
+            <div className="tooltip" data-tip="15 Seconds back">
+              <button onClick={() => skipTime(-15)}>
+                <ChevronDoubleDownIcon className='w-6 h-6 md:w-8 md:h-8 rotate-90 hover:text-gray-300' />
+              </button>
+            </div>
+            <div className="tooltip" data-tip="Play or Pause">
+              <button onClick={togglePlayPause}>
+                {
+                  isPlaying ?
+                    <PauseCircleIcon className='w-10 h-10 md:w-14 md:h-14 hover:text-gray-300' /> :
+                    <PlayCircleIcon className='w-10 h-10 md:w-14 md:h-14 hover:text-gray-300' />
+                }
+              </button>
+            </div>
+            <div className="tooltip" data-tip="15 Seconds Forward">
+              <button onClick={() => skipTime(15)}>
+                <ChevronDoubleDownIcon className='w-6 h-6 md:w-8 md:h-8 -rotate-90 hover:text-gray-300' />
+              </button>
+            </div>
+            <div className="tooltip" data-tip="Chapter Forward">
+              <button onClick={() => skipChapter('forward')}>
+                <ForwardIcon className='w-6 h-6 md:w-8 md:h-8 hover:text-gray-300' />
+              </button>
             </div>
           </div>
-          {/* Volume o--> */}
-          <div className='flex flex-row items-center justify-center h-full mr-6'>
-            <button onClick={toggleMute} className='w-6 h-w-6 hover:text-gray-300'>
-              {volume === 0 ? <SpeakerXMarkIcon /> : <SpeakerWaveIcon />}
-            </button>
+          {/* Seek bar */}
+          <div className='flex items-center justify-center w-full gap-2 px-2'>
+            <p className='text-xs md:text-sm whitespace-nowrap'>{formatTime(Math.ceil(currentTime))}</p>
             <input
               type="range"
               min={0}
               max={100}
-              value={volume}
-              onChange={handleVolume}
-              className="range range-xs [--range-shdw:green] ml-2" />
+              value={duration ? secondsToPercentage(currentTime, duration) : 0}
+              onChange={handleSeek}
+              className="range range-xs" />
+            <p className='text-xs md:text-sm whitespace-nowrap'>{formatTime(Math.ceil(duration - currentTime))}</p>
           </div>
         </div>
+        {/* Volume */}
+        <div className='flex flex-row items-center justify-center h-full mr-2 md:mr-6 shrink-0'>
+          <button onClick={toggleMute} className='w-6 h-6 hover:text-gray-300'>
+            {volume === 0 ? <SpeakerXMarkIcon /> : <SpeakerWaveIcon />}
+          </button>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={volume}
+            onChange={handleVolume}
+            className="hidden md:block range range-xs [--range-shdw:green] ml-2" />
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 

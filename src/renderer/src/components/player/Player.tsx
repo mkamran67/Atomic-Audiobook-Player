@@ -24,8 +24,8 @@ export default function Player() {
   const bookCoverPath = coverPath !== 'none' && coverPath ? convertURI(coverPath) : null;
 
   return (
-    <div className="fixed bottom-0 left-0 z-40 w-screen bg-gray-900 h-52 overflow-none">
-      <div className="flex flex-row items-center justify-center w-full h-full ">
+    <div className="fixed bottom-0 left-0 z-40 w-screen bg-gray-900 h-28 md:h-32 border-t border-white/10">
+      <div className="flex flex-row items-center justify-center w-full h-full">
         <BookCover imgSrc={bookCoverPath} />
         {
           currentChapter ?
@@ -42,11 +42,11 @@ export default function Player() {
             </>
             ) : (
               <div className="flex flex-col items-center justify-center w-full gap-2">
-                <h3 className="text-xl">No book playing</h3>
+                <h3 className="text-lg md:text-xl text-gray-400">No book playing</h3>
               </div>
             )
         }
       </div>
-    </div >
+    </div>
   );
 }

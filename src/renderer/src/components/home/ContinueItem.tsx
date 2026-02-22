@@ -30,8 +30,8 @@ function ContinueItem({ book }: Props) {
   };
 
   return (
-    <li key={book.bookAuthor} className="mx-6 my-4 rounded-md shadow-xl max-h-64 card lg:card-side bg-base-100">
-      <figure className='max-w-64'>
+    <li key={book.bookAuthor} className="mx-2 md:mx-6 my-4 rounded-md shadow-xl max-h-64 card lg:card-side bg-base-100">
+      <figure className='max-w-full lg:max-w-64'>
         {imgSrc ? (<img src={imgSrc} alt="Album" />) : <img src={default_img} alt="Album" />}
       </figure>
       <div className="card-body">
