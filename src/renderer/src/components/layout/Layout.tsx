@@ -11,6 +11,7 @@ import {
   GET_PREVIOUS_BOOK,
   READ_LIBRARY_FILE,
   READ_SETTINGS_FILE,
+  READ_STATS_FILE,
   REQUEST_TO_ELECTRON,
   RESPONSE_FROM_ELECTRON
 } from '../../../../shared/constants';
@@ -20,6 +21,7 @@ import { IncomingElectronResponseType } from '../../types/layout.types';
 import { setSettings } from '../settings/settingsSlice';
 import Search from '../Search';
 import UIHandler from '../alerts/UIHandler';
+import { useTheme } from '../../utils/useTheme';
 import { clearError, clearInfo, clearWarning, setError, setInfo, setWarning } from '../../state/slices/errorsSlice';
 import { setStats } from '../../state/slices/statsSlice';
 import Sidebar from './Sidebar';
@@ -38,6 +40,7 @@ function MobileOverlay() {
 }
 
 function LayoutContent() {
+  useTheme();
   const dispatch = useDispatch();
   const oneTime = useRef(true);
 
@@ -135,7 +138,7 @@ function LayoutContent() {
       <div className="pb-32 md:pl-72 md:pb-36">
         <Search />
         <main>
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-base-content/5">
             <div className='m-2 mb-16'>
               <UIHandler />
               <Outlet />

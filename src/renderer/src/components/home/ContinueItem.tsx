@@ -39,7 +39,7 @@ function ContinueItem({ book }: Props) {
         <h6>by {bookAuthor}</h6>
         <p>Started on {formattedDate}</p>
         <div className="justify-end card-actions">
-          <button onClick={handleContinue} className="text-black bg-green-500 btn hover:bg-green-700">
+          <button onClick={handleContinue} className="btn btn-success">
             Continue Listening
           </button>
         </div>

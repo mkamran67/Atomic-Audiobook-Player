@@ -96,6 +96,7 @@ async function getAllDetailsOfAMediaFile(
 
 			jsmediatags.read(mediaPath, {
 				onSuccess: async (read_info: any) => {
+				try {
 					let currentChapterLength = 0;
 					// const totalTracks = read_info.tags.track ? read_info.tags.track.split('/')[1] : 1;
 					const totalTracks = read_info.tags.track ? read_info.tags.track : 1;
@@ -126,6 +127,9 @@ async function getAllDetailsOfAMediaFile(
 					};
 
 					resolve(bookData);
+				} catch (err) {
+					reject(err);
+				}
 				},
 				onError: (err) => {
 					reject(err);
@@ -135,7 +139,7 @@ async function getAllDetailsOfAMediaFile(
 
 		return [bookDetails, totalSize, totalLength];
 	} catch (err: any) {
-		throw new Error(err);
+		throw err instanceof Error ? err : new Error(String(err));
 	}
 }
 
@@ -162,7 +166,7 @@ async function getChapterDetails(
 		return [chapterDetails, totalSize, totalLength];
 		// }
 	} catch (err: any) {
-		throw new Error(err);
+		throw err instanceof Error ? err : new Error(String(err));
 	}
 }
 
@@ -237,8 +241,8 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 		return bookDetails;
 
 	} catch (err: any) {
-		console.error("\n\n👉 -> file: diskReader.ts:238 -> err:", err);
+		console.error("\n\n👉 -> file: diskReader.ts -> getBookDetails err:", err);
 		logger.error(`Error reading directory: ${dirPath}`);
-		throw new Error(err);
+		throw err instanceof Error ? err : new Error(String(err));
 	}
 }

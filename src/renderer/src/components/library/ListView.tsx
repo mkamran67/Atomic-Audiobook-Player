@@ -31,7 +31,7 @@ export default function ListView({ books }: Props) {
   };
 
   return (
-    <ul role="list" className="divide-y divide-gray-700">
+    <ul role="list" className="divide-y divide-base-300">
       {books.map((book, index) => {
         return (
           <ListViewItem

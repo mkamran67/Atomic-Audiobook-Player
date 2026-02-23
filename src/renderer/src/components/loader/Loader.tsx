@@ -4,7 +4,7 @@ export default function Loader() {
       <div className="flex flex-col w-full h-full m-auto" role="status">
         <svg
           aria-hidden="true"
-          className="w-16 h-16 m-auto text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+          className="w-16 h-16 m-auto text-base-300 animate-spin fill-primary"
           viewBox="0 0 100 101"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -18,7 +18,7 @@ export default function Loader() {
             fill="currentFill"
           />
         </svg>
-        <span className="z-50 m-auto font-mono text-center text-black text-ellipsis">Looking for books...</span>
+        <span className="z-50 m-auto font-mono text-center text-base-content text-ellipsis">Looking for books...</span>
         <span className="sr-only">Looking for books...</span>
       </div>
     </div>

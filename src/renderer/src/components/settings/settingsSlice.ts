@@ -1,5 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { LibraryView, SettingsStructureType } from '../../../../shared/types';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { CustomThemeColors, LibraryView, SettingsStructureType } from '../../../../shared/types';
 
 const initialState: SettingsStructureType = {
   volume: 100,
@@ -7,6 +7,8 @@ const initialState: SettingsStructureType = {
   previousBookDirectory: '',
   rootDirectories: [],
   libraryView: LibraryView.LIST,
+  customColors: null,
+  useCustomColors: false,
 };
 
 
@@ -26,11 +28,20 @@ const settingsSlice = createSlice({
         ...payload
       };
     },
+    setThemeMode: (state, { payload }: PayloadAction<'dark' | 'light' | 'system'>) => {
+      state.themeMode = payload;
+    },
+    setCustomColors: (state, { payload }: PayloadAction<CustomThemeColors | null>) => {
+      state.customColors = payload;
+    },
+    setUseCustomColors: (state, { payload }: PayloadAction<boolean>) => {
+      state.useCustomColors = payload;
+    },
     resetSettings: () => {
       return initialState;
     }
   }
 });
 
-export const { setSettings, resetSettings, changeLibraryView } = settingsSlice.actions;
+export const { setSettings, resetSettings, changeLibraryView, setThemeMode, setCustomColors, setUseCustomColors } = settingsSlice.actions;
 export default settingsSlice.reducer;

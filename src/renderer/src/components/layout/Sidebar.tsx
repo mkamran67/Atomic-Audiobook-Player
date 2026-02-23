@@ -12,7 +12,7 @@ function Sidebar() {
       ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       md:translate-x-0
     `}>
-      <div className="flex flex-col px-6 pb-4 overflow-y-auto grow gap-y-5 bg-black/10 ring-1 ring-white/5">
+      <div className="flex flex-col px-6 pb-4 overflow-y-auto grow gap-y-5 bg-neutral ring-1 ring-base-content/5">
         {/* Icon */}
         <div className="flex items-center h-16 shrink-0">
           <img

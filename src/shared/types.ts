@@ -4,6 +4,17 @@ export enum LibraryView {
   LIST = 'list',
 }
 
+export type CustomThemeColors = {
+  primary: string;
+  secondary: string;
+  accent: string;
+  neutral: string;
+  "base-100": string;
+  "base-200": string;
+  "base-300": string;
+  "base-content": string;
+};
+
 export type SettingsStructureType = {
   rootDirectories: string[];
   themeMode: 'dark' | 'light' | 'system';
@@ -12,6 +23,8 @@ export type SettingsStructureType = {
   fontSize?: number;
   volume: number;
   libraryView: LibraryView;
+  customColors?: CustomThemeColors | null;
+  useCustomColors?: boolean;
 };
 
 export interface ChapterStats {

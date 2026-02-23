@@ -16,9 +16,9 @@ function SettingListItem(props: Props) {
     <>
       <li key={liKey} className="flex justify-between py-6 gap-x-6">
         {/* Title */}
-        <div className="font-medium text-white-900">{title}</div>
+        <div className="font-medium text-base-content">{title}</div>
         {/* Description */}
-        {description && (<div className="text-white-900">{description}</div>)}
+        {description && (<div className="text-base-content">{description}</div>)}
         {/* Input */}
         {inputProps && <InputSelector inputEnumSelector={inputEnum} inputProps={inputProps} />}
       </li>

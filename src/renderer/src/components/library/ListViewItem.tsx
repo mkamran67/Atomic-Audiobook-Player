@@ -18,24 +18,24 @@ function ListViewItem({ book, setPlaying }: Props) {
 
   return (
     <li
-      className="relative flex justify-between px-4 py-5 cursor-pointer gap-x-6 hover:bg-gray-800 sm:px-6 lg:px-8"
+      className="relative flex justify-between px-4 py-5 cursor-pointer gap-x-6 hover:bg-base-200 sm:px-6 lg:px-8"
       onClick={(e) => setPlaying(e, dirPath)}
     >
       <div className="flex min-w-0 gap-x-4">
-        <img className="flex-none w-12 h-12 rounded-md bg-gray-50" src={coverSrc} alt={title + 'cover'} />
+        <img className="flex-none w-12 h-12 rounded-md bg-base-300" src={coverSrc} alt={title + 'cover'} />
         <div className="flex-auto min-w-0">
-          <p className="text-sm font-semibold leading-6 text-white truncate">
+          <p className="text-sm font-semibold leading-6 text-base-content truncate">
             <span className="absolute inset-x-0 bottom-0 truncate -top-px" />
             {title ? title : dirPath.split('\\').pop()}
           </p>
-          <p className="flex mt-1 text-xs leading-5 text-gray-300 truncate">
+          <p className="flex mt-1 text-xs leading-5 text-base-content/70 truncate">
             {author}
           </p>
         </div>
       </div>
       <div className="flex items-center shrink-0 gap-x-4">
         <div className="hidden sm:flex sm:flex-col sm:items-end">
-          <p className="text-sm leading-6 text-gray-200 truncate max-w-48 xl:max-w-lg">{dirPath}</p>
+          <p className="text-sm leading-6 text-base-content/70 truncate max-w-48 xl:max-w-lg">{dirPath}</p>
           {/* {person.lastSeen ? (
             <p className="mt-1 text-xs leading-5 text-gray-500">
               Last seen <time dateTime={person.lastSeenDateTime}>{person.lastSeen}</time>
@@ -49,7 +49,7 @@ function ListViewItem({ book, setPlaying }: Props) {
             </div>
           )} */}
         </div>
-        <ChevronRightIcon className="flex-none w-5 h-5 text-gray-400" aria-hidden="true" />
+        <ChevronRightIcon className="flex-none w-5 h-5 text-base-content/60" aria-hidden="true" />
       </div>
     </li>
   );

@@ -20,7 +20,7 @@ function ContinueReading() {
         stats.length > 0 ?
           (
             <>
-              <h3 className="w-full p-4 text-2xl text-gray-300">
+              <h3 className="w-full p-4 text-2xl text-base-content/70">
                 Continue Listening
               </h3>
               <ul className='w-full h-full'>

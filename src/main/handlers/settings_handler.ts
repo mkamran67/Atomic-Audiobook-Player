@@ -29,10 +29,9 @@ function readSettings(): SettingsStructureType {
 }
 
 export function checkForDuplicateRootDirectories(dirPath: string) {
-	// 1. Read Settings File
 	const settingsFile: SettingsStructureType = readAndParseTextFile(SETTINGS_LOCATION);
-	const listOfDirectories = settingsFile.rootDirectories;
-	// 2. Check if directory exists return true or false -> empty = false
+	const listOfDirectories = settingsFile?.rootDirectories;
+	if (!Array.isArray(listOfDirectories)) return false;
 	return listOfDirectories.includes(dirPath);
 }
 
@@ -62,7 +61,9 @@ async function updateSettings(data: SettingsStructureType) {
 	let settings = readSettings();
 
 	if (settings) {
-		let tempRootDirectories = [...new Set([...settings.rootDirectories, ...data.rootDirectories])];
+		const existingDirs = settings.rootDirectories || [];
+		const newDirs = data.rootDirectories || [];
+		let tempRootDirectories = [...new Set([...existingDirs, ...newDirs])];
 
 		settings = {
 			...settings,

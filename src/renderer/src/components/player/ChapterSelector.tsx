@@ -13,7 +13,7 @@ function ChapterSelector({ chapterList, setNewChapter, currentChapter }: Props) 
   if (chapterList.length <= 1) {
     // REVIEW - Fix colors
     return (
-      <button className="text-gray-600 btn btn-disabled">No Chapters</button>
+      <button className="text-base-content/50 btn btn-disabled">No Chapters</button>
     );
   }
 

@@ -41,8 +41,8 @@ function LeftNav() {
                     onClick={close}
                     className={classNames(
                       isCurrent
-                        ? 'bg-gray-800 text-white'
-                        : 'text-gray-400 hover:text-white hover:bg-gray-800',
+                        ? 'bg-base-300 text-base-content'
+                        : 'text-base-content/60 hover:text-base-content hover:bg-base-300',
                       'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                     )}
                   >
@@ -55,16 +55,16 @@ function LeftNav() {
           </ul>
         </li>
         <li>
-          <div className="text-xs font-semibold leading-6 text-gray-400">Playlists</div>
+          <div className="text-xs font-semibold leading-6 text-base-content/60">Playlists</div>
           <ul role="list" className="mt-2 -mx-2 space-y-1">
             {playlists.map((item) => (
               <li key={item.name}>
                 <Link
                   to={item.href}
                   onClick={close}
-                  className="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                  className="text-base-content/60 hover:text-base-content hover:bg-base-300 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                 >
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-base-300 bg-base-200 text-[0.625rem] font-medium text-base-content/60 group-hover:text-base-content">
                     {item.initial}
                   </span>
                   <span className="truncate">{item.name}</span>

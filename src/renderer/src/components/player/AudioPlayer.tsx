@@ -86,37 +86,37 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full gap-1 md:gap-2 px-2">
-      <div className='flex items-center justify-center w-full h-full text-white'>
+      <div className='flex items-center justify-center w-full h-full text-base-content'>
         <div className='flex flex-col items-center justify-center gap-1 md:gap-2 grow'>
           {/* Playback controls */}
           <div className='flex items-center justify-center gap-1'>
             <div className="tooltip" data-tip="Chapter Rewind">
               <button onClick={() => skipChapter('backward')}>
-                <BackwardIcon className='w-6 h-6 md:w-8 md:h-8 hover:text-gray-300' />
+                <BackwardIcon className='w-6 h-6 md:w-8 md:h-8 hover:text-base-content/70' />
               </button>
             </div>
             <div className="tooltip" data-tip="15 Seconds back">
               <button onClick={() => skipTime(-15)}>
-                <ChevronDoubleDownIcon className='w-6 h-6 md:w-8 md:h-8 rotate-90 hover:text-gray-300' />
+                <ChevronDoubleDownIcon className='w-6 h-6 md:w-8 md:h-8 rotate-90 hover:text-base-content/70' />
               </button>
             </div>
             <div className="tooltip" data-tip="Play or Pause">
               <button onClick={togglePlayPause}>
                 {
                   isPlaying ?
-                    <PauseCircleIcon className='w-10 h-10 md:w-14 md:h-14 hover:text-gray-300' /> :
-                    <PlayCircleIcon className='w-10 h-10 md:w-14 md:h-14 hover:text-gray-300' />
+                    <PauseCircleIcon className='w-10 h-10 md:w-14 md:h-14 hover:text-base-content/70' /> :
+                    <PlayCircleIcon className='w-10 h-10 md:w-14 md:h-14 hover:text-base-content/70' />
                 }
               </button>
             </div>
             <div className="tooltip" data-tip="15 Seconds Forward">
               <button onClick={() => skipTime(15)}>
-                <ChevronDoubleDownIcon className='w-6 h-6 md:w-8 md:h-8 -rotate-90 hover:text-gray-300' />
+                <ChevronDoubleDownIcon className='w-6 h-6 md:w-8 md:h-8 -rotate-90 hover:text-base-content/70' />
               </button>
             </div>
             <div className="tooltip" data-tip="Chapter Forward">
               <button onClick={() => skipChapter('forward')}>
-                <ForwardIcon className='w-6 h-6 md:w-8 md:h-8 hover:text-gray-300' />
+                <ForwardIcon className='w-6 h-6 md:w-8 md:h-8 hover:text-base-content/70' />
               </button>
             </div>
           </div>
@@ -135,7 +135,7 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
         </div>
         {/* Volume */}
         <div className='flex flex-row items-center justify-center h-full mr-2 md:mr-6 shrink-0'>
-          <button onClick={toggleMute} className='w-6 h-6 hover:text-gray-300'>
+          <button onClick={toggleMute} className='w-6 h-6 hover:text-base-content/70'>
             {volume === 0 ? <SpeakerXMarkIcon /> : <SpeakerWaveIcon />}
           </button>
           <input

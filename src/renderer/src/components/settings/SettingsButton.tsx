@@ -14,13 +14,13 @@ type Props = {
 function SettingsButton({ description, setAction, isDisabled, btnText, tooltip }: Props) {
   return (
     <div className="flex items-center justify-between w-full">
-      {description && <p className="font-mono text-center text-black cursor-default">{description}</p>}
+      {description && <p className="font-mono text-center text-base-content cursor-default">{description}</p>}
 
       <div className="flex items-center justify-center">
         <button
           onClick={setAction}
           type="button"
-          className="inline-flex items-center rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          className="inline-flex items-center rounded border border-base-300 bg-base-100 px-2.5 py-1.5 text-xs font-medium text-base-content shadow-sm hover:bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           disabled={isDisabled}
         >
           {btnText}

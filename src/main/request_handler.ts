@@ -97,7 +97,10 @@ export default async function handleRendererRequest(event: any, request: Request
     }
   } catch (error: any) {
     logger.error('Error in handleRendererRequest');
-    logger.error(error.stack);
-    event.reply(RESPONSE_FROM_ELECTRON, { type: 'error', data: error });
+    logger.error(error.stack || error.message || String(error));
+    event.reply(RESPONSE_FROM_ELECTRON, {
+      type: ELECTRON_ERROR,
+      data: error.message || String(error)
+    });
   }
 }
