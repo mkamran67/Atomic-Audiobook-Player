@@ -90,17 +90,17 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
         <div className='flex flex-col items-center justify-center gap-1 md:gap-2 grow'>
           {/* Playback controls */}
           <div className='flex items-center justify-center gap-1'>
-            <div className="tooltip" data-tip="Chapter Rewind">
+            <div title="Chapter Rewind">
               <button onClick={() => skipChapter('backward')}>
                 <BackwardIcon className='w-6 h-6 md:w-8 md:h-8 hover:text-base-content/70' />
               </button>
             </div>
-            <div className="tooltip" data-tip="15 Seconds back">
+            <div title="15 Seconds back">
               <button onClick={() => skipTime(-15)}>
                 <ChevronDoubleDownIcon className='w-6 h-6 md:w-8 md:h-8 rotate-90 hover:text-base-content/70' />
               </button>
             </div>
-            <div className="tooltip" data-tip="Play or Pause">
+            <div title="Play or Pause">
               <button onClick={togglePlayPause}>
                 {
                   isPlaying ?
@@ -109,12 +109,12 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
                 }
               </button>
             </div>
-            <div className="tooltip" data-tip="15 Seconds Forward">
+            <div title="15 Seconds Forward">
               <button onClick={() => skipTime(15)}>
                 <ChevronDoubleDownIcon className='w-6 h-6 md:w-8 md:h-8 -rotate-90 hover:text-base-content/70' />
               </button>
             </div>
-            <div className="tooltip" data-tip="Chapter Forward">
+            <div title="Chapter Forward">
               <button onClick={() => skipChapter('forward')}>
                 <ForwardIcon className='w-6 h-6 md:w-8 md:h-8 hover:text-base-content/70' />
               </button>
@@ -129,7 +129,7 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
               max={100}
               value={duration ? secondsToPercentage(currentTime, duration) : 0}
               onChange={handleSeek}
-              className="range range-xs" />
+              className="w-full" />
             <p className='text-xs md:text-sm whitespace-nowrap'>{formatTime(Math.ceil(duration - currentTime))}</p>
           </div>
         </div>
@@ -144,7 +144,7 @@ function AudioPlayer({ url, title, bookURL, currentTrack, incomingTime, chapterL
             max={100}
             value={volume}
             onChange={handleVolume}
-            className="hidden md:block range range-xs [--range-shdw:green] ml-2" />
+            className="hidden md:block w-20 ml-2" />
         </div>
       </div>
     </div>

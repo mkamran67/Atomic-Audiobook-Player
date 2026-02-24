@@ -45,34 +45,14 @@ function LayoutContent() {
   const oneTime = useRef(true);
 
   useEffect(() => {
-    if (oneTime.current) {
-      window.api.send(
-        REQUEST_TO_ELECTRON,
-        {
-          type: READ_LIBRARY_FILE,
-          payload: null
-        }
-      );
+    if (!oneTime.current) return;
+    oneTime.current = false;
 
-      window.api.send(
-        REQUEST_TO_ELECTRON,
-        {
-          type: READ_SETTINGS_FILE,
-          payload: null
-        }
-      );
+    window.api.send(REQUEST_TO_ELECTRON, { type: READ_LIBRARY_FILE, payload: null });
+    window.api.send(REQUEST_TO_ELECTRON, { type: READ_SETTINGS_FILE, payload: null });
+    window.api.send(REQUEST_TO_ELECTRON, { type: GET_PREVIOUS_BOOK, payload: null });
 
-      window.api.send(
-        REQUEST_TO_ELECTRON,
-        {
-          type: GET_PREVIOUS_BOOK,
-          payload: null
-        }
-      );
-      oneTime.current = false;
-    }
-
-    // Recieve information from Electron -> Listeners
+    // Register listener once
     window.api.receive(RESPONSE_FROM_ELECTRON, async (res: IncomingElectronResponseType) => {
       const { type, data } = res;
 

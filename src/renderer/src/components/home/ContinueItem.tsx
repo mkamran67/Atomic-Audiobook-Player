@@ -30,16 +30,18 @@ function ContinueItem({ book }: Props) {
   };
 
   return (
-    <li key={book.bookAuthor} className="mx-2 md:mx-6 my-4 rounded-md shadow-xl max-h-64 card lg:card-side bg-base-100">
-      <figure className='max-w-full lg:max-w-64'>
-        {imgSrc ? (<img src={imgSrc} alt="Album" />) : <img src={default_img} alt="Album" />}
+    <li key={book.bookAuthor} className="mx-2 md:mx-6 my-4 rounded-lg shadow-xl max-h-64 flex flex-col lg:flex-row bg-base-100 overflow-hidden">
+      <figure className='max-w-full lg:max-w-64 shrink-0'>
+        {imgSrc ? (<img src={imgSrc} alt="Album" className="w-full h-full object-cover" />) : <img src={default_img} alt="Album" className="w-full h-full object-cover" />}
       </figure>
-      <div className="card-body">
-        <h2 className="card-title">{bookTitle}</h2>
-        <h6>by {bookAuthor}</h6>
-        <p>Started on {formattedDate}</p>
-        <div className="justify-end card-actions">
-          <button onClick={handleContinue} className="btn btn-success">
+      <div className="p-4 flex flex-col justify-between flex-1">
+        <div>
+          <h2 className="text-lg font-bold">{bookTitle}</h2>
+          <h6>by {bookAuthor}</h6>
+          <p className="text-sm text-base-content/60">Started on {formattedDate}</p>
+        </div>
+        <div className="flex justify-end mt-2">
+          <button onClick={handleContinue} className="px-4 py-2 rounded-md bg-success text-white font-medium hover:bg-success/80 transition-colors">
             Continue Listening
           </button>
         </div>

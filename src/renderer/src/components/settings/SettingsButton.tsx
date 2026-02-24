@@ -25,11 +25,11 @@ function SettingsButton({ description, setAction, isDisabled, btnText, tooltip }
         >
           {btnText}
         </button>
-        {
-          <div className={tooltip ? "z-50 ml-2 tooltip" : "z-50 ml-2 invisible"} data-tip={tooltip}>
+        {tooltip && (
+          <div className="z-50 ml-2" title={tooltip}>
             <QuestionMarkCircleIcon className="w-5 h-5" aria-hidden="true" />
           </div>
-        }
+        )}
       </div>
     </div>
   );

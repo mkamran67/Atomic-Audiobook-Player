@@ -1,7 +1,139 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@source "./src/**/*.{ts,tsx}";
 
-/* @import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities"; */
+@theme {
+  --color-base-100: var(--base-100);
+  --color-base-200: var(--base-200);
+  --color-base-300: var(--base-300);
+  --color-base-content: var(--base-content);
+  --color-primary: var(--primary);
+  --color-primary-content: var(--primary-content);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-neutral: var(--neutral);
+  --color-info: var(--info);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+}
+
+/* Dark theme (default) */
+:root,
+[data-theme="atomicDark"] {
+  --base-100: #0F0F1A;
+  --base-200: #161625;
+  --base-300: #1F1F35;
+  --base-content: #E8E6F0;
+  --primary: #A78BFA;
+  --primary-content: #1a1025;
+  --secondary: #34D399;
+  --accent: #FB923C;
+  --neutral: #1A1A2E;
+  --info: #67C3F3;
+  --success: #36D399;
+  --warning: #FBBD23;
+  --error: #F87272;
+  color-scheme: dark;
+}
+
+/* Light theme */
+[data-theme="atomicLight"] {
+  --base-100: #FAFAFE;
+  --base-200: #F0EEF8;
+  --base-300: #E0DDEE;
+  --base-content: #1C1B2E;
+  --primary: #7C3AED;
+  --primary-content: #ffffff;
+  --secondary: #059669;
+  --accent: #EA580C;
+  --neutral: #E2E0EC;
+  --info: #2196F3;
+  --success: #16A34A;
+  --warning: #D97706;
+  --error: #DC2626;
+  color-scheme: light;
+}
+
+/* Custom theme (overridden at runtime via JS) */
+[data-theme="custom"] {
+  --base-100: #0F0F1A;
+  --base-200: #161625;
+  --base-300: #1F1F35;
+  --base-content: #E8E6F0;
+  --primary: #A78BFA;
+  --primary-content: #1a1025;
+  --secondary: #34D399;
+  --accent: #FB923C;
+  --neutral: #1A1A2E;
+  --info: #67C3F3;
+  --success: #36D399;
+  --warning: #FBBD23;
+  --error: #F87272;
+  color-scheme: dark;
+}
+
+/* Base styles */
+body {
+  background-color: var(--base-100);
+  color: var(--base-content);
+}
+
+/* Range input styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--base-300);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: none;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--base-300);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.toggle-switch.active {
+  background: var(--primary);
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.toggle-switch.active::after {
+  transform: translateX(20px);
+}

@@ -11,7 +11,16 @@ rules.push({
     }, {
       loader: 'css-loader'
     }, {
-      loader: 'postcss-loader'
+      loader: 'postcss-loader',
+      options: {
+        postcssOptions: {
+          config: false,
+          plugins: [
+            ['@tailwindcss/postcss', {}],
+            ['autoprefixer', {}],
+          ],
+        },
+      },
     }
   ],
 

@@ -11,14 +11,14 @@ const THEME_MODES = [
 ];
 
 const DEFAULT_DARK_COLORS: CustomThemeColors = {
-  primary: '#8B7EC8',
-  secondary: '#5EADAD',
-  accent: '#D4A574',
-  neutral: '#1E1B2E',
-  'base-100': '#13111C',
-  'base-200': '#1A1726',
-  'base-300': '#252136',
-  'base-content': '#E2DFF0',
+  primary: '#A78BFA',
+  secondary: '#34D399',
+  accent: '#FB923C',
+  neutral: '#1A1A2E',
+  'base-100': '#0F0F1A',
+  'base-200': '#161625',
+  'base-300': '#1F1F35',
+  'base-content': '#E8E6F0',
 };
 
 const COLOR_LABELS: { key: keyof CustomThemeColors; label: string }[] = [
@@ -82,12 +82,14 @@ export default function ThemeSettings() {
       {/* Theme Mode Selector */}
       <div className="mt-4">
         <p className="text-sm text-base-content/60 mb-2">Appearance</p>
-        <div className="join">
+        <div className="inline-flex rounded-lg overflow-hidden border border-base-300">
           {THEME_MODES.map(({ value, label }) => (
             <button
               key={value}
-              className={`join-item btn btn-sm ${
-                themeMode === value ? 'btn-primary' : 'btn-ghost'
+              className={`px-4 py-1.5 text-sm font-medium transition-colors ${
+                themeMode === value
+                  ? 'bg-primary text-primary-content'
+                  : 'bg-base-200 text-base-content/70 hover:bg-base-300'
               }`}
               onClick={() => handleThemeMode(value)}
             >
@@ -104,11 +106,12 @@ export default function ThemeSettings() {
             <p className="text-sm font-medium text-base-content">Use Custom Colors</p>
             <p className="text-xs text-base-content/50">Override theme with your own palette</p>
           </div>
-          <input
-            type="checkbox"
-            className="toggle toggle-primary"
-            checked={useCustomColors || false}
-            onChange={handleToggleCustomColors}
+          <button
+            type="button"
+            className={`toggle-switch ${useCustomColors ? 'active' : ''}`}
+            onClick={handleToggleCustomColors}
+            role="switch"
+            aria-checked={useCustomColors || false}
           />
         </div>
 
@@ -129,7 +132,7 @@ export default function ThemeSettings() {
               </div>
             ))}
             <button
-              className="btn btn-ghost btn-sm mt-2 text-error"
+              className="px-3 py-1.5 text-sm rounded-md text-error hover:bg-error/10 transition-colors mt-2"
               onClick={handleReset}
             >
               Reset to Default

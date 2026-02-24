@@ -13,7 +13,7 @@ function Stats() {
 
   return (
     <div className='grid w-full h-full mb-32 place-items-center'>
-      <button className="btn" onClick={testDirectory}>
+      <button className="px-4 py-2 rounded-md bg-primary text-primary-content font-medium hover:bg-primary/80 transition-colors" onClick={testDirectory}>
         Test Directory
       </button>
     </div>

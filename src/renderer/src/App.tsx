@@ -40,7 +40,7 @@ const router = createHashRouter([
   },
 ]);
 
-function App(): JSX.Element {
+function App(): React.JSX.Element {
   return (
     <div className="App">
       <Provider store={store}>

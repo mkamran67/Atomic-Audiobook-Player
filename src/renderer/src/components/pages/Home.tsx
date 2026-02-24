@@ -1,16 +1,15 @@
 import ContinueReading from "../home/ContinueReading";
 import TimeLine from "../home/TimeLine";
 
-
 export default function Home() {
-  return (
-    <div className="flex flex-col lg:flex-row w-full h-full gap-2 text-base-content">
-      <div className="flex-1 rounded-lg bg-base-200">
-        <ContinueReading />
-      </div>
-      <div className="flex-1 rounded-lg bg-base-200">
-        <TimeLine />
-      </div>
-    </div>
-  );
+	return (
+		<div className="flex flex-col w-full h-full gap-2 lg:flex-row text-base-content">
+			<div className="flex-1 rounded-lg bg-base-200">
+				<ContinueReading />
+			</div>
+			<div className="flex-1 rounded-lg bg-base-200">
+				<TimeLine />
+			</div>
+		</div>
+	);
 }

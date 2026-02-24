@@ -69,7 +69,7 @@ const createWindow = (): void => {
     callback({
       responseHeaders: {
         ...details.responseHeaders,
-        'Content-Security-Policy': ["default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' aap-img:; media-src 'self' data: aap-img: get-audio:; "]
+        'Content-Security-Policy': ["default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: aap-img:; media-src 'self' data: aap-img: get-audio:; "]
       }
     });
   });
