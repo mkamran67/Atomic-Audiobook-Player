@@ -12,7 +12,6 @@ export default function Settings() {
   // Handle saves
   // Read updates from Redux
   const {
-    themeMode,
     rootDirectories,
     previousBookDirectory,
     volume,

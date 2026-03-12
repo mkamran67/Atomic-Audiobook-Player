@@ -56,7 +56,7 @@ async function getBookInformation(bookDirectories: string[]): Promise<BookData[]
 		// iterate through directory contents
 		for (let i = 0; i < bookDirectoryContents.length; i++) {
 			let theFile = bookDirectoryContents[i]; // File name
-			let fileExtension = bookDirectoryContents[i].split('.')[1]; // File extension
+			let fileExtension = (theFile.split('.').pop() || '').toLowerCase(); // File extension
 
 			if (fileTypeData.hasOwnProperty(fileExtension)) {
 				fileTypeData[`${fileExtension}`]++;

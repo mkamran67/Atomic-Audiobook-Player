@@ -4,21 +4,21 @@ import { RootState } from '../state/store';
 import { applyTheme, listenForSystemThemeChanges } from './themeManager';
 
 export function useTheme(): void {
-  const { themeMode, customColors, useCustomColors } = useSelector(
+  const { theme, useSystemTheme, customColors, useCustomColors } = useSelector(
     (state: RootState) => state.settings
   );
 
   useEffect(() => {
-    applyTheme(themeMode, useCustomColors, customColors);
-  }, [themeMode, customColors, useCustomColors]);
+    applyTheme(theme, useSystemTheme, useCustomColors, customColors);
+  }, [theme, useSystemTheme, customColors, useCustomColors]);
 
   useEffect(() => {
-    if (themeMode !== 'system' || useCustomColors) return;
+    if (!useSystemTheme || useCustomColors) return;
 
     const cleanup = listenForSystemThemeChanges(() => {
-      applyTheme('system', false, null);
+      applyTheme(theme, true, false, null);
     });
 
     return cleanup;
-  }, [themeMode, useCustomColors]);
+  }, [theme, useSystemTheme, useCustomColors]);
 }

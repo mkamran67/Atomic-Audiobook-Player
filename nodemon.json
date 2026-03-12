@@ -3,5 +3,5 @@
   "ignore": [".git", "node_modules/**/node_modules"],
   "watch": ["src"],
   "exec": "npm run start",
-  "delay": "500"
+  "delay": "2000"
 }

@@ -2,8 +2,8 @@
 // Paths, static variables
 import path from 'path';
 import { app } from 'electron';
-export const MEDIA_EXTENSIONS = ['mp3', 'm4b']; // REVIEW update to include all
-export const IMG_EXTENSIONS = ['img', 'jpeg', 'jpg', 'png'];
+export const MEDIA_EXTENSIONS = ['mp3', 'm4a', 'm4b', 'ogg', 'wav', 'flac', 'wma', 'aac', 'opus'];
+export const IMG_EXTENSIONS = ['jpeg', 'jpg', 'png', 'webp', 'bmp'];
 
 // Somewhat Constants -> that are system-generated <OS_TYPICAL> but will function the same.
 export const INFO_FOLDER_LOCATION = path.join(app.getPath('appData'), 'Atomic Audiobook Player');

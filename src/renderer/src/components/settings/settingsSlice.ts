@@ -3,7 +3,8 @@ import { CustomThemeColors, LibraryView, SettingsStructureType } from '../../../
 
 const initialState: SettingsStructureType = {
   volume: 100,
-  themeMode: 'system',
+  theme: 'atomicDark',
+  useSystemTheme: true,
   previousBookDirectory: '',
   rootDirectories: [],
   libraryView: LibraryView.LIST,
@@ -28,8 +29,11 @@ const settingsSlice = createSlice({
         ...payload
       };
     },
-    setThemeMode: (state, { payload }: PayloadAction<'dark' | 'light' | 'system'>) => {
-      state.themeMode = payload;
+    setTheme: (state, { payload }: PayloadAction<string>) => {
+      state.theme = payload;
+    },
+    setUseSystemTheme: (state, { payload }: PayloadAction<boolean>) => {
+      state.useSystemTheme = payload;
     },
     setCustomColors: (state, { payload }: PayloadAction<CustomThemeColors | null>) => {
       state.customColors = payload;
@@ -43,5 +47,5 @@ const settingsSlice = createSlice({
   }
 });
 
-export const { setSettings, resetSettings, changeLibraryView, setThemeMode, setCustomColors, setUseCustomColors } = settingsSlice.actions;
+export const { setSettings, resetSettings, changeLibraryView, setTheme, setUseSystemTheme, setCustomColors, setUseCustomColors } = settingsSlice.actions;
 export default settingsSlice.reducer;

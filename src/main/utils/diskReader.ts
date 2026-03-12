@@ -25,24 +25,24 @@ export async function checkIfFileExistsAsync(filePath: string) {
 }
 
 function recursiveBookSearch(bookList: string[], dirPath: string): void {
-	// Read the contents of the current directory
 	const directoryElements = readdirSync(dirPath, { withFileTypes: true });
 
-	// if it's empty -> return;
 	if (!directoryElements || directoryElements.length === 0) {
 		return;
 	}
-	// REVIEW <-||-> 
-	// if the first file is not a directory -> push the current directory as an audiobook location;
-	if (!directoryElements[0].isDirectory()) {
+
+	const hasAudioFiles = directoryElements.some(
+		(el) => el.isFile() && MEDIA_EXTENSIONS.includes(el.name.split('.').pop()?.toLowerCase() || '')
+	);
+
+	if (hasAudioFiles) {
 		bookList.push(dirPath);
-		return; // End of recursion
+		return;
 	}
 
-	// Else recall recursively
-	for (let i = 0; i < directoryElements.length; i++) {
-		if (directoryElements[i].isDirectory()) {
-			recursiveBookSearch(bookList, path.join(dirPath, directoryElements[i].name));
+	for (const el of directoryElements) {
+		if (el.isDirectory()) {
+			recursiveBookSearch(bookList, path.join(dirPath, el.name));
 		}
 	}
 }
@@ -205,7 +205,7 @@ export async function getBookDetails(dirPath: string): Promise<BookDetails> {
 					chapters.push(name);
 				} else if (IMG_EXTENSIONS.includes(extension)) {
 					// Store the larger cover - hopefully better quality
-					if (cover && statSync(path.join(dirPath, file.name)) > statSync(path.join(dirPath, cover))) {
+					if (cover && statSync(path.join(dirPath, file.name)).size > statSync(path.join(dirPath, cover)).size) {
 						cover = file.name;
 					} else if (!cover) {
 						cover = file.name;

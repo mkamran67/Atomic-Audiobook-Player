@@ -27,7 +27,8 @@ export default function Library() {
       bookSet.books.forEach((book) => {
         // combinedBooks.push(book);
         if (searchTerm) {
-          if (book.title && book.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+          const term = searchTerm.toLowerCase();
+          if (book.title?.toLowerCase().includes(term) || book.author?.toLowerCase().includes(term)) {
             combinedBooks.push(book);
           }
         } else {

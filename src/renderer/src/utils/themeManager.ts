@@ -1,4 +1,5 @@
 import { CustomThemeColors } from '../../../shared/types';
+import { resolveSystemTheme } from './themes';
 
 const CUSTOM_STYLE_ID = 'custom-theme';
 
@@ -45,17 +46,11 @@ export function removeCustomThemeVars(): void {
 }
 
 /**
- * Get the system (OS) preferred theme.
- */
-export function getSystemTheme(): 'atomicDark' | 'atomicLight' {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'atomicDark' : 'atomicLight';
-}
-
-/**
  * Apply theme to the document.
  */
 export function applyTheme(
-  mode: 'dark' | 'light' | 'system',
+  themeId: string,
+  useSystemTheme: boolean,
   useCustomColors?: boolean,
   customColors?: CustomThemeColors | null
 ): void {
@@ -67,20 +62,8 @@ export function applyTheme(
 
   removeCustomThemeVars();
 
-  let theme: string;
-  switch (mode) {
-    case 'dark':
-      theme = 'atomicDark';
-      break;
-    case 'light':
-      theme = 'atomicLight';
-      break;
-    case 'system':
-      theme = getSystemTheme();
-      break;
-  }
-
-  document.documentElement.setAttribute('data-theme', theme);
+  const resolvedTheme = useSystemTheme ? resolveSystemTheme(themeId) : themeId;
+  document.documentElement.setAttribute('data-theme', resolvedTheme);
 }
 
 /**

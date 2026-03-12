@@ -40,7 +40,8 @@ export function createSettingsFile(): boolean {
 		// Check if the file exists
 		const emptySettingsFile: SettingsStructureType = {
 			rootDirectories: [],
-			themeMode: 'system',
+			theme: 'atomicDark',
+			useSystemTheme: true,
 			previousBookDirectory: '',
 			volume: 100,
 			libraryView: LibraryView.GALLERY

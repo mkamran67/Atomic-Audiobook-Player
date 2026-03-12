@@ -1,14 +1,9 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../state/store';
-import { setThemeMode, setCustomColors, setUseCustomColors } from './settingsSlice';
+import { setTheme, setUseSystemTheme, setCustomColors, setUseCustomColors } from './settingsSlice';
 import { REQUEST_TO_ELECTRON, WRITE_SETTINGS_FILE } from '../../../../../src/shared/constants';
 import { CustomThemeColors } from '../../../../shared/types';
-
-const THEME_MODES = [
-  { value: 'light' as const, label: 'Light' },
-  { value: 'dark' as const, label: 'Dark' },
-  { value: 'system' as const, label: 'System' },
-];
+import { DARK_THEMES, LIGHT_THEMES, ThemePreset, resolveSystemTheme } from '../../utils/themes';
 
 const DEFAULT_DARK_COLORS: CustomThemeColors = {
   primary: '#A78BFA',
@@ -39,15 +34,67 @@ function persistSettings(settings: Record<string, unknown>) {
   });
 }
 
+function ThemeCard({
+  preset,
+  isActive,
+  onSelect,
+}: {
+  preset: ThemePreset;
+  isActive: boolean;
+  onSelect: () => void;
+}) {
+  const { colors } = preset;
+  return (
+    <button
+      onClick={onSelect}
+      className={`flex flex-col items-start gap-1.5 rounded-lg p-3 text-left transition-all border-2 ${
+        isActive
+          ? 'border-primary ring-1 ring-primary/30'
+          : 'border-base-300 hover:border-base-content/20'
+      }`}
+      style={{ backgroundColor: colors['base-100'] }}
+    >
+      <span
+        className="text-xs font-medium"
+        style={{ color: colors['base-content'] }}
+      >
+        {preset.label}
+      </span>
+      <div className="flex gap-1.5">
+        <span
+          className="w-4 h-4 rounded-full"
+          style={{ backgroundColor: colors.primary }}
+        />
+        <span
+          className="w-4 h-4 rounded-full"
+          style={{ backgroundColor: colors.secondary }}
+        />
+        <span
+          className="w-4 h-4 rounded-full"
+          style={{ backgroundColor: colors.accent }}
+        />
+      </div>
+    </button>
+  );
+}
+
 export default function ThemeSettings() {
   const dispatch = useDispatch();
-  const { themeMode, customColors, useCustomColors } = useSelector(
+  const { theme, useSystemTheme, customColors, useCustomColors } = useSelector(
     (state: RootState) => state.settings
   );
 
-  const handleThemeMode = (mode: 'dark' | 'light' | 'system') => {
-    dispatch(setThemeMode(mode));
-    persistSettings({ themeMode: mode });
+  const activeThemeId = useSystemTheme ? resolveSystemTheme(theme) : theme;
+
+  const handleSelectTheme = (id: string) => {
+    dispatch(setTheme(id));
+    persistSettings({ theme: id });
+  };
+
+  const handleToggleSystem = () => {
+    const newValue = !useSystemTheme;
+    dispatch(setUseSystemTheme(newValue));
+    persistSettings({ useSystemTheme: newValue });
   };
 
   const handleToggleCustomColors = () => {
@@ -79,22 +126,47 @@ export default function ThemeSettings() {
     <section>
       <h2 className="text-base font-semibold leading-7 text-base-content/70">Theme</h2>
 
-      {/* Theme Mode Selector */}
+      {/* System Theme Toggle */}
+      <div className="mt-4 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-base-content">Follow System</p>
+          <p className="text-xs text-base-content/50">Automatically switch between dark and light</p>
+        </div>
+        <button
+          type="button"
+          className={`toggle-switch ${useSystemTheme ? 'active' : ''}`}
+          onClick={handleToggleSystem}
+          role="switch"
+          aria-checked={useSystemTheme}
+        />
+      </div>
+
+      {/* Dark Themes */}
+      <div className="mt-6">
+        <p className="text-sm text-base-content/60 mb-2">Dark</p>
+        <div className="grid grid-cols-3 gap-2">
+          {DARK_THEMES.map((preset) => (
+            <ThemeCard
+              key={preset.id}
+              preset={preset}
+              isActive={activeThemeId === preset.id}
+              onSelect={() => handleSelectTheme(preset.id)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Light Themes */}
       <div className="mt-4">
-        <p className="text-sm text-base-content/60 mb-2">Appearance</p>
-        <div className="inline-flex rounded-lg overflow-hidden border border-base-300">
-          {THEME_MODES.map(({ value, label }) => (
-            <button
-              key={value}
-              className={`px-4 py-1.5 text-sm font-medium transition-colors ${
-                themeMode === value
-                  ? 'bg-primary text-primary-content'
-                  : 'bg-base-200 text-base-content/70 hover:bg-base-300'
-              }`}
-              onClick={() => handleThemeMode(value)}
-            >
-              {label}
-            </button>
+        <p className="text-sm text-base-content/60 mb-2">Light</p>
+        <div className="grid grid-cols-3 gap-2">
+          {LIGHT_THEMES.map((preset) => (
+            <ThemeCard
+              key={preset.id}
+              preset={preset}
+              isActive={activeThemeId === preset.id}
+              onSelect={() => handleSelectTheme(preset.id)}
+            />
           ))}
         </div>
       </div>

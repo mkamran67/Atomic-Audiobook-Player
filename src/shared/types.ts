@@ -17,8 +17,9 @@ export type CustomThemeColors = {
 
 export type SettingsStructureType = {
   rootDirectories: string[];
-  themeMode: 'dark' | 'light' | 'system';
-  theme?: string;
+  themeMode?: 'dark' | 'light' | 'system'; // deprecated, kept for migration
+  theme: string;
+  useSystemTheme: boolean;
   previousBookDirectory: string;
   fontSize?: number;
   volume: number;
