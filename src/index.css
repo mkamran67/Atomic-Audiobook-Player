@@ -1,0 +1,6 @@
+/* src/index.css */
+@import "tailwindcss";
+
+/* In v4, you customize your theme directly in CSS 
+  using the @theme block. This replaces tailwind.config.js.
+*/
