@@ -1,7 +1,0 @@
-{
-  "restartable": "rs",
-  "ignore": [".git", "node_modules/**/node_modules"],
-  "watch": ["src"],
-  "exec": "npm run start",
-  "delay": "2000"
-}
