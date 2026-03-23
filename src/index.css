@@ -1,6 +1,83 @@
-/* src/index.css */
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* In v4, you customize your theme directly in CSS 
-  using the @theme block. This replaces tailwind.config.js.
-*/
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  
+  body {
+    @apply font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Styled thin scrollbar */
+  .scrollbar-styled {
+    scrollbar-width: thin;
+    scrollbar-color: #c4b5fd transparent;
+  }
+
+  .scrollbar-styled::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+  }
+
+  .scrollbar-styled::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-styled::-webkit-scrollbar-thumb {
+    background: #c4b5fd;
+    border-radius: 9999px;
+  }
+
+  .scrollbar-styled::-webkit-scrollbar-thumb:hover {
+    background: #a78bfa;
+  }
+
+  .dark .scrollbar-styled {
+    scrollbar-color: #7c3aed transparent;
+  }
+
+  .dark .scrollbar-styled::-webkit-scrollbar-thumb {
+    background: #7c3aed;
+  }
+
+  .dark .scrollbar-styled::-webkit-scrollbar-thumb:hover {
+    background: #6d28d9;
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastSlide {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  10%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+  78%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+}
+
+@keyframes eqBounce {
+  0%, 100% { transform: scaleY(0.25); }
+  50%       { transform: scaleY(1); }
+}

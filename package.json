@@ -1,16 +1,15 @@
 {
-  "name": "my-new-app",
-  "productName": "my-new-app",
+  "name": "atomic-audiobook-player",
+  "productName": "Atomic Audiobook Player",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Atomic Audiobook Player",
   "main": ".webpack/main",
   "private": true,
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "publish": "electron-forge publish"
   },
   "keywords": [],
   "author": {
@@ -30,29 +29,33 @@
     "@electron-forge/plugin-fuses": "^7.11.1",
     "@electron-forge/plugin-webpack": "^7.11.1",
     "@electron/fuses": "^1.8.0",
-    "@tailwindcss/postcss": "^4.2.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+    "autoprefixer": "^10.4.21",
     "babel-loader": "^10.1.1",
     "css-loader": "^6.11.0",
     "electron": "41.0.2",
-    "eslint": "^8.57.1",
-    "eslint-plugin-import": "^2.32.0",
     "fork-ts-checker-webpack-plugin": "^7.3.0",
     "node-loader": "^2.1.0",
     "postcss": "^8.5.8",
     "postcss-loader": "^8.2.1",
     "style-loader": "^3.3.4",
-    "tailwindcss": "^4.2.1",
+    "tailwindcss": "^3.4.17",
     "ts-loader": "^9.5.4",
-    "typescript": "~4.5.4"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@reduxjs/toolkit": "^2.11.2",
     "electron-squirrel-startup": "^1.0.1",
+    "i18next": "^25.3.2",
+    "i18next-browser-languagedetector": "^8.2.0",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "react-i18next": "^15.6.0",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.6.3",
+    "remixicon": "^4.9.1"
   }
 }
