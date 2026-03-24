@@ -125,7 +125,7 @@ export default function LibraryPage() {
     if (tab === 'collections') { navigate('/collections'); return; }
   };
 
-  const handleToggleLike = (id: number) => {
+  const handleToggleLike = (id: string) => {
     dispatch(toggleLike(id));
   };
 

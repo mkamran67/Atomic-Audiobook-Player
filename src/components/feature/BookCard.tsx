@@ -1,18 +1,24 @@
 import { BookStatus } from '../../hooks/useBookProgress';
+import CoverImage from '../base/CoverImage';
 
 interface BookCardProps {
   book: {
-    id: number;
+    id: string;
     title: string;
     author: string;
     genre: string;
     cover: string;
     rating: number;
-    color: string;
+    color?: string;
   };
   onClick?: () => void;
   status?: BookStatus;
 }
+
+const CARD_COLORS = [
+  'bg-cyan-100', 'bg-purple-100', 'bg-amber-100', 'bg-rose-100',
+  'bg-emerald-100', 'bg-sky-100', 'bg-orange-100', 'bg-pink-100',
+];
 
 const statusConfig: Record<BookStatus, { label: string; classes: string; icon: string }> = {
   'not-started': {
@@ -38,10 +44,10 @@ export default function BookCard({ book, onClick, status }: BookCardProps) {
   return (
     <div
       onClick={onClick}
-      className={`${book.color} dark:bg-gray-800 rounded-3xl p-6 cursor-pointer transition-shadow duration-300 hover:shadow-xl min-w-[280px] group`}
+      className={`${book.color ?? CARD_COLORS[Math.abs(book.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % CARD_COLORS.length]} dark:bg-gray-800 rounded-3xl p-6 cursor-pointer transition-shadow duration-300 hover:shadow-xl min-w-[280px] group`}
     >
       <div className="relative w-32 h-48 mx-auto mb-4 rounded-lg overflow-hidden shadow-lg">
-        <img src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
+        <CoverImage src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
           <div className="w-12 h-12 flex items-center justify-center rounded-full bg-white/90 shadow-lg">
             <i className="ri-play-fill text-2xl text-purple-600 ml-1"></i>

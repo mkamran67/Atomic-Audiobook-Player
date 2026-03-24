@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSidebarCollapsed } from '../../hooks/useSidebarCollapsed';
 import Sidebar from '../../components/feature/Sidebar';
-import { mockCollections, Collection } from '../../mocks/collections';
-import { libraryBooks } from '../../mocks/library';
+import type { Collection } from '../../types/collection';
+import { useAppSelector } from '../../store';
 import CollectionCard from './components/CollectionCard';
 import CollectionDetail from './components/CollectionDetail';
 import CreateCollectionModal from './components/CreateCollectionModal';
@@ -11,7 +11,8 @@ import CreateCollectionModal from './components/CreateCollectionModal';
 export default function CollectionsPage() {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useSidebarCollapsed();
-  const [collections, setCollections] = useState<Collection[]>(mockCollections);
+  const libraryBooks = useAppSelector((state) => state.library.books);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 

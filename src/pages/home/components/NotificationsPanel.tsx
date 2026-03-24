@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { notifications as initialNotifications, Notification } from '../../../mocks/notifications';
+import type { Notification } from '../../../types/notification';
 
 interface NotificationsPanelProps {
   open: boolean;
@@ -112,4 +112,3 @@ export default function NotificationsPanel({
   );
 }
 
-export { initialNotifications };

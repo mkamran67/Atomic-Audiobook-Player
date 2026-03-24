@@ -2,11 +2,13 @@ import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import libraryReducer from './librarySlice';
 import playerReducer from './playerSlice';
+import scannerReducer from './scannerSlice';
 
 export const store = configureStore({
   reducer: {
     library: libraryReducer,
     player: playerReducer,
+    scanner: scannerReducer,
   },
 });
 

@@ -10,10 +10,13 @@ import LogsModal from './components/LogsModal';
 import ConfirmDialog from './components/ConfirmDialog';
 import { logsAsText } from '../../utils/logger';
 import { useFontSize } from '../../contexts/FontSizeContext';
+import { useRootDirectories } from '../../hooks/useRootDirectories';
+import { useScanLibrary } from '../../hooks/useScanLibrary';
 
-type Section = 'appearance' | 'audio' | 'accessibility' | 'notifications' | 'privacy' | 'help' | 'about';
+type Section = 'storage' | 'appearance' | 'audio' | 'accessibility' | 'notifications' | 'privacy' | 'help' | 'about';
 
 const sections: { id: Section; icon: string; label: string }[] = [
+  { id: 'storage',       icon: 'ri-folder-line',          label: 'Storage'       },
   { id: 'appearance',    icon: 'ri-palette-line',         label: 'Appearance'    },
   { id: 'audio',         icon: 'ri-headphone-line',       label: 'Audio'         },
   { id: 'accessibility', icon: 'ri-eye-line',             label: 'Accessibility' },
@@ -74,7 +77,9 @@ type ConfirmType = 'history' | 'bookmarks' | 'reset' | null;
 export default function SettingsPage() {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useSidebarCollapsed();
-  const [activeSection, setActiveSection] = useState<Section>('appearance');
+  const [activeSection, setActiveSection] = useState<Section>('storage');
+  const { directories, addDirectory, removeDirectory } = useRootDirectories();
+  const { isScanning, progress, currentDir, startScan, cancelScan } = useScanLibrary();
   const [confirmOpen, setConfirmOpen] = useState<ConfirmType>(null);
 
   // ── Toast ────────────────────────────────────────────────────────────────────
@@ -260,6 +265,91 @@ export default function SettingsPage() {
 
           {/* ── Content panel ───────────────────────────────────────────────── */}
           <div className="flex-1 min-w-0">
+
+            {/* ── Storage ── */}
+            {activeSection === 'storage' && (
+              <div>
+                <SectionLabel label="Audiobook Directories" />
+                <Card>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 pt-4 pb-2">
+                    Audiobooks in these directories will be imported into your library.
+                  </p>
+                  {directories.length > 0 ? (
+                    <div className="space-y-2 pb-4">
+                      {directories.map((dir) => (
+                        <div key={dir} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                          <i className="ri-folder-3-line text-amber-500 dark:text-amber-400 flex-shrink-0"></i>
+                          <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1" title={dir}>
+                            {dir}
+                          </span>
+                          <button
+                            onClick={() => removeDirectory(dir)}
+                            className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer flex-shrink-0"
+                          >
+                            <i className="ri-close-line text-sm"></i>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center py-8">
+                      <div className="w-12 h-12 flex items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-900/20 mb-3">
+                        <i className="ri-folder-add-line text-xl text-amber-300 dark:text-amber-700"></i>
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">No directories added</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">Add a folder to start importing audiobooks</p>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 pb-4">
+                    <button
+                      onClick={async () => {
+                        const path = await window.electronAPI.selectDirectory();
+                        if (path) addDirectory(path);
+                      }}
+                      className="h-10 px-4 flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap"
+                    >
+                      <i className="ri-folder-add-line text-base"></i>
+                      Add Directory
+                    </button>
+                    {directories.length > 0 && (
+                      <button
+                        onClick={isScanning ? cancelScan : startScan}
+                        className={`h-10 px-4 flex items-center gap-2 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+                          isScanning
+                            ? 'bg-red-500 hover:bg-red-600 text-white'
+                            : 'bg-purple-500 hover:bg-purple-600 text-white'
+                        }`}
+                      >
+                        <i className={`${isScanning ? 'ri-stop-line' : 'ri-refresh-line'} text-base`}></i>
+                        {isScanning ? 'Cancel Scan' : 'Scan Library'}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Scan progress */}
+                  {isScanning && (
+                    <div className="pb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                          Scanning... {progress}%
+                        </span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-purple-500 rounded-full transition-all duration-300"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                      {currentDir && (
+                        <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1 truncate" title={currentDir}>
+                          {currentDir}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </Card>
+              </div>
+            )}
 
             {/* ── Appearance ── */}
             {activeSection === 'appearance' && (

@@ -1,5 +1,6 @@
-import { Collection, parseDurationSecs, formatTotalDuration } from '../../../mocks/collections';
-import { LibraryBook } from '../../../mocks/library';
+import { Collection, parseDurationSecs, formatTotalDuration } from '../../../types/collection';
+import { LibraryBook } from '../../../types/library';
+import CoverImage from '../../../components/base/CoverImage';
 
 interface CollectionCardProps {
   collection: Collection;
@@ -8,7 +9,7 @@ interface CollectionCardProps {
   onPlay: () => void;
 }
 
-function getQueueInfo(bookIds: number[], allBooks: LibraryBook[]) {
+function getQueueInfo(bookIds: string[], allBooks: LibraryBook[]) {
   const books = bookIds.map((id) => allBooks.find((b) => b.id === id)).filter(Boolean) as LibraryBook[];
   const nowPlaying = books.find((b) => b.status === 'in-progress') ?? null;
   let nextUp: LibraryBook | null = null;
@@ -48,7 +49,7 @@ export default function CollectionCard({ collection, allBooks, onOpen, onPlay }:
               transform: `rotate(${(i - 1) * 3}deg)`,
             }}
           >
-            <img
+            <CoverImage
               src={book.cover}
               alt={book.title}
               className="w-full h-full object-cover object-top"

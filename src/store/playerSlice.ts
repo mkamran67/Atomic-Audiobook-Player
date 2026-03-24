@@ -1,8 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { keepReading } from '../mocks/books';
-
 export interface Track {
-  id: number;
+  id: string;
   title: string;
   author: string;
   cover: string;
@@ -19,8 +17,8 @@ interface PlayerState {
 }
 
 const initialState: PlayerState = {
-  currentTrack: keepReading[2] ?? null,
-  playlist: keepReading as Track[],
+  currentTrack: null,
+  playlist: [],
   isPlaying: false,
   playerCollapsed: true,
 };
@@ -40,7 +38,7 @@ const playerSlice = createSlice({
         state.playlist.push(action.payload);
       }
     },
-    removeFromQueue(state, action: PayloadAction<number>) {
+    removeFromQueue(state, action: PayloadAction<string>) {
       state.playlist = state.playlist.filter((t) => t.id !== action.payload);
     },
     setIsPlaying(state, action: PayloadAction<boolean>) {

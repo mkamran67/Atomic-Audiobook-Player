@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { LibraryBook } from '../../../mocks/library';
+import { LibraryBook } from '../../../types/library';
+import CoverImage from '../../../components/base/CoverImage';
 
 interface BooksShelfProps {
   books: LibraryBook[];
-  bookmarkCounts: Map<number, number>;
-  selectedBookId: number | null;
-  onSelect: (id: number | null) => void;
+  bookmarkCounts: Map<string, number>;
+  selectedBookId: string | null;
+  onSelect: (id: string | null) => void;
 }
 
 export default function BooksShelf({
@@ -14,7 +15,7 @@ export default function BooksShelf({
   selectedBookId,
   onSelect,
 }: BooksShelfProps) {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   return (
     <div className="grid grid-cols-10 sm:grid-cols-12 md:grid-cols-14 lg:grid-cols-[repeat(auto-fill,minmax(64px,1fr))] gap-2">
@@ -41,7 +42,7 @@ export default function BooksShelf({
                   : ''
               }`}
             >
-              <img
+              <CoverImage
                 src={book.cover}
                 alt={book.title}
                 className={`w-full h-full object-cover object-top transition-transform duration-200 ${isHovered ? 'scale-105' : ''}`}

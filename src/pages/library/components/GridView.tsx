@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { LibraryBook, genreColors } from '../../../mocks/library';
+import { LibraryBook, genreColors } from '../../../types/library';
+import CoverImage from '../../../components/base/CoverImage';
 
 interface GridViewProps {
   books: LibraryBook[];
-  likedIds: Set<number>;
-  onToggleLike: (id: number) => void;
+  likedIds: Set<string>;
+  onToggleLike: (id: string) => void;
 }
 
 const statusBadge = {
@@ -14,7 +15,7 @@ const statusBadge = {
 };
 
 export default function GridView({ books, likedIds, onToggleLike }: GridViewProps) {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   if (books.length === 0) {
     return (
@@ -44,7 +45,7 @@ export default function GridView({ books, likedIds, onToggleLike }: GridViewProp
           >
             {/* Cover */}
             <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden mb-3">
-              <img
+              <CoverImage
                 src={book.cover}
                 alt={book.title}
                 className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105"

@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
-import { LibraryBook } from '../../../mocks/library';
+import { LibraryBook } from '../../../types/library';
+import CoverImage from '../../../components/base/CoverImage';
 
 interface FolderViewProps {
   books: LibraryBook[];
-  likedIds: Set<number>;
-  onToggleLike: (id: number) => void;
+  likedIds: Set<string>;
+  onToggleLike: (id: string) => void;
 }
 
 const statusConfig = {
@@ -44,7 +45,7 @@ function BookRow({
   book: LibraryBook;
   isLast: boolean;
   isLiked: boolean;
-  onToggleLike: (id: number) => void;
+  onToggleLike: (id: string) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const st = statusConfig[book.status];
@@ -70,7 +71,7 @@ function BookRow({
 
       {/* Thumbnail */}
       <div className="w-8 h-11 rounded overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700">
-        <img src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
+        <CoverImage src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
       </div>
 
       {/* Title + author */}
@@ -125,8 +126,8 @@ function FolderRow({
 }: {
   genre: string;
   books: LibraryBook[];
-  likedIds: Set<number>;
-  onToggleLike: (id: number) => void;
+  likedIds: Set<string>;
+  onToggleLike: (id: string) => void;
   defaultOpen: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);

@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { LibraryBook, genreColors } from '../../../mocks/library';
+import { LibraryBook, genreColors } from '../../../types/library';
+import CoverImage from '../../../components/base/CoverImage';
 
 interface CompactViewProps {
   books: LibraryBook[];
-  likedIds: Set<number>;
-  onToggleLike: (id: number) => void;
+  likedIds: Set<string>;
+  onToggleLike: (id: string) => void;
 }
 
 const statusConfig = {
@@ -14,7 +15,7 @@ const statusConfig = {
 };
 
 export default function CompactView({ books, likedIds, onToggleLike }: CompactViewProps) {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   if (books.length === 0) {
     return (
@@ -44,7 +45,7 @@ export default function CompactView({ books, likedIds, onToggleLike }: CompactVi
           >
             {/* Cover */}
             <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden">
-              <img
+              <CoverImage
                 src={book.cover}
                 alt={book.title}
                 className="w-full h-full object-cover object-top transition-transform duration-200 group-hover:scale-105"

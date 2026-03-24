@@ -1,5 +1,6 @@
-import { LibraryBook } from '../../../mocks/library';
-import { MockBookmark, formatBookmarkTime, formatRelativeDate } from '../../../mocks/bookmarks';
+import { LibraryBook } from '../../../types/library';
+import { MockBookmark, formatBookmarkTime, formatRelativeDate } from '../../../types/bookmark';
+import CoverImage from '../../../components/base/CoverImage';
 
 interface BookmarkGroupProps {
   book: LibraryBook;
@@ -26,7 +27,7 @@ export default function BookmarkGroup({ book, bookmarks, isCollapsed, onToggle, 
         className="flex items-center gap-4 px-5 py-4 border-b border-gray-100 dark:border-gray-800 cursor-pointer select-none hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
       >
         <div className="w-10 h-[60px] flex-shrink-0 rounded-md overflow-hidden">
-          <img
+          <CoverImage
             src={book.cover}
             alt={book.title}
             className="w-full h-full object-cover object-top"

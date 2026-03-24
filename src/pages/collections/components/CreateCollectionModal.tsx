@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Collection } from '../../../mocks/collections';
-import { LibraryBook } from '../../../mocks/library';
+import { Collection } from '../../../types/collection';
+import { LibraryBook } from '../../../types/library';
+import CoverImage from '../../../components/base/CoverImage';
 
 interface CreateCollectionModalProps {
   allBooks: LibraryBook[];
@@ -11,7 +12,7 @@ interface CreateCollectionModalProps {
 export default function CreateCollectionModal({ allBooks, onConfirm, onCancel }: CreateCollectionModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [search, setSearch] = useState('');
 
   const filtered = allBooks.filter(
@@ -20,7 +21,7 @@ export default function CreateCollectionModal({ allBooks, onConfirm, onCancel }:
       b.author.toLowerCase().includes(search.toLowerCase())
   );
 
-  const toggleBook = (id: number) => {
+  const toggleBook = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
@@ -124,7 +125,7 @@ export default function CreateCollectionModal({ allBooks, onConfirm, onCancel }:
                     {checked ? order : <i className="ri-add-line text-sm"></i>}
                   </div>
                   <div className="w-8 h-11 rounded-md overflow-hidden flex-shrink-0">
-                    <img src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
+                    <CoverImage src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-gray-800 dark:text-white truncate">{book.title}</p>

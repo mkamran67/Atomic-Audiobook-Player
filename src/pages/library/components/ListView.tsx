@@ -1,9 +1,10 @@
-import { LibraryBook, genreColors } from '../../../mocks/library';
+import { LibraryBook, genreColors } from '../../../types/library';
+import CoverImage from '../../../components/base/CoverImage';
 
 interface ListViewProps {
   books: LibraryBook[];
-  likedIds: Set<number>;
-  onToggleLike: (id: number) => void;
+  likedIds: Set<string>;
+  onToggleLike: (id: string) => void;
   sortBy: string;
   sortDir: 'asc' | 'desc';
   onSort: (col: string) => void;
@@ -70,12 +71,12 @@ export default function ListView({ books, likedIds, onToggleLike, sortBy, sortDi
               {/* Cover + info */}
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-14 rounded-lg overflow-hidden flex-shrink-0">
-                  <img src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
+                  <CoverImage src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-gray-800 dark:text-white truncate">{book.title}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{book.author}</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{book.pages} pages · {book.duration}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{book.duration}</p>
                   {/* Mobile: show status + rating inline */}
                   <div className="flex items-center gap-2 mt-1 md:hidden">
                     <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium ${st.cls}`}>

@@ -3,7 +3,7 @@ import { useState } from 'react';
 export type BookStatus = 'not-started' | 'in-progress' | 'completed';
 
 export interface BookProgressData {
-  id: number;
+  id: string;
   progress: number;
   currentChapter: number;
   totalChapters: number;
@@ -11,7 +11,7 @@ export interface BookProgressData {
 }
 
 interface InitialBook {
-  id: number;
+  id: string;
   progress: number;
   currentChapter: number;
   totalChapters: number;
@@ -25,8 +25,8 @@ function deriveStatus(progress: number): BookStatus {
   return 'in-progress';
 }
 
-function buildInitialMap(books: InitialBook[]): Record<number, BookProgressData> {
-  const map: Record<number, BookProgressData> = {};
+function buildInitialMap(books: InitialBook[]): Record<string, BookProgressData> {
+  const map: Record<string, BookProgressData> = {};
   books.forEach((b) => {
     map[b.id] = {
       id: b.id,
@@ -40,11 +40,11 @@ function buildInitialMap(books: InitialBook[]): Record<number, BookProgressData>
 }
 
 function loadFromStorage(
-  fallback: Record<number, BookProgressData>
-): Record<number, BookProgressData> {
+  fallback: Record<string, BookProgressData>
+): Record<string, BookProgressData> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as Record<number, BookProgressData>;
+    if (raw) return JSON.parse(raw) as Record<string, BookProgressData>;
   } catch {
     // ignore
   }
@@ -52,11 +52,11 @@ function loadFromStorage(
 }
 
 export function useBookProgress(initialBooks: InitialBook[]) {
-  const [progressMap, setProgressMap] = useState<Record<number, BookProgressData>>(() =>
+  const [progressMap, setProgressMap] = useState<Record<string, BookProgressData>>(() =>
     loadFromStorage(buildInitialMap(initialBooks))
   );
 
-  const save = (map: Record<number, BookProgressData>) => {
+  const save = (map: Record<string, BookProgressData>) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
     } catch {
@@ -65,12 +65,12 @@ export function useBookProgress(initialBooks: InitialBook[]) {
     setProgressMap(map);
   };
 
-  const markChapterComplete = (bookId: number) => {
+  const markChapterComplete = (bookId: string) => {
     const book = progressMap[bookId];
     if (!book || book.status === 'completed') return;
     const newChapter = Math.min(book.currentChapter + 1, book.totalChapters);
     const newProgress = Math.round((newChapter / book.totalChapters) * 100);
-    const updated: Record<number, BookProgressData> = {
+    const updated: Record<string, BookProgressData> = {
       ...progressMap,
       [bookId]: {
         ...book,
@@ -82,10 +82,10 @@ export function useBookProgress(initialBooks: InitialBook[]) {
     save(updated);
   };
 
-  const markBookComplete = (bookId: number) => {
+  const markBookComplete = (bookId: string) => {
     const book = progressMap[bookId];
     if (!book) return;
-    const updated: Record<number, BookProgressData> = {
+    const updated: Record<string, BookProgressData> = {
       ...progressMap,
       [bookId]: {
         ...book,
@@ -97,12 +97,12 @@ export function useBookProgress(initialBooks: InitialBook[]) {
     save(updated);
   };
 
-  const markPreviousChapter = (bookId: number) => {
+  const markPreviousChapter = (bookId: string) => {
     const book = progressMap[bookId];
     if (!book || book.currentChapter <= 0) return;
     const newChapter = book.currentChapter - 1;
     const newProgress = Math.round((newChapter / book.totalChapters) * 100);
-    const updated: Record<number, BookProgressData> = {
+    const updated: Record<string, BookProgressData> = {
       ...progressMap,
       [bookId]: {
         ...book,
@@ -114,10 +114,10 @@ export function useBookProgress(initialBooks: InitialBook[]) {
     save(updated);
   };
 
-  const resetBook = (bookId: number) => {
+  const resetBook = (bookId: string) => {
     const book = progressMap[bookId];
     if (!book) return;
-    const updated: Record<number, BookProgressData> = {
+    const updated: Record<string, BookProgressData> = {
       ...progressMap,
       [bookId]: {
         ...book,
@@ -129,7 +129,7 @@ export function useBookProgress(initialBooks: InitialBook[]) {
     save(updated);
   };
 
-  const getBookProgress = (bookId: number): BookProgressData | undefined =>
+  const getBookProgress = (bookId: string): BookProgressData | undefined =>
     progressMap[bookId];
 
   return { progressMap, markChapterComplete, markBookComplete, markPreviousChapter, resetBook, getBookProgress };

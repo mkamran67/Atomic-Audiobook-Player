@@ -4,7 +4,7 @@ const STORAGE_KEY = 'audiobook_bookmarks';
 
 export interface Bookmark {
   id: string;
-  bookId: number;
+  bookId: string;
   time: number;
   label: string;
   note?: string;
@@ -36,7 +36,7 @@ export function useBookmarks() {
     setBookmarks(list);
   };
 
-  const addBookmark = (bookId: number, time: number, label: string): Bookmark => {
+  const addBookmark = (bookId: string, time: number, label: string): Bookmark => {
     const entry: Bookmark = {
       id: `${bookId}-${Math.round(time)}-${Date.now()}`,
       bookId,
@@ -61,7 +61,7 @@ export function useBookmarks() {
     save(bookmarks.filter((b) => b.id !== id));
   };
 
-  const getBookmarks = (bookId: number): Bookmark[] =>
+  const getBookmarks = (bookId: string): Bookmark[] =>
     bookmarks.filter((b) => b.bookId === bookId).sort((a, b) => a.time - b.time);
 
   return { bookmarks, addBookmark, updateBookmark, removeBookmark, getBookmarks };

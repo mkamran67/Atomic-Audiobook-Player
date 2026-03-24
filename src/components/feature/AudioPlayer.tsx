@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { BookProgressData, BookStatus } from '../../hooks/useBookProgress';
 import { useBookmarks, Bookmark } from '../../hooks/useBookmarks';
-import { myBooks } from '../../mocks/books';
 import { Track } from '../../store/playerSlice';
+import { useAppSelector } from '../../store';
+import CoverImage from '../base/CoverImage';
 
 interface AudioPlayerProps {
-  currentTrack: Track;
+  currentTrack: Track | null;
   playlist: Track[];
   onTrackChange: (track: Track) => void;
   isCollapsed: boolean;
@@ -63,6 +64,7 @@ export default function AudioPlayer({
   onBookComplete,
   onAddToQueue,
 }: AudioPlayerProps) {
+  const libraryBooks = useAppSelector((state) => state.library.books);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -156,7 +158,7 @@ export default function AudioPlayer({
   const [queueSearch, setQueueSearch] = useState('');
   const [showCreateCollection, setShowCreateCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState('');
-  const [collections, setCollections] = useState<{ id: number; name: string; tracks: Track[] }[]>([]);
+  const [collections, setCollections] = useState<{ id: string; name: string; tracks: Track[] }[]>([]);
 
   const queueSearchRef = useRef<HTMLDivElement>(null);
 
@@ -339,12 +341,12 @@ export default function AudioPlayer({
   };
 
   // ── Queue search pool ────────────────────────────────────────────────────────
-  const allAvailableBooks: Track[] = myBooks.map((b) => ({
-    id: b.id + 1000,
+  const allAvailableBooks: Track[] = libraryBooks.map((b) => ({
+    id: b.id,
     title: b.title,
     author: b.author,
     cover: b.cover,
-    duration: '6:00:00',
+    duration: b.duration,
   }));
 
   const searchResults = queueSearch.trim()
@@ -360,7 +362,7 @@ export default function AudioPlayer({
     if (!newCollectionName.trim()) return;
     setCollections((prev) => [
       ...prev,
-      { id: Date.now(), name: newCollectionName.trim(), tracks: [...playlist] },
+      { id: String(Date.now()), name: newCollectionName.trim(), tracks: [...playlist] },
     ]);
     setShowCreateCollection(false);
     setNewCollectionName('');
@@ -534,7 +536,7 @@ export default function AudioPlayer({
 
           <div className="px-4 py-3 flex gap-4 items-stretch">
             <div className="w-16 h-16 self-center rounded-xl overflow-hidden flex-shrink-0 shadow-md">
-              <img src={currentTrack.cover} alt={currentTrack.title} className="w-full h-full object-cover object-top" />
+              <CoverImage src={currentTrack.cover} alt={currentTrack.title} className="w-full h-full object-cover object-top" />
             </div>
 
             <div className="flex-1 flex flex-col gap-2 min-w-0">
@@ -903,7 +905,7 @@ export default function AudioPlayer({
                 {searchResults.map((book) => (
                   <div key={book.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
-                      <img src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
+                      <CoverImage src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{book.title}</p>
@@ -951,7 +953,7 @@ export default function AudioPlayer({
                     }
                   </div>
                   <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
-                    <img src={track.cover} alt={track.title} className="w-full h-full object-cover object-top" />
+                    <CoverImage src={track.cover} alt={track.title} className="w-full h-full object-cover object-top" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-medium truncate ${isActive ? 'text-purple-700 dark:text-purple-300' : 'text-gray-800 dark:text-white'}`}>
@@ -1003,7 +1005,7 @@ export default function AudioPlayer({
             </div>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                <img src={currentTrack.cover} alt={currentTrack.title} className="w-full h-full object-cover object-top" />
+                <CoverImage src={currentTrack.cover} alt={currentTrack.title} className="w-full h-full object-cover object-top" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-800 dark:text-white truncate">{currentTrack.title}</p>
@@ -1173,7 +1175,7 @@ export default function AudioPlayer({
 
             {/* ── Cover ── */}
             <div className="w-44 h-44 rounded-2xl overflow-hidden shadow-2xl mb-4 flex-shrink-0">
-              <img src={currentTrack.cover} alt={currentTrack.title} className="w-full h-full object-cover object-top" />
+              <CoverImage src={currentTrack.cover} alt={currentTrack.title} className="w-full h-full object-cover object-top" />
             </div>
             <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-1 text-center w-full truncate">{currentTrack.title}</h2>
             <div className="flex items-center justify-center gap-2 mb-4 w-full min-w-0">
@@ -1386,7 +1388,7 @@ export default function AudioPlayer({
                       className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${currentTrack.id === track.id ? 'bg-purple-50 dark:bg-purple-900/20' : ''}`}
                     >
                       <div className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0">
-                        <img src={track.cover} alt={track.title} className="w-full h-full object-cover object-top" />
+                        <CoverImage src={track.cover} alt={track.title} className="w-full h-full object-cover object-top" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{track.title}</p>

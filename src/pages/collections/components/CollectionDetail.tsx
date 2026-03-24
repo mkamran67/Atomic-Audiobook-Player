@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Collection, parseDurationSecs, formatTotalDuration } from '../../../mocks/collections';
-import { LibraryBook } from '../../../mocks/library';
+import { Collection, parseDurationSecs, formatTotalDuration } from '../../../types/collection';
+import { LibraryBook } from '../../../types/library';
+import CoverImage from '../../../components/base/CoverImage';
 
 interface CollectionDetailProps {
   collection: Collection;
@@ -16,7 +17,7 @@ const statusConfig = {
   completed:      { label: 'Done',      cls: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' },
 };
 
-function getQueueInfo(bookIds: number[], allBooks: LibraryBook[]) {
+function getQueueInfo(bookIds: string[], allBooks: LibraryBook[]) {
   const books = bookIds.map((id) => allBooks.find((b) => b.id === id)).filter(Boolean) as LibraryBook[];
   const nowPlayingIdx = books.findIndex((b) => b.status === 'in-progress');
   const nowPlaying = nowPlayingIdx >= 0 ? books[nowPlayingIdx] : null;
@@ -61,11 +62,11 @@ export default function CollectionDetail({ collection, allBooks, onBack, onUpdat
     onUpdate({ ...collection, bookIds: ids });
   }
 
-  function removeBook(id: number) {
+  function removeBook(id: string) {
     onUpdate({ ...collection, bookIds: collection.bookIds.filter((x) => x !== id) });
   }
 
-  function addBook(id: number) {
+  function addBook(id: string) {
     if (collection.bookIds.includes(id)) return;
     onUpdate({ ...collection, bookIds: [...collection.bookIds, id] });
   }
@@ -171,7 +172,7 @@ export default function CollectionDetail({ collection, allBooks, onBack, onUpdat
 
               {/* Cover */}
               <div className="w-10 h-[56px] rounded-md overflow-hidden flex-shrink-0">
-                <img src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
+                <CoverImage src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
               </div>
 
               {/* Info */}
@@ -267,7 +268,7 @@ export default function CollectionDetail({ collection, allBooks, onBack, onUpdat
                   className="flex items-center gap-3 px-4 py-3 hover:bg-amber-50 dark:hover:bg-amber-900/10 cursor-pointer transition-colors group"
                 >
                   <div className="w-8 h-11 rounded-md overflow-hidden flex-shrink-0">
-                    <img src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
+                    <CoverImage src={book.cover} alt={book.title} className="w-full h-full object-cover object-top" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-gray-800 dark:text-white truncate">{book.title}</p>

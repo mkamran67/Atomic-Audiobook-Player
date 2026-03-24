@@ -2,8 +2,8 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSidebarCollapsed } from '../../hooks/useSidebarCollapsed';
 import Sidebar from '../../components/feature/Sidebar';
-import { libraryBooks } from '../../mocks/library';
-import { mockBookmarks, MockBookmark } from '../../mocks/bookmarks';
+import type { MockBookmark } from '../../types/bookmark';
+import { useAppSelector } from '../../store';
 import BooksShelf from './components/BooksShelf';
 import BookmarkGroup from './components/BookmarkGroup';
 
@@ -11,11 +11,12 @@ export default function BookmarksPage() {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useSidebarCollapsed();
   const [search, setSearch] = useState('');
-  const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
-  const [bookmarks, setBookmarks] = useState<MockBookmark[]>(mockBookmarks);
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
+  const libraryBooks = useAppSelector((state) => state.library.books);
+  const [bookmarks, setBookmarks] = useState<MockBookmark[]>([]);
 
   // ── Collapse state (lifted from BookmarkGroup) ───────────────────────────
-  const [collapsedIds, setCollapsedIds] = useState<Set<number>>(new Set());
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
 
   const handleTabChange = (tab: string) => {
     if (tab === 'home')        { navigate('/');            return; }
@@ -30,7 +31,7 @@ export default function BookmarksPage() {
 
   // Map of bookId → count (for the shelf badges)
   const bookmarkCounts = useMemo(() => {
-    const map = new Map<number, number>();
+    const map = new Map<string, number>();
     bookmarks.forEach((bm) => map.set(bm.bookId, (map.get(bm.bookId) ?? 0) + 1));
     return map;
   }, [bookmarks]);
@@ -70,7 +71,7 @@ export default function BookmarksPage() {
     }
 
     // Group by bookId preserving the order books appear in library
-    const grouped = new Map<number, MockBookmark[]>();
+    const grouped = new Map<string, MockBookmark[]>();
     bms.forEach((bm) => {
       const arr = grouped.get(bm.bookId) ?? [];
       arr.push(bm);
@@ -90,7 +91,7 @@ export default function BookmarksPage() {
     filteredGroups.length > 0 &&
     filteredGroups.every((g) => collapsedIds.has(g.book.id));
 
-  function toggleGroup(bookId: number) {
+  function toggleGroup(bookId: string) {
     setCollapsedIds((prev) => {
       const next = new Set(prev);
       if (next.has(bookId)) next.delete(bookId);
