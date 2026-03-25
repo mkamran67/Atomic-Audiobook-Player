@@ -8,6 +8,8 @@ import CompactView from './components/CompactView';
 import FolderView from './components/FolderView';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { toggleLike } from '../../store/librarySlice';
+import { setCurrentTrack } from '../../store/playerSlice';
+import type { LibraryBook } from '../../types/library';
 
 type ViewMode = 'grid' | 'list' | 'folder';
 type StatusFilter = 'all' | 'not-started' | 'in-progress' | 'completed' | 'new-arrivals' | 'liked';
@@ -43,7 +45,9 @@ export default function LibraryPage() {
     const params = new URLSearchParams(location.search);
     const v = params.get('view') as ViewMode | null;
     const valid: ViewMode[] = ['grid', 'list', 'folder'];
-    return v && valid.includes(v) ? v : 'grid';
+    if (v && valid.includes(v)) return v;
+    const saved = localStorage.getItem('library_view_mode') as ViewMode | null;
+    return saved && valid.includes(saved) ? saved : 'grid';
   };
 
   const dispatch = useAppDispatch();
@@ -127,6 +131,15 @@ export default function LibraryPage() {
 
   const handleToggleLike = (id: string) => {
     dispatch(toggleLike(id));
+  };
+
+  const handleBookClick = (book: LibraryBook) => {
+    dispatch(setCurrentTrack({ id: book.id, title: book.title, author: book.author, cover: book.cover, duration: book.duration }));
+  };
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('library_view_mode', mode);
   };
 
   const handleSort = (col: string) => {
@@ -260,7 +273,7 @@ export default function LibraryPage() {
               ]).map(({ mode, icon, tip }) => (
                 <button
                   key={mode}
-                  onClick={() => setViewMode(mode)}
+                  onClick={() => handleViewModeChange(mode)}
                   title={tip}
                   className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                     viewMode === mode
@@ -307,7 +320,7 @@ export default function LibraryPage() {
 
         {/* ── Book views ── */}
         {viewMode === 'grid' && (
-          <GridView books={filteredBooks} likedIds={likedIds} onToggleLike={handleToggleLike} />
+          <GridView books={filteredBooks} likedIds={likedIds} onToggleLike={handleToggleLike} onBookClick={handleBookClick} />
         )}
         {viewMode === 'list' && (
           <ListView
@@ -317,10 +330,11 @@ export default function LibraryPage() {
             sortBy={sortBy}
             sortDir={sortDir}
             onSort={handleSort}
+            onBookClick={handleBookClick}
           />
         )}
         {viewMode === 'folder' && (
-          <FolderView books={filteredBooks} likedIds={likedIds} onToggleLike={handleToggleLike} />
+          <FolderView books={filteredBooks} likedIds={likedIds} onToggleLike={handleToggleLike} onBookClick={handleBookClick} />
         )}
       </main>
     </div>

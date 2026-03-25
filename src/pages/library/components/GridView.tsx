@@ -6,6 +6,7 @@ interface GridViewProps {
   books: LibraryBook[];
   likedIds: Set<string>;
   onToggleLike: (id: string) => void;
+  onBookClick: (book: LibraryBook) => void;
 }
 
 const statusBadge = {
@@ -14,7 +15,7 @@ const statusBadge = {
   completed: { label: 'Completed', cls: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', icon: 'ri-checkbox-circle-line' },
 };
 
-export default function GridView({ books, likedIds, onToggleLike }: GridViewProps) {
+export default function GridView({ books, likedIds, onToggleLike, onBookClick }: GridViewProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   if (books.length === 0) {
@@ -30,7 +31,7 @@ export default function GridView({ books, likedIds, onToggleLike }: GridViewProp
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+    <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}>
       {books.map((book) => {
         const badge = statusBadge[book.status];
         const isHovered = hoveredId === book.id;
@@ -40,6 +41,7 @@ export default function GridView({ books, likedIds, onToggleLike }: GridViewProp
           <div
             key={book.id}
             className="group cursor-pointer"
+            onClick={() => onBookClick(book)}
             onMouseEnter={() => setHoveredId(book.id)}
             onMouseLeave={() => setHoveredId(null)}
           >
@@ -65,7 +67,10 @@ export default function GridView({ books, likedIds, onToggleLike }: GridViewProp
 
                 {/* Bottom: play + progress */}
                 <div>
-                  <button className="w-full h-9 flex items-center justify-center gap-2 rounded-xl bg-white/90 hover:bg-white text-gray-800 text-xs font-semibold transition-colors mb-2 cursor-pointer whitespace-nowrap">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onBookClick(book); }}
+                    className="w-full h-9 flex items-center justify-center gap-2 rounded-xl bg-white/90 hover:bg-white text-gray-800 text-xs font-semibold transition-colors mb-2 cursor-pointer whitespace-nowrap"
+                  >
                     <i className="ri-play-fill text-sm"></i>
                     {book.status === 'not-started' ? 'Start' : 'Restart'}
                   </button>

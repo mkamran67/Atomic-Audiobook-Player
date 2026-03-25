@@ -3,10 +3,12 @@ import { LibraryBook } from '../types/library';
 
 interface LibraryState {
   books: LibraryBook[];
+  loaded: boolean;
 }
 
 const initialState: LibraryState = {
   books: [],
+  loaded: false,
 };
 
 const librarySlice = createSlice({
@@ -15,6 +17,10 @@ const librarySlice = createSlice({
   reducers: {
     setBooks(state, action: PayloadAction<LibraryBook[]>) {
       state.books = action.payload;
+      state.loaded = true;
+    },
+    setLibraryLoaded(state) {
+      state.loaded = true;
     },
     addBook(state, action: PayloadAction<LibraryBook>) {
       const index = state.books.findIndex((b) => b.id === action.payload.id);
@@ -36,6 +42,9 @@ const librarySlice = createSlice({
         book.progress = action.payload.progress;
       }
     },
+    removeBooksByDirectory(state, action: PayloadAction<string>) {
+      state.books = state.books.filter(b => !b.folderPath.startsWith(action.payload));
+    },
     updateBookStatus(state, action: PayloadAction<{ id: string; status: LibraryBook['status'] }>) {
       const book = state.books.find((b) => b.id === action.payload.id);
       if (book) {
@@ -45,5 +54,5 @@ const librarySlice = createSlice({
   },
 });
 
-export const { setBooks, addBook, toggleLike, updateBookProgress, updateBookStatus } = librarySlice.actions;
+export const { setBooks, setLibraryLoaded, addBook, removeBooksByDirectory, toggleLike, updateBookProgress, updateBookStatus } = librarySlice.actions;
 export default librarySlice.reducer;

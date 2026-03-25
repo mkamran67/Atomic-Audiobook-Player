@@ -5,6 +5,7 @@ interface ListViewProps {
   books: LibraryBook[];
   likedIds: Set<string>;
   onToggleLike: (id: string) => void;
+  onBookClick: (book: LibraryBook) => void;
   sortBy: string;
   sortDir: 'asc' | 'desc';
   onSort: (col: string) => void;
@@ -31,7 +32,7 @@ function SortHeader({ label, col, active, dir, onSort }: { label: string; col: s
   );
 }
 
-export default function ListView({ books, likedIds, onToggleLike, sortBy, sortDir, onSort }: ListViewProps) {
+export default function ListView({ books, likedIds, onToggleLike, onBookClick, sortBy, sortDir, onSort }: ListViewProps) {
   if (books.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -66,6 +67,7 @@ export default function ListView({ books, likedIds, onToggleLike, sortBy, sortDi
           return (
             <div
               key={book.id}
+              onClick={() => onBookClick(book)}
               className="group flex md:grid md:grid-cols-[2.5fr_1fr_1fr_1fr_1.2fr_0.8fr_auto] gap-3 md:gap-4 items-center px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors cursor-pointer"
             >
               {/* Cover + info */}
@@ -147,7 +149,7 @@ export default function ListView({ books, likedIds, onToggleLike, sortBy, sortDi
                   <i className={`${isLiked ? 'ri-heart-fill text-rose-400' : 'ri-heart-line text-gray-400 dark:text-gray-500'} text-sm`}></i>
                 </button>
                 <button
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => { e.stopPropagation(); onBookClick(book); }}
                   className="w-8 h-8 flex items-center justify-center rounded-lg bg-purple-500 hover:bg-purple-600 text-white transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <i className="ri-play-fill text-sm"></i>
@@ -162,7 +164,10 @@ export default function ListView({ books, likedIds, onToggleLike, sortBy, sortDi
                 >
                   <i className={`${isLiked ? 'ri-heart-fill text-rose-400' : 'ri-heart-line text-gray-400'} text-sm`}></i>
                 </button>
-                <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-purple-500 text-white cursor-pointer whitespace-nowrap">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onBookClick(book); }}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-purple-500 text-white cursor-pointer whitespace-nowrap"
+                >
                   <i className="ri-play-fill text-sm"></i>
                 </button>
               </div>

@@ -5,6 +5,7 @@ import { ScannedBook, ScannerOutMessage, ScannerInMessage } from '../types/scann
 import { LibraryBook } from '../types/library';
 
 const LIBRARY_FILE = path.join(app.getPath('userData'), 'library.json');
+const DIRS_FILE = path.join(app.getPath('userData'), 'root_directories.json');
 
 let scannerProcess: UtilityProcess | null = null;
 let discoveredBooks: LibraryBook[] = [];
@@ -126,6 +127,32 @@ export function cancelScan(): void {
   }
 }
 
+export function removeBooksByDirectory(directory: string): LibraryBook[] {
+  const books = readStore();
+  const remaining = books.filter(b => !b.folderPath.startsWith(directory));
+  writeStore(remaining);
+  return remaining;
+}
+
 export function loadLibrary(): LibraryBook[] {
   return readStore();
+}
+
+export function loadDirectories(): string[] {
+  try {
+    if (fs.existsSync(DIRS_FILE)) {
+      return JSON.parse(fs.readFileSync(DIRS_FILE, 'utf-8'));
+    }
+  } catch {
+    // ignore corrupt file
+  }
+  return [];
+}
+
+export function saveDirectories(dirs: string[]): void {
+  try {
+    fs.writeFileSync(DIRS_FILE, JSON.stringify(dirs, null, 2), 'utf-8');
+  } catch {
+    // ignore write failures
+  }
 }

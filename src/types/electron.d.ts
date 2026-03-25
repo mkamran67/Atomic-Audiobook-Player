@@ -13,6 +13,11 @@ export interface ElectronAPI {
 
   // Library persistence
   loadLibrary: () => Promise<LibraryBook[]>;
+  removeBooksByDirectory: (directory: string) => Promise<LibraryBook[]>;
+
+  // Directory persistence
+  loadDirectories: () => Promise<string[]>;
+  saveDirectories: (dirs: string[]) => Promise<void>;
 }
 
 declare global {

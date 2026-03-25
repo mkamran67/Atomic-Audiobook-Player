@@ -10,8 +10,11 @@ import LogsModal from './components/LogsModal';
 import ConfirmDialog from './components/ConfirmDialog';
 import { logsAsText } from '../../utils/logger';
 import { useFontSize } from '../../contexts/FontSizeContext';
+import { useSettings } from '../../contexts/SettingsContext';
 import { useRootDirectories } from '../../hooks/useRootDirectories';
 import { useScanLibrary } from '../../hooks/useScanLibrary';
+import { useAppDispatch } from '../../store';
+import { removeBooksByDirectory } from '../../store/librarySlice';
 
 type Section = 'storage' | 'appearance' | 'audio' | 'accessibility' | 'notifications' | 'privacy' | 'help' | 'about';
 
@@ -72,15 +75,17 @@ function SectionResetBtn({ onClick }: { onClick: () => void }) {
   );
 }
 
-type ConfirmType = 'history' | 'bookmarks' | 'reset' | null;
+type ConfirmType = 'history' | 'bookmarks' | 'reset' | 'remove-dir' | null;
 
 export default function SettingsPage() {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useSidebarCollapsed();
   const [activeSection, setActiveSection] = useState<Section>('storage');
+  const dispatch = useAppDispatch();
   const { directories, addDirectory, removeDirectory } = useRootDirectories();
-  const { isScanning, progress, currentDir, startScan, cancelScan } = useScanLibrary();
+  const { isScanning, progress, currentDir, startScan, scanDirectories, cancelScan } = useScanLibrary();
   const [confirmOpen, setConfirmOpen] = useState<ConfirmType>(null);
+  const [pendingRemoveDir, setPendingRemoveDir] = useState<string | null>(null);
 
   // ── Toast ────────────────────────────────────────────────────────────────────
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -90,32 +95,9 @@ export default function SettingsPage() {
     setTimeout(() => setToastMsg(msg), 30);
   }, []);
 
-  // ── Appearance ──────────────────────────────────────────────────────────────
+  // ── Persisted settings ────────────────────────────────────────────────────────
+  const { settings, updateSettings } = useSettings();
   const { fontSize, setFontSize } = useFontSize();
-  const [compactCards, setCompactCards] = useState(false);
-  const [showProgress, setShowProgress] = useState(true);
-  const [showBadges, setShowBadges]     = useState(true);
-
-  // ── Audio ───────────────────────────────────────────────────────────────────
-  const [defaultSpeed, setDefaultSpeed] = useState(1.0);
-  const [sleepTimer, setSleepTimer]     = useState(30);
-  const [autoNextChapter, setAutoNext]  = useState(true);
-  const [loudnessEq, setLoudnessEq]     = useState(true);
-
-  // ── Accessibility ───────────────────────────────────────────────────────────
-  const [appLanguage, setAppLanguage]             = useState('en');
-  const [autoTranslate, setAutoTranslate]         = useState(false);
-  const [translateTargetLang, setTranslateTarget] = useState('en');
-  const [highContrast, setHighContrast]           = useState(false);
-  const [reduceMotion, setReduceMotion]           = useState(false);
-  const [largerTargets, setLargerTargets]         = useState(false);
-  const [dyslexicFont, setDyslexicFont]           = useState(false);
-  const [screenReaderHints, setScreenReaderHints] = useState(false);
-
-  // ── Notifications ───────────────────────────────────────────────────────────
-  const [readingGoals, setReadingGoals]           = useState(true);
-  const [weeklyDigest, setWeeklyDigest]           = useState(false);
-  const [bookmarkReminders, setBookmarkReminders] = useState(true);
 
   // ── Diagnostics ─────────────────────────────────────────────────────────────
   const [showLogs, setShowLogs] = useState(false);
@@ -123,36 +105,31 @@ export default function SettingsPage() {
   // ── Per-section resets ───────────────────────────────────────────────────────
   function resetAppearance() {
     setFontSize('md');
-    setCompactCards(false);
-    setShowProgress(true);
-    setShowBadges(true);
+    updateSettings({ compactCards: false, showProgress: true, showBadges: true });
     triggerToast('Appearance reset to defaults');
   }
 
   function resetAudio() {
-    setDefaultSpeed(1.0);
-    setSleepTimer(30);
-    setAutoNext(true);
-    setLoudnessEq(true);
+    updateSettings({ defaultSpeed: 1.0, sleepTimer: 30, autoNextChapter: true, loudnessEq: true });
     triggerToast('Audio reset to defaults');
   }
 
   function resetAccessibility() {
-    setAppLanguage('en');
-    setAutoTranslate(false);
-    setTranslateTarget('en');
-    setHighContrast(false);
-    setReduceMotion(false);
-    setLargerTargets(false);
-    setDyslexicFont(false);
-    setScreenReaderHints(false);
+    updateSettings({
+      appLanguage: 'en',
+      autoTranslate: false,
+      translateTargetLang: 'en',
+      highContrast: false,
+      reduceMotion: false,
+      largerTargets: false,
+      dyslexicFont: false,
+      screenReaderHints: false,
+    });
     triggerToast('Accessibility reset to defaults');
   }
 
   function resetNotifications() {
-    setReadingGoals(true);
-    setWeeklyDigest(false);
-    setBookmarkReminders(true);
+    updateSettings({ readingGoals: true, weeklyDigest: false, bookmarkReminders: true });
     triggerToast('Notifications reset to defaults');
   }
 
@@ -176,6 +153,7 @@ export default function SettingsPage() {
       description: 'All local playback data will be permanently removed. This cannot be undone.',
       confirmLabel: 'Clear History',
       onConfirm: () => {
+        localStorage.removeItem('audiobook_progress');
         setConfirmOpen(null);
         triggerToast('Listening history cleared');
       },
@@ -185,8 +163,26 @@ export default function SettingsPage() {
       description: 'All saved bookmarks and highlights will be permanently removed. This cannot be undone.',
       confirmLabel: 'Clear Bookmarks',
       onConfirm: () => {
+        localStorage.removeItem('audiobook_bookmarks');
         setConfirmOpen(null);
         triggerToast('Bookmarks cleared');
+      },
+    },
+    'remove-dir': {
+      title: 'Remove Directory?',
+      description: pendingRemoveDir
+        ? `All books imported from "${pendingRemoveDir}" will be removed from your library. This cannot be undone.`
+        : '',
+      confirmLabel: 'Remove',
+      onConfirm: async () => {
+        if (pendingRemoveDir) {
+          removeDirectory(pendingRemoveDir);
+          await window.electronAPI.removeBooksByDirectory(pendingRemoveDir);
+          dispatch(removeBooksByDirectory(pendingRemoveDir));
+        }
+        setConfirmOpen(null);
+        setPendingRemoveDir(null);
+        triggerToast('Directory and its books removed');
       },
     },
     reset: {
@@ -195,24 +191,26 @@ export default function SettingsPage() {
       confirmLabel: 'Reset Settings',
       onConfirm: () => {
         setFontSize('md');
-        setCompactCards(false);
-        setShowProgress(true);
-        setShowBadges(true);
-        setDefaultSpeed(1.0);
-        setSleepTimer(30);
-        setAutoNext(true);
-        setLoudnessEq(true);
-        setAppLanguage('en');
-        setAutoTranslate(false);
-        setTranslateTarget('en');
-        setHighContrast(false);
-        setReduceMotion(false);
-        setLargerTargets(false);
-        setDyslexicFont(false);
-        setScreenReaderHints(false);
-        setReadingGoals(true);
-        setWeeklyDigest(false);
-        setBookmarkReminders(true);
+        updateSettings({
+          compactCards: false,
+          showProgress: true,
+          showBadges: true,
+          defaultSpeed: 1.0,
+          sleepTimer: 30,
+          autoNextChapter: true,
+          loudnessEq: true,
+          appLanguage: 'en',
+          autoTranslate: false,
+          translateTargetLang: 'en',
+          highContrast: false,
+          reduceMotion: false,
+          largerTargets: false,
+          dyslexicFont: false,
+          screenReaderHints: false,
+          readingGoals: true,
+          weeklyDigest: false,
+          bookmarkReminders: true,
+        });
         setConfirmOpen(null);
         triggerToast('All settings reset to defaults');
       },
@@ -283,7 +281,16 @@ export default function SettingsPage() {
                             {dir}
                           </span>
                           <button
-                            onClick={() => removeDirectory(dir)}
+                            onClick={() => scanDirectories([dir])}
+                            disabled={isScanning}
+                            title="Rescan this directory"
+                            className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors cursor-pointer flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <i className="ri-refresh-line text-sm"></i>
+                          </button>
+                          <button
+                            onClick={() => { setPendingRemoveDir(dir); setConfirmOpen('remove-dir'); }}
+                            title="Remove directory"
                             className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer flex-shrink-0"
                           >
                             <i className="ri-close-line text-sm"></i>
@@ -388,21 +395,21 @@ export default function SettingsPage() {
                 <Card>
                   <Row
                     label="Compact Cards"
-                    description={compactCards ? 'Cards shown in compact size' : 'Cards shown at standard size'}
+                    description={settings.compactCards ? 'Cards shown in compact size' : 'Cards shown at standard size'}
                   >
-                    <Toggle value={compactCards} onChange={setCompactCards} />
+                    <Toggle value={settings.compactCards} onChange={(v) => updateSettings({ compactCards: v })} />
                   </Row>
                   <Row
                     label="Show Progress Bars"
-                    description={showProgress ? 'Progress bars visible on book cards' : 'Progress bars hidden'}
+                    description={settings.showProgress ? 'Progress bars visible on book cards' : 'Progress bars hidden'}
                   >
-                    <Toggle value={showProgress} onChange={setShowProgress} />
+                    <Toggle value={settings.showProgress} onChange={(v) => updateSettings({ showProgress: v })} />
                   </Row>
                   <Row
                     label="Show Status Badges"
-                    description={showBadges ? 'Status badges visible on covers' : 'Status badges hidden'}
+                    description={settings.showBadges ? 'Status badges visible on covers' : 'Status badges hidden'}
                   >
-                    <Toggle value={showBadges} onChange={setShowBadges} />
+                    <Toggle value={settings.showBadges} onChange={(v) => updateSettings({ showBadges: v })} />
                   </Row>
                 </Card>
               </div>
@@ -417,15 +424,15 @@ export default function SettingsPage() {
                 <Card>
                   <Row
                     label="Default Playback Speed"
-                    description={`Currently set to ${defaultSpeed}× — applied when opening a new book`}
+                    description={`Currently set to ${settings.defaultSpeed}× — applied when opening a new book`}
                   >
                     <div className="flex items-center gap-1 flex-wrap justify-end">
                       {speedOptions.map((s) => (
                         <button
                           key={s}
-                          onClick={() => setDefaultSpeed(s)}
+                          onClick={() => updateSettings({ defaultSpeed: s })}
                           className={`h-7 px-2 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
-                            defaultSpeed === s
+                            settings.defaultSpeed === s
                               ? 'bg-amber-500 text-white'
                               : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                           }`}
@@ -437,9 +444,9 @@ export default function SettingsPage() {
                   </Row>
                   <Row
                     label="Auto-advance Chapters"
-                    description={autoNextChapter ? 'Next chapter plays automatically' : 'Pauses at end of each chapter'}
+                    description={settings.autoNextChapter ? 'Next chapter plays automatically' : 'Pauses at end of each chapter'}
                   >
-                    <Toggle value={autoNextChapter} onChange={setAutoNext} />
+                    <Toggle value={settings.autoNextChapter} onChange={(v) => updateSettings({ autoNextChapter: v })} />
                   </Row>
                 </Card>
 
@@ -448,15 +455,15 @@ export default function SettingsPage() {
                   <div className="py-4">
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
                       Stop playback after{' '}
-                      <span className="font-semibold text-amber-500">{sleepTimer} min</span>
+                      <span className="font-semibold text-amber-500">{settings.sleepTimer} min</span>
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {sleepOptions.map((m) => (
                         <button
                           key={m}
-                          onClick={() => setSleepTimer(m)}
+                          onClick={() => updateSettings({ sleepTimer: m })}
                           className={`h-8 px-3 rounded-xl text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
-                            sleepTimer === m
+                            settings.sleepTimer === m
                               ? 'bg-amber-500 text-white'
                               : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                           }`}
@@ -469,8 +476,8 @@ export default function SettingsPage() {
                 </Card>
 
                 <EqualiserSection
-                  loudnessEq={loudnessEq}
-                  setLoudnessEq={setLoudnessEq}
+                  loudnessEq={settings.loudnessEq}
+                  setLoudnessEq={(v) => updateSettings({ loudnessEq: v })}
                 />
               </div>
             )}
@@ -484,11 +491,11 @@ export default function SettingsPage() {
                 <Card>
                   <Row
                     label="App Language"
-                    description={`Interface set to: ${langLabel(appLanguage)}`}
+                    description={`Interface set to: ${langLabel(settings.appLanguage)}`}
                   >
                     <SmartSelect
-                      value={appLanguage}
-                      onChange={setAppLanguage}
+                      value={settings.appLanguage}
+                      onChange={(v) => updateSettings({ appLanguage: v })}
                       options={LANGUAGE_OPTIONS}
                       minWidth={160}
                     />
@@ -499,18 +506,18 @@ export default function SettingsPage() {
                 <Card>
                   <Row
                     label="Auto-Translate Content"
-                    description={autoTranslate ? 'Translating book synopses and UI text on the fly' : 'Showing content in its original language'}
+                    description={settings.autoTranslate ? 'Translating book synopses and UI text on the fly' : 'Showing content in its original language'}
                   >
-                    <Toggle value={autoTranslate} onChange={setAutoTranslate} />
+                    <Toggle value={settings.autoTranslate} onChange={(v) => updateSettings({ autoTranslate: v })} />
                   </Row>
-                  {autoTranslate && (
+                  {settings.autoTranslate && (
                     <Row
                       label="Translate Into"
-                      description={`Translating into: ${langLabel(translateTargetLang)}`}
+                      description={`Translating into: ${langLabel(settings.translateTargetLang)}`}
                     >
                       <SmartSelect
-                        value={translateTargetLang}
-                        onChange={setTranslateTarget}
+                        value={settings.translateTargetLang}
+                        onChange={(v) => updateSettings({ translateTargetLang: v })}
                         options={LANGUAGE_OPTIONS}
                         minWidth={160}
                       />
@@ -522,21 +529,21 @@ export default function SettingsPage() {
                 <Card>
                   <Row
                     label="High Contrast Mode"
-                    description={highContrast ? 'High contrast active' : 'Standard contrast'}
+                    description={settings.highContrast ? 'High contrast active' : 'Standard contrast'}
                   >
-                    <Toggle value={highContrast} onChange={setHighContrast} />
+                    <Toggle value={settings.highContrast} onChange={(v) => updateSettings({ highContrast: v })} />
                   </Row>
                   <Row
                     label="Reduce Motion"
-                    description={reduceMotion ? 'Animations minimised' : 'Full animations enabled'}
+                    description={settings.reduceMotion ? 'Animations minimised' : 'Full animations enabled'}
                   >
-                    <Toggle value={reduceMotion} onChange={setReduceMotion} />
+                    <Toggle value={settings.reduceMotion} onChange={(v) => updateSettings({ reduceMotion: v })} />
                   </Row>
                   <Row
                     label="Dyslexia-Friendly Font"
-                    description={dyslexicFont ? 'OpenDyslexic typeface active' : 'Standard typeface'}
+                    description={settings.dyslexicFont ? 'OpenDyslexic typeface active' : 'Standard typeface'}
                   >
-                    <Toggle value={dyslexicFont} onChange={setDyslexicFont} />
+                    <Toggle value={settings.dyslexicFont} onChange={(v) => updateSettings({ dyslexicFont: v })} />
                   </Row>
                 </Card>
 
@@ -544,15 +551,15 @@ export default function SettingsPage() {
                 <Card>
                   <Row
                     label="Larger Touch Targets"
-                    description={largerTargets ? 'Bigger tap areas active' : 'Standard touch targets'}
+                    description={settings.largerTargets ? 'Bigger tap areas active' : 'Standard touch targets'}
                   >
-                    <Toggle value={largerTargets} onChange={setLargerTargets} />
+                    <Toggle value={settings.largerTargets} onChange={(v) => updateSettings({ largerTargets: v })} />
                   </Row>
                   <Row
                     label="Screen Reader Hints"
-                    description={screenReaderHints ? 'Extra ARIA labels active throughout the app' : 'Standard accessibility markup'}
+                    description={settings.screenReaderHints ? 'Extra ARIA labels active throughout the app' : 'Standard accessibility markup'}
                   >
-                    <Toggle value={screenReaderHints} onChange={setScreenReaderHints} />
+                    <Toggle value={settings.screenReaderHints} onChange={(v) => updateSettings({ screenReaderHints: v })} />
                   </Row>
                 </Card>
               </div>
@@ -567,21 +574,21 @@ export default function SettingsPage() {
                 <Card>
                   <Row
                     label="Listening Goals"
-                    description={readingGoals ? 'Goal reminders and streaks are on' : 'Goal reminders are off'}
+                    description={settings.readingGoals ? 'Goal reminders and streaks are on' : 'Goal reminders are off'}
                   >
-                    <Toggle value={readingGoals} onChange={setReadingGoals} />
+                    <Toggle value={settings.readingGoals} onChange={(v) => updateSettings({ readingGoals: v })} />
                   </Row>
                   <Row
                     label="Weekly Digest"
-                    description={weeklyDigest ? 'A weekly summary will appear each Monday' : 'Weekly summary is off'}
+                    description={settings.weeklyDigest ? 'A weekly summary will appear each Monday' : 'Weekly summary is off'}
                   >
-                    <Toggle value={weeklyDigest} onChange={setWeeklyDigest} />
+                    <Toggle value={settings.weeklyDigest} onChange={(v) => updateSettings({ weeklyDigest: v })} />
                   </Row>
                   <Row
                     label="Bookmark Reminders"
-                    description={bookmarkReminders ? 'Nudges about saved highlights are on' : 'Bookmark nudges are off'}
+                    description={settings.bookmarkReminders ? 'Nudges about saved highlights are on' : 'Bookmark nudges are off'}
                   >
-                    <Toggle value={bookmarkReminders} onChange={setBookmarkReminders} />
+                    <Toggle value={settings.bookmarkReminders} onChange={(v) => updateSettings({ bookmarkReminders: v })} />
                   </Row>
                 </Card>
               </div>

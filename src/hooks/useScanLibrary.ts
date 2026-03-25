@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../store';
-import { setBooks, addBook } from '../store/librarySlice';
+import { setBooks, setLibraryLoaded, addBook } from '../store/librarySlice';
 import { scanStarted, scanProgress, scanComplete, scanError, scanCancelled } from '../store/scannerSlice';
 import { useRootDirectories } from './useRootDirectories';
 
@@ -14,6 +14,8 @@ export function useScanLibrary() {
     window.electronAPI.loadLibrary().then((books) => {
       if (books && books.length > 0) {
         dispatch(setBooks(books));
+      } else {
+        dispatch(setLibraryLoaded());
       }
     });
   }, [dispatch]);
@@ -35,10 +37,16 @@ export function useScanLibrary() {
     window.electronAPI.startScan(directories);
   }, [dispatch, directories]);
 
+  const scanDirectories = useCallback((dirs: string[]) => {
+    if (dirs.length === 0) return;
+    dispatch(scanStarted());
+    window.electronAPI.startScan(dirs);
+  }, [dispatch]);
+
   const cancel = useCallback(() => {
     window.electronAPI.cancelScan();
     dispatch(scanCancelled());
   }, [dispatch]);
 
-  return { isScanning, progress, currentDir, error, startScan, cancelScan: cancel };
+  return { isScanning, progress, currentDir, error, startScan, scanDirectories, cancelScan: cancel };
 }

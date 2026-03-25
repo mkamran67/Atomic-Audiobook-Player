@@ -6,6 +6,7 @@ interface FolderViewProps {
   books: LibraryBook[];
   likedIds: Set<string>;
   onToggleLike: (id: string) => void;
+  onBookClick: (book: LibraryBook) => void;
 }
 
 const statusConfig = {
@@ -14,38 +15,79 @@ const statusConfig = {
   completed:      { label: 'Completed',   dot: 'bg-emerald-400',              text: 'text-emerald-500' },
 };
 
-// Folder colour strip — one accent per genre bucket
-const folderAccent = (genre: string) => {
-  const map: Record<string, string> = {
-    Fantasy: 'text-emerald-500',
-    Fiction: 'text-cyan-500',
-    Novel: 'text-violet-500',
-    'Dark Academia': 'text-amber-500',
-    'Dark Romance': 'text-rose-500',
-    'Gothic Fantasy': 'text-slate-500',
-    'Epic Fantasy': 'text-orange-500',
-    'Dark Fantasy': 'text-red-500',
-    'Ocean Fantasy': 'text-sky-500',
-    'Academic Novel': 'text-lime-600',
-    'Magical Realism': 'text-teal-500',
-    'Gothic Horror': 'text-pink-500',
-    'Military Fantasy': 'text-stone-500',
-    'Fantasy Romance': 'text-fuchsia-500',
-    Mythology: 'text-yellow-500',
-  };
-  return map[genre] ?? 'text-amber-500';
-};
+// ── Tree data structure ──
+
+interface DirNode {
+  name: string;
+  children: Map<string, DirNode>;
+  books: LibraryBook[];
+}
+
+function buildTree(books: LibraryBook[]): DirNode {
+  const root: DirNode = { name: '', children: new Map(), books: [] };
+
+  for (const book of books) {
+    // Normalize path separators and split
+    const parts = book.folderPath
+      .replace(/\\/g, '/')
+      .split('/')
+      .filter(Boolean);
+
+    let node = root;
+    for (const part of parts) {
+      if (!node.children.has(part)) {
+        node.children.set(part, { name: part, children: new Map(), books: [] });
+      }
+      node = node.children.get(part)!;
+    }
+    node.books.push(book);
+  }
+
+  // Collapse single-child directory chains (strip common prefix)
+  return collapseChain(root);
+}
+
+function collapseChain(node: DirNode): DirNode {
+  // If node has exactly one child dir and no books, merge into child
+  while (node.children.size === 1 && node.books.length === 0) {
+    const [childName, child] = [...node.children.entries()][0];
+    const merged = node.name ? `${node.name}/${childName}` : childName;
+    node = { name: merged, children: child.children, books: child.books };
+  }
+
+  // Recurse into children
+  const collapsed = new Map<string, DirNode>();
+  for (const [key, child] of node.children) {
+    const c = collapseChain(child);
+    collapsed.set(c.name || key, c);
+  }
+  node.children = collapsed;
+
+  return node;
+}
+
+function countBooks(node: DirNode): number {
+  let count = node.books.length;
+  for (const child of node.children.values()) {
+    count += countBooks(child);
+  }
+  return count;
+}
+
+// ── Book row ──
 
 function BookRow({
   book,
-  isLast,
   isLiked,
   onToggleLike,
+  onBookClick,
+  depth,
 }: {
   book: LibraryBook;
-  isLast: boolean;
   isLiked: boolean;
   onToggleLike: (id: string) => void;
+  onBookClick: (book: LibraryBook) => void;
+  depth: number;
 }) {
   const [hovered, setHovered] = useState(false);
   const st = statusConfig[book.status];
@@ -55,12 +97,14 @@ function BookRow({
       className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors group ${
         hovered ? 'bg-gray-50 dark:bg-gray-800/60' : ''
       }`}
+      style={{ paddingLeft: `${depth * 24 + 16}px` }}
+      onClick={() => onBookClick(book)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Tree line */}
-      <div className="flex-shrink-0 flex items-center" style={{ width: 40 }}>
-        <div className="w-px self-stretch bg-gray-200 dark:bg-gray-700 ml-4 mr-2" style={{ minHeight: 20 }} />
+      {/* Tree connector */}
+      <div className="flex-shrink-0 flex items-center" style={{ width: 24 }}>
+        <div className="w-px self-stretch bg-gray-200 dark:bg-gray-700" style={{ minHeight: 20 }} />
         <div className="w-3 h-px bg-gray-200 dark:bg-gray-700" />
       </div>
 
@@ -117,70 +161,84 @@ function BookRow({
   );
 }
 
-function FolderRow({
-  genre,
-  books,
+// ── Directory row (recursive) ──
+
+function DirRow({
+  node,
+  depth,
   likedIds,
   onToggleLike,
+  onBookClick,
   defaultOpen,
 }: {
-  genre: string;
-  books: LibraryBook[];
+  node: DirNode;
+  depth: number;
   likedIds: Set<string>;
   onToggleLike: (id: string) => void;
+  onBookClick: (book: LibraryBook) => void;
   defaultOpen: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  const completed  = books.filter((b) => b.status === 'completed').length;
-  const inProgress = books.filter((b) => b.status === 'in-progress').length;
-  const accent = folderAccent(genre);
+  const total = countBooks(node);
+  const sortedChildren = useMemo(
+    () => [...node.children.entries()].sort(([a], [b]) => a.localeCompare(b)),
+    [node.children],
+  );
 
   return (
-    <div className="mb-1">
+    <div>
       {/* Folder header */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors cursor-pointer group"
+        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors cursor-pointer group"
+        style={{ paddingLeft: `${depth * 24 + 16}px` }}
       >
         {/* Chevron */}
-        <div className="w-5 h-5 flex items-center justify-center text-gray-400 flex-shrink-0 transition-transform duration-200" style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+        <div
+          className="w-5 h-5 flex items-center justify-center text-gray-400 flex-shrink-0 transition-transform duration-200"
+          style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
+        >
           <i className="ri-arrow-right-s-line text-base"></i>
         </div>
 
         {/* Folder icon */}
-        <div className={`w-5 h-5 flex items-center justify-center flex-shrink-0 ${accent}`}>
+        <div className="w-5 h-5 flex items-center justify-center flex-shrink-0 text-amber-500">
           <i className={`${open ? 'ri-folder-open-line' : 'ri-folder-line'} text-base`}></i>
         </div>
 
-        {/* Genre name */}
-        <span className="text-sm font-semibold text-gray-800 dark:text-gray-100 flex-1 text-left">{genre}</span>
+        {/* Name */}
+        <span className="text-sm font-semibold text-gray-800 dark:text-gray-100 flex-1 text-left truncate">
+          {node.name}
+        </span>
 
-        {/* Counts */}
-        <div className="flex items-center gap-2 mr-2 opacity-60 group-hover:opacity-100 transition-opacity">
-          {inProgress > 0 && (
-            <span className="text-[10px] font-medium text-orange-500 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded-full">
-              {inProgress} listening
-            </span>
-          )}
-          {completed > 0 && (
-            <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-full">
-              {completed} done
-            </span>
-          )}
-          <span className="text-xs text-gray-400 tabular-nums">{books.length} file{books.length !== 1 ? 's' : ''}</span>
-        </div>
+        {/* Count */}
+        <span className="text-xs text-gray-400 tabular-nums flex-shrink-0">
+          {total} item{total !== 1 ? 's' : ''}
+        </span>
       </button>
 
-      {/* Books */}
+      {/* Children */}
       {open && (
-        <div className="ml-2 border-l-0">
-          {books.map((book, i) => (
+        <div>
+          {sortedChildren.map(([key, child]) => (
+            <DirRow
+              key={key}
+              node={child}
+              depth={depth + 1}
+              likedIds={likedIds}
+              onToggleLike={onToggleLike}
+              onBookClick={onBookClick}
+              defaultOpen={defaultOpen}
+            />
+          ))}
+          {node.books.map((book) => (
             <BookRow
               key={book.id}
               book={book}
-              isLast={i === books.length - 1}
               isLiked={likedIds.has(book.id)}
               onToggleLike={onToggleLike}
+              onBookClick={onBookClick}
+              depth={depth + 1}
             />
           ))}
         </div>
@@ -189,22 +247,38 @@ function FolderRow({
   );
 }
 
-export default function FolderView({ books, likedIds, onToggleLike }: FolderViewProps) {
-  const [allOpen, setAllOpen] = useState(true);
-  const [key, setKey] = useState(0); // force remount on toggle-all
+// ── Main component ──
 
-  const folders = useMemo(() => {
-    const map = new Map<string, LibraryBook[]>();
-    books.forEach((b) => {
-      if (!map.has(b.genre)) map.set(b.genre, []);
-      map.get(b.genre)!.push(b);
-    });
-    return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
-  }, [books]);
+export default function FolderView({ books, likedIds, onToggleLike, onBookClick }: FolderViewProps) {
+  const [allOpen, setAllOpen] = useState(true);
+  const [key, setKey] = useState(0);
+
+  const tree = useMemo(() => buildTree(books), [books]);
+
+  // If root has no name and no direct books, render its children as top-level
+  const topLevel = useMemo(() => {
+    if (!tree.name && tree.books.length === 0 && tree.children.size > 0) {
+      return [...tree.children.entries()].sort(([a], [b]) => a.localeCompare(b));
+    }
+    return null;
+  }, [tree]);
+
+  const folderCount = useMemo(() => {
+    function countDirs(node: DirNode): number {
+      let c = node.children.size;
+      for (const child of node.children.values()) c += countDirs(child);
+      return c;
+    }
+    return topLevel
+      ? topLevel.reduce((sum, [, n]) => sum + 1 + countDirs(n), 0) // +1 for each top-level dir
+      : tree.children.size > 0
+        ? 1 + [...tree.children.values()].reduce((sum, n) => sum + countDirs(n), 0) // count tree itself? no, just children
+        : 0;
+  }, [tree, topLevel]);
 
   function handleToggleAll() {
     setAllOpen((v) => !v);
-    setKey((k) => k + 1); // remount folders with new default
+    setKey((k) => k + 1);
   }
 
   if (books.length === 0) {
@@ -231,7 +305,7 @@ export default function FolderView({ books, likedIds, onToggleLike }: FolderView
           <span>/</span>
           <span className="text-gray-600 dark:text-gray-300 font-medium">All Books</span>
           <span className="ml-2 text-gray-300 dark:text-gray-600">·</span>
-          <span className="ml-2">{books.length} items in {folders.length} folders</span>
+          <span className="ml-2">{books.length} items in {folderCount} folders</span>
         </div>
         <button
           onClick={handleToggleAll}
@@ -246,7 +320,7 @@ export default function FolderView({ books, likedIds, onToggleLike }: FolderView
 
       {/* Column headers */}
       <div className="flex items-center gap-3 px-4 py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40">
-        <div style={{ width: 40 }} className="flex-shrink-0" />
+        <div style={{ width: 24 }} className="flex-shrink-0" />
         <div className="w-5 flex-shrink-0" />
         <div className="w-8 flex-shrink-0" />
         <span className="flex-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Title</span>
@@ -256,18 +330,43 @@ export default function FolderView({ books, likedIds, onToggleLike }: FolderView
         <div className="w-6 flex-shrink-0" />
       </div>
 
-      {/* Folders */}
+      {/* Tree */}
       <div className="p-2">
-        {folders.map(([genre, genreBooks]) => (
-          <FolderRow
-            key={`${key}-${genre}`}
-            genre={genre}
-            books={genreBooks}
-            likedIds={likedIds}
-            onToggleLike={onToggleLike}
-            defaultOpen={allOpen}
-          />
-        ))}
+        {topLevel
+          ? topLevel.map(([name, node]) => (
+              <DirRow
+                key={`${key}-${name}`}
+                node={node}
+                depth={0}
+                likedIds={likedIds}
+                onToggleLike={onToggleLike}
+                onBookClick={onBookClick}
+                defaultOpen={allOpen}
+              />
+            ))
+          : tree.name
+            ? (
+              <DirRow
+                key={`${key}-root`}
+                node={tree}
+                depth={0}
+                likedIds={likedIds}
+                onToggleLike={onToggleLike}
+                onBookClick={onBookClick}
+                defaultOpen={allOpen}
+              />
+            )
+            : tree.books.map((book) => (
+              <BookRow
+                key={book.id}
+                book={book}
+                isLiked={likedIds.has(book.id)}
+                onToggleLike={onToggleLike}
+                onBookClick={onBookClick}
+                depth={0}
+              />
+            ))
+        }
       </div>
     </div>
   );

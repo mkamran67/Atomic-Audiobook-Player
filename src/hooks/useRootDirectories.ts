@@ -1,30 +1,19 @@
-import { useState } from 'react';
-
-const STORAGE_KEY = 'atomic_root_directories';
-
-function load(): string[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as string[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function persist(dirs: string[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(dirs));
-  } catch {
-    // ignore
-  }
-}
+import { useState, useEffect } from 'react';
 
 export function useRootDirectories() {
-  const [directories, setDirectories] = useState<string[]>(load);
+  const [directories, setDirectories] = useState<string[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    window.electronAPI.loadDirectories().then((dirs) => {
+      setDirectories(dirs);
+      setLoaded(true);
+    });
+  }, []);
 
   const save = (dirs: string[]) => {
-    persist(dirs);
     setDirectories(dirs);
+    window.electronAPI.saveDirectories(dirs);
   };
 
   const addDirectory = (path: string) => {
@@ -37,5 +26,5 @@ export function useRootDirectories() {
     save(directories.filter((d) => d !== path));
   };
 
-  return { directories, addDirectory, removeDirectory };
+  return { directories, addDirectory, removeDirectory, loaded };
 }
