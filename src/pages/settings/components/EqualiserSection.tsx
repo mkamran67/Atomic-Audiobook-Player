@@ -142,6 +142,7 @@ export default function EqualiserSection({
     setBands(b);
     localStorage.setItem(EQ_ACTIVE_KEY, preset.id);
     localStorage.setItem(EQ_BANDS_KEY, JSON.stringify(b));
+    window.dispatchEvent(new CustomEvent('eq-bands-changed'));
   };
 
   const handleBandChange = (index: number, value: number) => {
@@ -149,6 +150,7 @@ export default function EqualiserSection({
     next[index] = value;
     setBands(next);
     localStorage.setItem(EQ_BANDS_KEY, JSON.stringify(next));
+    window.dispatchEvent(new CustomEvent('eq-bands-changed'));
     const active = allPresets.find((p) => p.id === activePresetId);
     if (active && JSON.stringify(active.bands) !== JSON.stringify(next)) {
       setActivePresetId('custom-unsaved');

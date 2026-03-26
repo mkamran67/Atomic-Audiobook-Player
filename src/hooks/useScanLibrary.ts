@@ -31,10 +31,11 @@ export function useScanLibrary() {
     return () => unsubs.forEach((fn) => fn());
   }, [dispatch]);
 
-  const startScan = useCallback(() => {
-    if (directories.length === 0) return;
+  const startScan = useCallback((dirs?: string[]) => {
+    const scanDirs = dirs ?? directories;
+    if (scanDirs.length === 0) return;
     dispatch(scanStarted());
-    window.electronAPI.startScan(directories);
+    window.electronAPI.startScan(scanDirs);
   }, [dispatch, directories]);
 
   const scanDirectories = useCallback((dirs: string[]) => {

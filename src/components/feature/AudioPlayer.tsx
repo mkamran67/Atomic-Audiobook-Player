@@ -1,8 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { BookProgressData, BookStatus } from '../../hooks/useBookProgress';
 import { useBookmarks, Bookmark } from '../../hooks/useBookmarks';
+import { useAudioEngine } from '../../hooks/useAudioEngine';
+import { usePlaybackPosition } from '../../hooks/usePlaybackPosition';
 import { Track } from '../../store/playerSlice';
 import { useAppSelector } from '../../store';
+import { getAudioEngine } from '../../audio/AudioEngine';
 import CoverImage from '../base/CoverImage';
 
 interface AudioPlayerProps {
@@ -52,6 +55,42 @@ const DEFAULT_EQ_PRESETS: EqPreset[] = [
   { id: 'podcast', name: 'Podcast', description: 'Mid-range warmth boost' },
 ];
 
+// ── Extracted components (stable references, no re-creation on parent render) ──
+
+const EqBars = ({ small = false }: { small?: boolean }) => {
+  const h = small ? 10 : 14;
+  const w = small ? 2 : 2.5;
+  const durations = [0.65, 0.8, 0.55, 0.7];
+  const delays = [0, 0.18, 0.32, 0.1];
+  return (
+    <div className="flex items-end flex-shrink-0" style={{ height: h, gap: small ? 1.5 : 2 }}>
+      {durations.map((dur, i) => (
+        <div
+          key={i}
+          style={{
+            width: w,
+            height: h,
+            backgroundColor: '#8b5cf6',
+            borderRadius: 2,
+            transformOrigin: 'bottom',
+            animation: `eqBounce ${dur}s ease-in-out ${delays[i]}s infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+const SkipBtn = ({ seconds, label, large, onSkip }: { seconds: number; label: string; large?: boolean; onSkip: (s: number) => void }) => (
+  <button
+    onClick={() => onSkip(seconds)}
+    className={`flex flex-col items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors whitespace-nowrap cursor-pointer gap-0.5 ${large ? 'w-12 h-12' : 'w-11 h-11'}`}
+  >
+    <i className={`${seconds < 0 ? 'ri-rewind-fill' : 'ri-speed-fill'} text-gray-600 dark:text-gray-400 ${large ? 'text-xl' : 'text-lg'}`}></i>
+    <span className="text-[9px] font-bold text-gray-400 dark:text-gray-500 leading-none">{label}</span>
+  </button>
+);
+
 export default function AudioPlayer({
   currentTrack,
   playlist,
@@ -65,9 +104,8 @@ export default function AudioPlayer({
   onAddToQueue,
 }: AudioPlayerProps) {
   const libraryBooks = useAppSelector((state) => state.library.books);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const engine = useAudioEngine();
+  const { isPlaying, currentTime, duration, error } = engine;
 
   // toolbar state
   const [sleepTimer, setSleepTimer] = useState<number | null>(null);
@@ -118,39 +156,62 @@ export default function AudioPlayer({
   const [playerView, setPlayerView] = useState<'player' | 'list'>('player');
 
   const { addBookmark, updateBookmark, removeBookmark, getBookmarks } = useBookmarks();
-  const trackBookmarks = getBookmarks(currentTrack.id);
+  const trackBookmarks = getBookmarks(currentTrack?.id);
 
-  // ── Effects ─────────────────────────────────────────────────────────────────
+  // ── Audio engine: chapter loading & position persistence ──────────────
+  const currentBook = libraryBooks.find((b) => b.id === currentTrack?.id);
+  const currentChapterIndex = bookProgress?.currentChapter ?? 0;
+  const currentChapterData = currentBook?.chapters?.[currentChapterIndex];
+
+  const getEngineTime = useCallback(() => getAudioEngine().currentTime, []);
+  const { savePosition, loadPosition, clearPosition } = usePlaybackPosition(
+    currentTrack?.id ?? null,
+    currentChapterIndex,
+    getEngineTime,
+    isPlaying,
+  );
+
+  // Load chapter audio when track or chapter changes
   useEffect(() => {
-    if (currentTrack) {
-      const [h, m, s] = currentTrack.duration.split(':').map(Number);
-      setDuration(h * 3600 + m * 60 + s);
+    if (currentChapterData?.filePath && currentTrack) {
+      const saved = loadPosition();
+      const startTime =
+        saved?.bookId === currentTrack.id && saved?.chapterIndex === currentChapterIndex
+          ? saved.timeOffset
+          : 0;
+      engine.loadAndPlay(currentChapterData.filePath, startTime);
     }
-  }, [currentTrack]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTrack?.id, currentChapterIndex, currentChapterData?.filePath]);
 
+  // Auto-advance to next chapter when current one ends
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isPlaying && currentTime < duration) {
-      interval = setInterval(() => {
-        setCurrentTime((prev) => Math.min(prev + playbackSpeed, duration));
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying, currentTime, duration, playbackSpeed]);
+    engine.registerOnEnded(() => {
+      if (!currentBook || !bookProgress) return;
+      const nextIndex = currentChapterIndex + 1;
+      if (nextIndex < currentBook.chapters.length) {
+        onChapterComplete?.();
+      } else {
+        onBookComplete?.();
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentBook?.id, currentChapterIndex, bookProgress?.totalChapters]);
 
+  // ── Keyboard shortcuts ──────────────────────────────────────────────────────
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.code === 'Space') { e.preventDefault(); setIsPlaying((p) => !p); }
-      else if (e.code === 'ArrowRight') setCurrentTime((p) => Math.min(p + 10, duration));
-      else if (e.code === 'ArrowLeft') setCurrentTime((p) => Math.max(p - 10, 0));
+      if (e.code === 'Space') { e.preventDefault(); engine.togglePlayPause(); }
+      else if (e.code === 'ArrowRight') engine.skip(10);
+      else if (e.code === 'ArrowLeft') engine.skip(-10);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [duration]);
+  }, [engine]);
 
   useEffect(() => {
     if (sleepTimer === null) return;
-    if (sleepTimer <= 0) { setIsPlaying(false); setSleepTimer(null); return; }
+    if (sleepTimer <= 0) { engine.pause(); setSleepTimer(null); return; }
     const tick = setInterval(() => setSleepTimer((p) => (p !== null ? p - 1 : null)), 1000);
     return () => clearInterval(tick);
   }, [sleepTimer]);
@@ -225,23 +286,20 @@ export default function AudioPlayer({
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>, ref: React.RefObject<HTMLDivElement>) => {
     if (ref.current) {
       const rect = ref.current.getBoundingClientRect();
-      setCurrentTime((e.clientX - rect.left) / rect.width * duration);
+      engine.seek((e.clientX - rect.left) / rect.width * duration);
     }
   };
 
-  const handleSkip = (seconds: number) =>
-    setCurrentTime((p) => Math.max(0, Math.min(p + seconds, duration)));
+  const handleSkip = useCallback((seconds: number) => engine.skip(seconds), [engine]);
 
   const handleNext = () => {
     const i = playlist.findIndex((t) => t.id === currentTrack.id);
     onTrackChange(playlist[(i + 1) % playlist.length]);
-    setCurrentTime(0);
   };
 
   const handlePrevious = () => {
     const i = playlist.findIndex((t) => t.id === currentTrack.id);
     onTrackChange(playlist[i === 0 ? playlist.length - 1 : i - 1]);
-    setCurrentTime(0);
   };
 
   const handleAddBookmark = () => {
@@ -290,7 +348,11 @@ export default function AudioPlayer({
     if (bookProgress && bookProgress.currentChapter > 0) onPreviousChapter?.();
   };
 
-  const handleMarkBookComplete = () => { onBookComplete?.(); setShowCompleteConfirm(false); };
+  const handleMarkBookComplete = () => {
+    onBookComplete?.();
+    setShowCompleteConfirm(false);
+    if (currentTrack) clearPosition(currentTrack.id);
+  };
 
   const handleCreateEqPreset = () => {
     if (!newEqName.trim()) return;
@@ -320,43 +382,57 @@ export default function AudioPlayer({
 
   if (!currentTrack) return null;
 
+  // progressPercent = chapter-level progress (used in chapter scrubber bars)
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   // ── Chapter progress math ─────────────────────────────────────────────────
+  // With real audio, `duration` is the current chapter's duration (not whole book)
   const totalChapters = bookProgress?.totalChapters ?? 1;
-  const currentChapterIndex = bookProgress?.currentChapter ?? 0;
-  const chapterDuration = duration > 0 ? duration / totalChapters : 0;
-  const chapterStartTime = currentChapterIndex * chapterDuration;
-  const chapterCurrentTime = Math.max(0, currentTime - chapterStartTime);
+  const chapterDuration = duration;
+  const chapterCurrentTime = currentTime;
   const chapterProgress = chapterDuration > 0
     ? Math.min((chapterCurrentTime / chapterDuration) * 100, 100)
+    : 0;
+
+  // Overall book progress: combine completed chapters + current chapter progress
+  const totalBookDurationMs = currentBook?.durationMs ?? 0;
+  const completedChaptersDurationMs = currentBook?.chapters
+    ?.slice(0, currentChapterIndex)
+    .reduce((sum, ch) => sum + ch.durationMs, 0) ?? 0;
+  const currentChapterProgressMs = currentTime * 1000;
+  const overallProgressPercent = totalBookDurationMs > 0
+    ? ((completedChaptersDurationMs + currentChapterProgressMs) / totalBookDurationMs) * 100
     : progressPercent;
 
   const handleChapterProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (chapterProgressRef.current && chapterDuration > 0) {
       const rect = chapterProgressRef.current.getBoundingClientRect();
       const ratio = Math.max(0, Math.min((e.clientX - rect.left) / rect.width, 1));
-      setCurrentTime(chapterStartTime + ratio * chapterDuration);
+      engine.seek(ratio * chapterDuration);
     }
   };
 
-  // ── Queue search pool ────────────────────────────────────────────────────────
-  const allAvailableBooks: Track[] = libraryBooks.map((b) => ({
-    id: b.id,
-    title: b.title,
-    author: b.author,
-    cover: b.cover,
-    duration: b.duration,
-  }));
+  // ── Queue search pool (memoized) ────────────────────────────────────────────
+  const allAvailableBooks = useMemo<Track[]>(() =>
+    libraryBooks.map((b) => ({
+      id: b.id,
+      title: b.title,
+      author: b.author,
+      cover: b.cover,
+      duration: b.duration,
+    })),
+  [libraryBooks]);
 
-  const searchResults = queueSearch.trim()
-    ? allAvailableBooks.filter(
-        (b) =>
-          !playlist.some((p) => p.title === b.title) &&
-          (b.title.toLowerCase().includes(queueSearch.toLowerCase()) ||
-            b.author.toLowerCase().includes(queueSearch.toLowerCase()))
-      )
-    : [];
+  const searchResults = useMemo(() =>
+    queueSearch.trim()
+      ? allAvailableBooks.filter(
+          (b) =>
+            !playlist.some((p) => p.title === b.title) &&
+            (b.title.toLowerCase().includes(queueSearch.toLowerCase()) ||
+              b.author.toLowerCase().includes(queueSearch.toLowerCase()))
+        )
+      : [],
+  [allAvailableBooks, queueSearch, playlist]);
 
   const handleCreateCollection = () => {
     if (!newCollectionName.trim()) return;
@@ -383,41 +459,6 @@ export default function AudioPlayer({
   const toolbarBtn = (active: boolean, activeClass: string) =>
     `w-12 h-12 flex flex-col items-center justify-center rounded-xl transition-all whitespace-nowrap cursor-pointer ${active ? activeClass : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`;
 
-  // ── EQ Bars indicator ─────────────────────────────────────────────────────────
-  const EqBars = ({ small = false }: { small?: boolean }) => {
-    const h = small ? 10 : 14;
-    const w = small ? 2 : 2.5;
-    const durations = [0.65, 0.8, 0.55, 0.7];
-    const delays = [0, 0.18, 0.32, 0.1];
-    return (
-      <div className="flex items-end flex-shrink-0" style={{ height: h, gap: small ? 1.5 : 2 }}>
-        {durations.map((dur, i) => (
-          <div
-            key={i}
-            style={{
-              width: w,
-              height: h,
-              backgroundColor: '#8b5cf6',
-              borderRadius: 2,
-              transformOrigin: 'bottom',
-              animation: `eqBounce ${dur}s ease-in-out ${delays[i]}s infinite`,
-            }}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  // ── Skip button ───────────────────────────────────────────────────────────────
-  const SkipBtn = ({ seconds, label, large }: { seconds: number; label: string; large?: boolean }) => (
-    <button
-      onClick={() => handleSkip(seconds)}
-      className={`flex flex-col items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors whitespace-nowrap cursor-pointer gap-0.5 ${large ? 'w-12 h-12' : 'w-11 h-11'}`}
-    >
-      <i className={`${seconds < 0 ? 'ri-rewind-fill' : 'ri-speed-fill'} text-gray-600 dark:text-gray-400 ${large ? 'text-xl' : 'text-lg'}`}></i>
-      <span className="text-[9px] font-bold text-gray-400 dark:text-gray-500 leading-none">{label}</span>
-    </button>
-  );
 
   // ── Bottom bar (collapsed) ────────────────────────────────────────────────────
   if (isCollapsed) {
@@ -438,6 +479,22 @@ export default function AudioPlayer({
                 <p className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">Added to your bookmarks</p>
               </div>
               <i className="ri-checkbox-circle-fill text-emerald-500 text-lg ml-1 flex-shrink-0"></i>
+            </div>
+          </div>
+        )}
+
+        {/* ── Error toast ── */}
+        {error && (
+          <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[200] cursor-pointer" onClick={() => engine.clearError()}>
+            <div className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-red-200 dark:border-red-700/50">
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/30 flex-shrink-0">
+                <i className="ri-error-warning-fill text-sm text-red-500"></i>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-800 dark:text-white whitespace-nowrap">Playback Error</p>
+                <p className="text-xs text-red-500 dark:text-red-400 max-w-[250px] truncate">{error}</p>
+              </div>
+              <i className="ri-close-circle-fill text-red-400 text-lg ml-1 flex-shrink-0"></i>
             </div>
           </div>
         )}
@@ -531,7 +588,7 @@ export default function AudioPlayer({
         {/* ── The bar itself ── */}
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
           <div className="w-full h-1 bg-gray-200 dark:bg-gray-700">
-            <div className="h-full bg-gradient-to-r from-orange-400 to-orange-500 transition-all duration-300" style={{ width: `${progressPercent}%` }} />
+            <div className="h-full bg-gradient-to-r from-orange-400 to-orange-500 transition-all duration-300" style={{ width: `${overallProgressPercent}%` }} />
           </div>
 
           <div className="px-4 py-3 flex gap-4 items-stretch">
@@ -547,7 +604,7 @@ export default function AudioPlayer({
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{currentTrack.author}</p>
                 </div>
                 <button
-                  onClick={() => setIsPlaying(!isPlaying)}
+                  onClick={() => engine.togglePlayPause()}
                   className="w-10 h-10 flex items-center justify-center rounded-xl bg-orange-500 hover:bg-orange-600 text-white transition-colors shadow-md whitespace-nowrap cursor-pointer flex-shrink-0"
                 >
                   <i className={`${isPlaying ? 'ri-pause-fill' : 'ri-play-fill'} text-xl`}></i>
@@ -617,7 +674,7 @@ export default function AudioPlayer({
                     )}
                   </div>
                   <button
-                    onClick={() => setVolumeBoost((p) => !p)}
+                    onClick={() => { setVolumeBoost((p) => !p); engine.setVolumeBoost(!volumeBoost); }}
                     title="Volume Boost"
                     className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all cursor-pointer whitespace-nowrap ${
                       volumeBoost
@@ -648,7 +705,7 @@ export default function AudioPlayer({
                         {SPEED_OPTIONS.map((s) => (
                           <button
                             key={s}
-                            onClick={() => { setPlaybackSpeed(s); setShowSpeedMenu(false); }}
+                            onClick={() => { setPlaybackSpeed(s); engine.setPlaybackSpeed(s); setShowSpeedMenu(false); }}
                             className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors whitespace-nowrap cursor-pointer flex items-center justify-between ${playbackSpeed === s ? 'text-sky-600 dark:text-sky-400 font-semibold' : 'text-gray-700 dark:text-gray-300'}`}
                           >
                             <span>{s}x</span>
@@ -758,16 +815,16 @@ export default function AudioPlayer({
                   )}
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  <SkipBtn seconds={-60} label="1m" large />
-                  <SkipBtn seconds={-10} label="10s" />
+                  <SkipBtn seconds={-60} label="1m" large onSkip={handleSkip} />
+                  <SkipBtn seconds={-10} label="10s" onSkip={handleSkip} />
                   <button
-                    onClick={() => setIsPlaying(!isPlaying)}
+                    onClick={() => engine.togglePlayPause()}
                     className="w-12 h-12 flex items-center justify-center rounded-2xl bg-orange-500 hover:bg-orange-600 text-white transition-colors shadow-lg whitespace-nowrap cursor-pointer mx-1"
                   >
                     <i className={`${isPlaying ? 'ri-pause-fill' : 'ri-play-fill'} text-3xl`}></i>
                   </button>
-                  <SkipBtn seconds={10} label="10s" />
-                  <SkipBtn seconds={60} label="1m" large />
+                  <SkipBtn seconds={10} label="10s" onSkip={handleSkip} />
+                  <SkipBtn seconds={60} label="1m" large onSkip={handleSkip} />
                 </div>
                 <div className="flex-1 hidden sm:flex items-center justify-end gap-1">
                   {bookProgress && bookProgress.status !== 'completed' && (
@@ -836,6 +893,22 @@ export default function AudioPlayer({
               <p className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">Added to your bookmarks</p>
             </div>
             <i className="ri-checkbox-circle-fill text-emerald-500 text-lg ml-1 flex-shrink-0"></i>
+          </div>
+        </div>
+      )}
+
+      {/* ── Error toast ── */}
+      {error && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[200] cursor-pointer" onClick={() => engine.clearError()}>
+          <div className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-red-200 dark:border-red-700/50">
+            <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/30 flex-shrink-0">
+              <i className="ri-error-warning-fill text-sm text-red-500"></i>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-800 dark:text-white whitespace-nowrap">Playback Error</p>
+              <p className="text-xs text-red-500 dark:text-red-400 max-w-[250px] truncate">{error}</p>
+            </div>
+            <i className="ri-close-circle-fill text-red-400 text-lg ml-1 flex-shrink-0"></i>
           </div>
         </div>
       )}
@@ -939,7 +1012,7 @@ export default function AudioPlayer({
               return (
                 <div
                   key={track.id}
-                  onClick={() => { onTrackChange(track); setCurrentTime(0); }}
+                  onClick={() => { onTrackChange(track); }}
                   className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${currentTrack.id === track.id ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/50' : ''}`}
                 >
                   <div className={`w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 text-xs font-bold transition-colors ${
@@ -968,7 +1041,7 @@ export default function AudioPlayer({
                   </div>
                   {isActive && (
                     <button
-                      onClick={(e) => { e.stopPropagation(); setIsPlaying((p) => !p); }}
+                      onClick={(e) => { e.stopPropagation(); engine.togglePlayPause(); }}
                       className="w-9 h-9 flex items-center justify-center rounded-xl bg-purple-500 hover:bg-purple-600 text-white transition-colors flex-shrink-0 whitespace-nowrap cursor-pointer"
                     >
                       <i className={`${isPlaying ? 'ri-pause-fill' : 'ri-play-fill'} text-xl`}></i>
@@ -995,7 +1068,7 @@ export default function AudioPlayer({
             <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mb-3 cursor-pointer overflow-hidden"
               onClick={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
-                setCurrentTime(((e.clientX - rect.left) / rect.width) * duration);
+                engine.seek(((e.clientX - rect.left) / rect.width) * duration);
               }}
             >
               <div
@@ -1017,7 +1090,7 @@ export default function AudioPlayer({
                   <span className="text-[8px] font-bold text-gray-400 leading-none">10s</span>
                 </button>
                 <button
-                  onClick={() => setIsPlaying((p) => !p)}
+                  onClick={() => engine.togglePlayPause()}
                   className="w-10 h-10 flex items-center justify-center rounded-xl bg-purple-500 hover:bg-purple-600 text-white transition-colors whitespace-nowrap cursor-pointer"
                 >
                   <i className={`${isPlaying ? 'ri-pause-fill' : 'ri-play-fill'} text-xl`}></i>
@@ -1071,7 +1144,7 @@ export default function AudioPlayer({
                 )}
               </div>
 
-              <button onClick={() => setVolumeBoost((p) => !p)} title="Volume Boost"
+              <button onClick={() => { setVolumeBoost((p) => !p); engine.setVolumeBoost(!volumeBoost); }} title="Volume Boost"
                 className={toolbarBtn(volumeBoost, 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400')}
               >
                 <i className={`${volumeBoost ? 'ri-volume-up-fill' : 'ri-volume-up-line'} text-lg`}></i>
@@ -1095,7 +1168,7 @@ export default function AudioPlayer({
                     {SPEED_OPTIONS.map((s) => (
                       <button
                         key={s}
-                        onClick={() => { setPlaybackSpeed(s); setShowSpeedMenu(false); }}
+                        onClick={() => { setPlaybackSpeed(s); engine.setPlaybackSpeed(s); setShowSpeedMenu(false); }}
                         className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors whitespace-nowrap cursor-pointer flex items-center justify-between ${playbackSpeed === s ? 'text-sky-600 dark:text-sky-400 font-semibold' : 'text-gray-700 dark:text-gray-300'}`}
                       >
                         <span>{s}x</span>
@@ -1162,13 +1235,13 @@ export default function AudioPlayer({
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Book Progress</span>
                 <span className="text-[11px] font-mono text-gray-400 dark:text-gray-500">
-                  {formatTime(currentTime)} / {formatTime(duration)}
+                  Ch {currentChapterIndex + 1}/{totalChapters} · {formatTime(currentTime)} / {formatTime(duration)}
                 </span>
               </div>
               <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full transition-all duration-300"
-                  style={{ width: `${progressPercent}%` }}
+                  style={{ width: `${overallProgressPercent}%` }}
                 />
               </div>
             </div>
@@ -1247,20 +1320,8 @@ export default function AudioPlayer({
               </div>
             )}
 
-            {/* ── Waveform + chapter scrubber ── */}
+            {/* ── Chapter scrubber ── */}
             <div className="w-full mb-4 flex-shrink-0">
-              <div className="h-14 mb-2">
-                <svg className="w-full h-full" viewBox="0 0 400 56" preserveAspectRatio="none">
-                  {[...Array(100)].map((_, i) => {
-                    const h = Math.random() * 44 + 6;
-                    return (
-                      <rect key={i} x={i * 4} y={28 - h / 2} width="2" height={h}
-                        fill={i < progressPercent ? '#a78bfa' : '#e5e7eb'} className="dark:fill-purple-500 dark:opacity-70" />
-                    );
-                  })}
-                </svg>
-              </div>
-
               {/* Chapter bar */}
               <div className="flex items-center gap-2.5 mb-1.5">
                 <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 w-16 flex-shrink-0 truncate">
@@ -1272,7 +1333,7 @@ export default function AudioPlayer({
                   className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative"
                 >
                   {duration > 0 && trackBookmarks.map((bm) => (
-                    <button key={bm.id} onClick={(e) => { e.stopPropagation(); setCurrentTime(bm.time); setActiveTab('bookmarks'); }}
+                    <button key={bm.id} onClick={(e) => { e.stopPropagation(); engine.seek(bm.time); setActiveTab('bookmarks'); }}
                       title={bm.note ? `${bm.label}: ${bm.note.slice(0, 50)}` : bm.label}
                       className={`absolute -top-1.5 w-1.5 h-4 rounded-sm transition-colors cursor-pointer z-10 -translate-x-1/2 ${bm.note ? 'bg-amber-500 hover:bg-amber-600' : 'bg-amber-300 hover:bg-amber-400'}`}
                       style={{ left: `${(bm.time / duration) * 100}%` }}
@@ -1300,14 +1361,14 @@ export default function AudioPlayer({
 
             {/* ── Media controls ── */}
             <div className="flex items-center justify-center gap-2 mb-4 w-full flex-shrink-0">
-              <SkipBtn seconds={-60} label="1m" large />
-              <SkipBtn seconds={-10} label="10s" />
-              <button onClick={() => setIsPlaying(!isPlaying)}
+              <SkipBtn seconds={-60} label="1m" large onSkip={handleSkip} />
+              <SkipBtn seconds={-10} label="10s" onSkip={handleSkip} />
+              <button onClick={() => engine.togglePlayPause()}
                 className="w-16 h-16 flex items-center justify-center rounded-2xl bg-orange-500 hover:bg-orange-600 text-white transition-colors shadow-lg whitespace-nowrap cursor-pointer mx-1">
                 <i className={`${isPlaying ? 'ri-pause-fill' : 'ri-play-fill'} text-3xl`}></i>
               </button>
-              <SkipBtn seconds={10} label="10s" />
-              <SkipBtn seconds={60} label="1m" large />
+              <SkipBtn seconds={10} label="10s" onSkip={handleSkip} />
+              <SkipBtn seconds={60} label="1m" large onSkip={handleSkip} />
             </div>
 
             {/* ── Pending bookmark create panel ── */}
@@ -1384,7 +1445,7 @@ export default function AudioPlayer({
               {activeTab === 'queue' && (
                 <div className="space-y-1 pb-2">
                   {playlist.map((track) => (
-                    <div key={track.id} onClick={() => { onTrackChange(track); setCurrentTime(0); }}
+                    <div key={track.id} onClick={() => { onTrackChange(track); }}
                       className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${currentTrack.id === track.id ? 'bg-purple-50 dark:bg-purple-900/20' : ''}`}
                     >
                       <div className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0">
@@ -1425,7 +1486,7 @@ export default function AudioPlayer({
                                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{formatTime(bm.time)}</p>
                               </div>
                               <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5">
-                                <button onClick={() => { setCurrentTime(bm.time); setIsPlaying(true); }} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-amber-600 dark:text-amber-400 transition-colors cursor-pointer whitespace-nowrap">
+                                <button onClick={() => { engine.seek(bm.time); engine.play(); }} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-amber-600 dark:text-amber-400 transition-colors cursor-pointer whitespace-nowrap">
                                   <i className="ri-play-circle-line text-base"></i>
                                 </button>
                                 <button onClick={() => handleStartEdit(bm)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors cursor-pointer whitespace-nowrap">
@@ -1449,7 +1510,7 @@ export default function AudioPlayer({
                                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{formatTime(bm.time)}</p>
                               </div>
                               <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5">
-                                <button onClick={() => { setCurrentTime(bm.time); setIsPlaying(true); }} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-amber-600 dark:text-amber-400 transition-colors cursor-pointer whitespace-nowrap">
+                                <button onClick={() => { engine.seek(bm.time); engine.play(); }} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-amber-600 dark:text-amber-400 transition-colors cursor-pointer whitespace-nowrap">
                                   <i className="ri-play-circle-line text-base"></i>
                                 </button>
                                 <button onClick={() => handleStartEdit(bm)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors cursor-pointer whitespace-nowrap">

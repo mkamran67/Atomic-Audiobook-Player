@@ -2,6 +2,7 @@ interface RootDirectoryModalProps {
   directories: string[];
   onAdd: () => void;
   onRemove: (path: string) => void;
+  onScan: () => void;
   onClose: () => void;
 }
 
@@ -9,6 +10,7 @@ export default function RootDirectoryModal({
   directories,
   onAdd,
   onRemove,
+  onScan,
   onClose,
 }: RootDirectoryModalProps) {
   return (
@@ -65,6 +67,15 @@ export default function RootDirectoryModal({
             <i className="ri-folder-add-line text-base"></i>
             Add Folder
           </button>
+          {directories.length > 0 && (
+            <button
+              onClick={onScan}
+              className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold transition-colors cursor-pointer"
+            >
+              <i className="ri-refresh-line text-base"></i>
+              Scan Library
+            </button>
+          )}
           <button
             onClick={onClose}
             className="w-full h-11 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"

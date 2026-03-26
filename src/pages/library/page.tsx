@@ -2,13 +2,15 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSidebarCollapsed } from '../../hooks/useSidebarCollapsed';
 import Sidebar from '../../components/feature/Sidebar';
+import AudioPlayer from '../../components/feature/AudioPlayer';
 import GridView from './components/GridView';
 import ListView from './components/ListView';
 import CompactView from './components/CompactView';
 import FolderView from './components/FolderView';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { toggleLike } from '../../store/librarySlice';
-import { setCurrentTrack } from '../../store/playerSlice';
+import { setCurrentTrack, addToQueue, setPlayerCollapsed } from '../../store/playerSlice';
+import { useBookProgress } from '../../hooks/useBookProgress';
 import type { LibraryBook } from '../../types/library';
 
 type ViewMode = 'grid' | 'list' | 'folder';
@@ -52,10 +54,19 @@ export default function LibraryPage() {
 
   const dispatch = useAppDispatch();
   const libraryBooks = useAppSelector((state) => state.library.books);
+  const currentTrack = useAppSelector((state) => state.player.currentTrack);
+  const playlist = useAppSelector((state) => state.player.playlist);
+  const playerCollapsed = useAppSelector((state) => state.player.playerCollapsed);
   const likedIds = useMemo(
     () => new Set(libraryBooks.filter((b) => b.liked).map((b) => b.id)),
     [libraryBooks]
   );
+
+  const currentBookForProgress = currentTrack
+    ? [{ id: currentTrack.id, progress: 0, currentChapter: 1, totalChapters: 1 }]
+    : [];
+  const { progressMap, markChapterComplete, markBookComplete, markPreviousChapter } =
+    useBookProgress(currentBookForProgress);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useSidebarCollapsed();
   const [viewMode, setViewMode] = useState<ViewMode>(getInitialView);
@@ -337,6 +348,21 @@ export default function LibraryPage() {
           <FolderView books={filteredBooks} likedIds={likedIds} onToggleLike={handleToggleLike} onBookClick={handleBookClick} />
         )}
       </main>
+
+      {currentTrack && (
+        <AudioPlayer
+          currentTrack={currentTrack}
+          playlist={playlist}
+          onTrackChange={(track) => dispatch(setCurrentTrack(track))}
+          isCollapsed={playerCollapsed}
+          onCollapsedChange={(collapsed) => dispatch(setPlayerCollapsed(collapsed))}
+          bookProgress={progressMap[currentTrack.id]}
+          onChapterComplete={() => markChapterComplete(currentTrack.id)}
+          onPreviousChapter={() => markPreviousChapter(currentTrack.id)}
+          onBookComplete={() => markBookComplete(currentTrack.id)}
+          onAddToQueue={(track) => dispatch(addToQueue(track))}
+        />
+      )}
     </div>
   );
 }

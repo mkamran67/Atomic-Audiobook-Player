@@ -320,7 +320,7 @@ export default function SettingsPage() {
                     </button>
                     {directories.length > 0 && (
                       <button
-                        onClick={isScanning ? cancelScan : startScan}
+                        onClick={isScanning ? cancelScan : () => startScan(directories)}
                         className={`h-10 px-4 flex items-center gap-2 rounded-xl text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                           isScanning
                             ? 'bg-red-500 hover:bg-red-600 text-white'
@@ -631,12 +631,6 @@ export default function SettingsPage() {
                   </Row>
                 </Card>
 
-                {confirmOpen && (
-                  <ConfirmDialog
-                    {...CONFIRM_CONFIG[confirmOpen]}
-                    onCancel={() => setConfirmOpen(null)}
-                  />
-                )}
               </div>
             )}
 
@@ -711,6 +705,14 @@ export default function SettingsPage() {
           </div>
         </div>
       </main>
+
+      {/* ── Confirm dialog (rendered at top level so it works from any section) */}
+      {confirmOpen && (
+        <ConfirmDialog
+          {...CONFIRM_CONFIG[confirmOpen]}
+          onCancel={() => setConfirmOpen(null)}
+        />
+      )}
 
       {/* ── Toast ───────────────────────────────────────────────────────────── */}
       {toastMsg && (
