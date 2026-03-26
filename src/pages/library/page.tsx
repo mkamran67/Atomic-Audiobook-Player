@@ -138,6 +138,7 @@ export default function LibraryPage() {
     if (tab === 'settings')    { navigate('/settings');    return; }
     if (tab === 'bookmarks')   { navigate('/bookmarks');   return; }
     if (tab === 'collections') { navigate('/collections'); return; }
+    if (tab === 'bulk-edit')   { navigate('/bulk-edit');   return; }
   };
 
   const handleToggleLike = (id: string) => {

@@ -138,6 +138,10 @@ export function loadLibrary(): LibraryBook[] {
   return readStore();
 }
 
+export function saveLibrary(books: LibraryBook[]): void {
+  writeStore(books);
+}
+
 export function loadDirectories(): string[] {
   try {
     if (fs.existsSync(DIRS_FILE)) {

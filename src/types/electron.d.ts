@@ -14,6 +14,7 @@ export interface ElectronAPI {
   // Library persistence
   loadLibrary: () => Promise<LibraryBook[]>;
   removeBooksByDirectory: (directory: string) => Promise<LibraryBook[]>;
+  saveLibrary: (books: LibraryBook[]) => Promise<void>;
 
   // Directory persistence
   loadDirectories: () => Promise<string[]>;

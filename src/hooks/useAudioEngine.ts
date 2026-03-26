@@ -10,6 +10,7 @@ export function useAudioEngine() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isBuffering, setIsBuffering] = useState(false);
 
   const lastTimeRef = useRef(0);
   const onEndedRef = useRef<(() => void) | null>(null);
@@ -42,6 +43,8 @@ export function useAudioEngine() {
       setError(msg);
     });
 
+    engine.on('buffering', (buffering: boolean) => setIsBuffering(buffering));
+
     return () => {
       engine.off('timeupdate');
       engine.off('durationchange');
@@ -49,6 +52,7 @@ export function useAudioEngine() {
       engine.off('pause');
       engine.off('ended');
       engine.off('error');
+      engine.off('buffering');
     };
   }, [engine]);
 
@@ -144,6 +148,7 @@ export function useAudioEngine() {
 
   return {
     isPlaying,
+    isBuffering,
     currentTime,
     duration,
     error,

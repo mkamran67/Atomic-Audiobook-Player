@@ -23,6 +23,7 @@ export default function BookmarksPage() {
     if (tab === 'library')     { navigate('/library');     return; }
     if (tab === 'settings')    { navigate('/settings');    return; }
     if (tab === 'collections') { navigate('/collections'); return; }
+    if (tab === 'bulk-edit')   { navigate('/bulk-edit');   return; }
   };
 
   const handleDelete = (id: string) => {

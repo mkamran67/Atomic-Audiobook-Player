@@ -8,6 +8,8 @@ import ThemeToggle from '../../components/base/ThemeToggle';
 import NotificationsPanel from './components/NotificationsPanel';
 import type { Notification } from '../../types/notification';
 import { useBookProgress } from '../../hooks/useBookProgress';
+import { useProgressSync } from '../../hooks/useProgressSync';
+import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { useSidebarCollapsed } from '../../hooks/useSidebarCollapsed';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { setCurrentTrack, addToQueue, setPlayerCollapsed } from '../../store/playerSlice';
@@ -38,6 +40,9 @@ export default function HomePage() {
 
   const { progressMap, markChapterComplete, markBookComplete, markPreviousChapter, getBookProgress } =
     useBookProgress(keepReadingForProgress);
+
+  const { isPlaying } = useAudioEngine();
+  useProgressSync(progressMap, currentTrack?.id ?? null, isPlaying, books, dispatch);
 
   // Derive stats from library
   const uniqueAuthors = new Set(books.map((b) => b.author)).size;
@@ -71,6 +76,7 @@ export default function HomePage() {
     if (tab === 'settings')    { navigate('/settings');    return; }
     if (tab === 'bookmarks')   { navigate('/bookmarks');   return; }
     if (tab === 'collections') { navigate('/collections'); return; }
+    if (tab === 'bulk-edit')   { navigate('/bulk-edit');   return; }
     setActiveTab(tab);
   };
 

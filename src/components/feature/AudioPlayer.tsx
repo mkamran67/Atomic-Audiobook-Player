@@ -105,7 +105,7 @@ export default function AudioPlayer({
 }: AudioPlayerProps) {
   const libraryBooks = useAppSelector((state) => state.library.books);
   const engine = useAudioEngine();
-  const { isPlaying, currentTime, duration, error } = engine;
+  const { isPlaying, isBuffering, currentTime, duration, error } = engine;
 
   // toolbar state
   const [sleepTimer, setSleepTimer] = useState<number | null>(null);
@@ -781,22 +781,29 @@ export default function AudioPlayer({
                 <div
                   ref={bottomProgressRef}
                   onClick={(e) => handleProgressClick(e, bottomProgressRef)}
-                  className="w-full h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative"
+                  className="w-full h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative overflow-hidden"
                 >
                   {duration > 0 && trackBookmarks.map((bm) => (
                     <div
                       key={bm.id}
                       title={bm.note ? `${bm.label}: ${bm.note.slice(0, 50)}` : bm.label}
-                      className="absolute top-0 w-1 h-2.5 rounded-sm bg-amber-500 -translate-x-1/2 pointer-events-none"
+                      className="absolute top-0 w-1 h-2.5 rounded-sm bg-amber-500 -translate-x-1/2 pointer-events-none z-10"
                       style={{ left: `${(bm.time / duration) * 100}%` }}
                     />
                   ))}
-                  <div
-                    className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full relative transition-all duration-300"
-                    style={{ width: `${progressPercent}%` }}
-                  >
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-orange-500 rounded-full shadow-md" />
-                  </div>
+                  {isBuffering ? (
+                    <div
+                      className="absolute top-0 h-full w-[30%] bg-gradient-to-r from-transparent via-orange-400 to-transparent rounded-full"
+                      style={{ animation: 'indeterminate 1.2s ease-in-out infinite' }}
+                    />
+                  ) : (
+                    <div
+                      className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full relative transition-all duration-300"
+                      style={{ width: `${progressPercent}%` }}
+                    >
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-orange-500 rounded-full shadow-md" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500 mt-1">
                   <span>{formatTime(currentTime)}</span>
@@ -1330,7 +1337,7 @@ export default function AudioPlayer({
                 <div
                   ref={chapterProgressRef}
                   onClick={handleChapterProgressClick}
-                  className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative"
+                  className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer relative overflow-hidden"
                 >
                   {duration > 0 && trackBookmarks.map((bm) => (
                     <button key={bm.id} onClick={(e) => { e.stopPropagation(); engine.seek(bm.time); setActiveTab('bookmarks'); }}
@@ -1339,12 +1346,19 @@ export default function AudioPlayer({
                       style={{ left: `${(bm.time / duration) * 100}%` }}
                     />
                   ))}
-                  <div
-                    className="h-full bg-gradient-to-r from-orange-300 to-orange-400 rounded-full transition-all duration-300 relative"
-                    style={{ width: `${chapterProgress}%` }}
-                  >
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-orange-400 rounded-full shadow-md" />
-                  </div>
+                  {isBuffering ? (
+                    <div
+                      className="absolute top-0 h-full w-[30%] bg-gradient-to-r from-transparent via-orange-300 to-transparent rounded-full"
+                      style={{ animation: 'indeterminate 1.2s ease-in-out infinite' }}
+                    />
+                  ) : (
+                    <div
+                      className="h-full bg-gradient-to-r from-orange-300 to-orange-400 rounded-full transition-all duration-300 relative"
+                      style={{ width: `${chapterProgress}%` }}
+                    >
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-orange-400 rounded-full shadow-md" />
+                    </div>
+                  )}
                 </div>
                 <span className="text-[11px] text-gray-400 dark:text-gray-500 w-16 text-right flex-shrink-0 font-mono">
                   {formatTime(chapterCurrentTime)}

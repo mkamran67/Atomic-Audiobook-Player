@@ -138,6 +138,7 @@ export default function SettingsPage() {
     if (tab === 'library')     { navigate('/library');     return; }
     if (tab === 'bookmarks')   { navigate('/bookmarks');   return; }
     if (tab === 'collections') { navigate('/collections'); return; }
+    if (tab === 'bulk-edit')   { navigate('/bulk-edit');   return; }
     if (tab !== 'settings')    navigate('/');
   };
 

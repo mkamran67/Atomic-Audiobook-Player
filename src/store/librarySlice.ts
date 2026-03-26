@@ -51,8 +51,17 @@ const librarySlice = createSlice({
         book.status = action.payload.status;
       }
     },
+    bulkUpdateBooks(state, action: PayloadAction<{
+      ids: string[];
+      updates: Partial<Pick<LibraryBook, 'author' | 'genre' | 'year' | 'narrator'>>;
+    }>) {
+      const idSet = new Set(action.payload.ids);
+      state.books.forEach(book => {
+        if (idSet.has(book.id)) Object.assign(book, action.payload.updates);
+      });
+    },
   },
 });
 
-export const { setBooks, setLibraryLoaded, addBook, removeBooksByDirectory, toggleLike, updateBookProgress, updateBookStatus } = librarySlice.actions;
+export const { setBooks, setLibraryLoaded, addBook, removeBooksByDirectory, toggleLike, updateBookProgress, updateBookStatus, bulkUpdateBooks } = librarySlice.actions;
 export default librarySlice.reducer;

@@ -81,3 +81,8 @@
   0%, 100% { transform: scaleY(0.25); }
   50%       { transform: scaleY(1); }
 }
+
+@keyframes indeterminate {
+  0%   { left: -30%; }
+  100% { left: 100%; }
+}

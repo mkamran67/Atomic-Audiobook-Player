@@ -21,6 +21,7 @@ export default function CollectionsPage() {
     if (tab === 'library')   { navigate('/library');     return; }
     if (tab === 'bookmarks') { navigate('/bookmarks');   return; }
     if (tab === 'settings')  { navigate('/settings');    return; }
+    if (tab === 'bulk-edit') { navigate('/bulk-edit');   return; }
   };
 
   const selectedCollection = selectedId ? collections.find((c) => c.id === selectedId) ?? null : null;

@@ -13,6 +13,7 @@ const menuItems = [
   { id: 'library',     icon: 'ri-book-2-line',        label: 'Library'     },
   { id: 'collections', icon: 'ri-headphone-line',     label: 'Collections' },
   { id: 'bookmarks',   icon: 'ri-bookmark-line',      label: 'Bookmarks'   },
+  { id: 'bulk-edit',   icon: 'ri-edit-2-line',        label: 'Bulk Edit'   },
   { id: 'settings',    icon: 'ri-settings-3-line',    label: 'Settings'    },
 ];
 

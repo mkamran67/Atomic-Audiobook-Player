@@ -31,6 +31,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   loadLibrary: () => ipcRenderer.invoke('library:load'),
   removeBooksByDirectory: (directory: string) => ipcRenderer.invoke('library:removeByDirectory', directory),
 
+  saveLibrary: (books: any[]) => ipcRenderer.invoke('library:save', books),
+
   // Directory persistence
   loadDirectories: () => ipcRenderer.invoke('directories:load'),
   saveDirectories: (dirs: string[]) => ipcRenderer.invoke('directories:save', dirs),

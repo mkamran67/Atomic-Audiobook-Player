@@ -2,6 +2,7 @@ type AudioEventCallback = () => void;
 type TimeUpdateCallback = (currentTime: number) => void;
 type DurationChangeCallback = (duration: number) => void;
 type ErrorCallback = (error: string) => void;
+type BufferingCallback = (isBuffering: boolean) => void;
 
 const EQ_FREQUENCIES = [60, 250, 1000, 4000, 16000];
 const EQ_Q = 1.4;
@@ -23,6 +24,7 @@ export class AudioEngine {
   private onPlay: AudioEventCallback | null = null;
   private onPause: AudioEventCallback | null = null;
   private onError: ErrorCallback | null = null;
+  private onBuffering: BufferingCallback | null = null;
 
   constructor() {
     this.audio = new Audio();
@@ -63,7 +65,10 @@ export class AudioEngine {
       this.onError?.(msg);
     });
 
-
+    this.audio.addEventListener('loadstart', () => this.onBuffering?.(true));
+    this.audio.addEventListener('waiting', () => this.onBuffering?.(true));
+    this.audio.addEventListener('playing', () => this.onBuffering?.(false));
+    this.audio.addEventListener('canplay', () => this.onBuffering?.(false));
   }
 
   // ── Web Audio graph (lazy init on first play) ──────────────────────────
@@ -194,6 +199,7 @@ export class AudioEngine {
   on(event: 'durationchange', cb: DurationChangeCallback): void;
   on(event: 'ended' | 'play' | 'pause', cb: AudioEventCallback): void;
   on(event: 'error', cb: ErrorCallback): void;
+  on(event: 'buffering', cb: BufferingCallback): void;
   on(event: string, cb: (...args: any[]) => void): void {
     switch (event) {
       case 'timeupdate': this.onTimeUpdate = cb as TimeUpdateCallback; break;
@@ -202,6 +208,7 @@ export class AudioEngine {
       case 'play': this.onPlay = cb as AudioEventCallback; break;
       case 'pause': this.onPause = cb as AudioEventCallback; break;
       case 'error': this.onError = cb as ErrorCallback; break;
+      case 'buffering': this.onBuffering = cb as BufferingCallback; break;
     }
   }
 
@@ -213,6 +220,7 @@ export class AudioEngine {
       case 'play': this.onPlay = null; break;
       case 'pause': this.onPause = null; break;
       case 'error': this.onError = null; break;
+      case 'buffering': this.onBuffering = null; break;
     }
   }
 
@@ -224,6 +232,7 @@ export class AudioEngine {
     this.sourceNode = null;
     this.eqFilters = [];
     this.gainNode = null;
+    this.onBuffering = null;
   }
 }
 
