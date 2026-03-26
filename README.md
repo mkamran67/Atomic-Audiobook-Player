@@ -80,3 +80,6 @@ The app uses Electron's multi-process model:
 ## License
 
 MIT
+
+
+### I've completely removed the older version
