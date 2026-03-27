@@ -76,7 +76,3 @@ The app uses Electron's multi-process model:
 - **Main process** -- Window management, IPC handlers, custom protocol handlers (`audiobook-cover://`, `audiobook-file://`) for secure local file access
 - **Renderer process** -- React app with Redux state and React Router
 - **Utility process** -- Background worker for scanning directories and extracting metadata
-
-## License
-
-MIT
